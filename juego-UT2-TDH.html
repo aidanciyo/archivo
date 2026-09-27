@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Juego para repasar la UT2 · Tecnologías Digitales Habilitadoras con 5 vidas.">
+<title>Enciende la Placa UT2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=Silkscreen&display=swap">
+<style>
+/* Paleta: placa de circuito impreso (máscara verde, cobre, oro de los pads, serigrafía blanca) */
+:root{
+  color-scheme:dark;
+  --board:#0E4A37;--board-2:#0A3A2B;--board-3:#136048;--board-dot:rgba(243,240,226,.075);
+  --trace:#6E4C2E;--copper:#D4894A;--gold:#F3C24F;--gold-2:#FFD978;--gold-ink:#A57C17;
+  --silk:#F3F0E2;--silk-2:#C9D6CC;--silk-3:#93AE9F;
+  --chip:#151919;--chip-2:#272D2D;--chip-line:#323A3A;--pin:#C8CBC4;
+  --paper:#F0F4EE;--paper-2:#E1E9E2;--paper-3:#C6D4CA;
+  --ink:#13221B;--ink-2:#3C5146;--copper-ink:#9A5117;
+  --red:#FF5A47;--red-ink:#B42318;--red-soft:#FDE4E0;
+  --ok:#3CCB7F;--ok-ink:#17744A;--ok-soft:#DCF5E6;
+  --amber:#FFB547;--note:#FFF3CF;
+  --w1:#E4572E;--w2:#2E86DE;--w3:#C99A06;--w4:#8E44AD;--w5:#138D75;
+  --f-display:"Chakra Petch","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-label:"Silkscreen",ui-monospace,"Courier New",monospace;
+  --shadow:0 24px 60px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background-color:var(--board);background-image:radial-gradient(circle,var(--board-dot) 1.3px,transparent 1.9px);background-size:24px 24px;color:var(--silk);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.sheet :focus-visible{outline-color:var(--copper-ink)}
+.sheet--dark :focus-visible{outline-color:var(--gold)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.app{min-height:100%;display:flex;flex-direction:column}
+
+/* HUD */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;padding-block:10px;padding-inline:16px;background:rgba(9,50,37,.95);border-bottom:1px solid rgba(212,137,74,.45);backdrop-filter:blur(8px)}
+.brand{display:flex;flex-direction:column;line-height:1.1;margin-right:auto}
+.brand-ref{font-family:var(--f-label);font-size:10px;letter-spacing:.08em;color:var(--copper)}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase}
+.hud-play{display:flex;align-items:center;gap:10px 24px;flex-wrap:wrap}
+.hud-actions{display:flex;gap:8px}
+.lives{display:flex;gap:5px}
+.life{width:26px;height:24px;display:block}
+.life svg{width:100%;height:100%;display:block}
+.life .h{fill:#3B2522;transition:fill .3s}
+.life .hl{fill:#fff;opacity:0}
+.life.on .h{fill:var(--red)}
+.life.on .hl{opacity:.55}
+.life.on{filter:drop-shadow(0 0 5px rgba(255,90,71,.65))}
+.life.blow{animation:blow .8s ease-out}
+@keyframes blow{0%{transform:scale(1.6) rotate(-8deg);filter:drop-shadow(0 0 14px #fff)}60%{transform:scale(.8)}100%{transform:scale(1)}}
+.stat{display:flex;flex-direction:column;line-height:1.05;min-width:58px}
+.stat-label{font-family:var(--f-label);font-size:9px;letter-spacing:.1em;color:var(--silk-3);text-transform:uppercase}
+.stat-val{font-family:var(--f-display);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.stat-val.bump{animation:bump .35s ease-out}
+@keyframes bump{40%{transform:scale(1.25);color:var(--gold)}}
+.energy{display:flex;gap:3px;margin-top:4px}
+.energy i{width:10px;height:14px;border-radius:2px;background:#1B372D;box-shadow:inset 0 0 0 1px rgba(243,240,226,.14)}
+.energy i.on{background:var(--gold);box-shadow:0 0 8px rgba(243,194,79,.7)}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;border:1px solid rgba(243,240,226,.2);background:rgba(255,255,255,.04);cursor:pointer}
+.icon-btn:hover{background:rgba(255,255,255,.1)}
+.icon-btn svg{width:20px;height:20px}
+@media (max-width:760px){.hud-play{order:3;width:100%;justify-content:space-between;gap:8px 12px}.brand-name{font-size:16px}.stat{min-width:0}.life{width:21px;height:19px}.lives{gap:4px}.energy{gap:2px}.energy i{width:7px;height:12px}}
+@media (max-width:350px){.stat--energy{display:none}}
+
+/* Placa (mapa) */
+.board-wrap{flex:1;padding-block:22px 40px;padding-inline:16px}
+.board-head{max-width:1100px;margin:0 auto 20px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 28px}
+.board-title{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,3.4vw,34px);line-height:1.08;margin:0;text-wrap:balance}
+.board-title em{font-style:normal;color:var(--gold)}
+.board-hint{margin:0;color:var(--silk-2);font-size:15px;max-width:48ch}
+.board{position:relative;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:64px 64px;padding:40px 34px 46px;border-radius:22px;background:var(--board-3);background-image:radial-gradient(circle,var(--board-dot) 1.3px,transparent 1.9px);background-size:24px 24px;box-shadow:inset 0 0 0 2px rgba(243,240,226,.1),0 30px 60px rgba(0,0,0,.35)}
+.board::before{content:"";position:absolute;inset:12px;pointer-events:none;border-radius:14px;background:radial-gradient(circle at 12px 12px,var(--board-2) 5px,var(--copper) 5.5px,var(--copper) 8px,transparent 8.5px) top left/40px 40px no-repeat,radial-gradient(circle at 28px 12px,var(--board-2) 5px,var(--copper) 5.5px,var(--copper) 8px,transparent 8.5px) top right/40px 40px no-repeat,radial-gradient(circle at 12px 28px,var(--board-2) 5px,var(--copper) 5.5px,var(--copper) 8px,transparent 8.5px) bottom left/40px 40px no-repeat,radial-gradient(circle at 28px 28px,var(--board-2) 5px,var(--copper) 5.5px,var(--copper) 8px,transparent 8.5px) bottom right/40px 40px no-repeat}
+.board-silk{position:absolute;left:58px;bottom:14px;font-family:var(--f-label);font-size:10px;letter-spacing:.1em;color:rgba(243,240,226,.45);pointer-events:none}
+.traces{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.tr-base{fill:none;stroke:var(--trace);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+.tr-on .tr-base{stroke:var(--copper)}
+.tr-live{fill:none;stroke:var(--gold-2);stroke-width:3;stroke-linecap:round;stroke-dasharray:9 15;animation:flow .9s linear infinite}
+.tr-new .tr-live{stroke-dasharray:1400;stroke-dashoffset:1400;animation:charge 1.2s ease-out forwards}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@keyframes charge{to{stroke-dashoffset:0}}
+.pad{fill:var(--copper)}
+.tr-off .pad{fill:#8C6440}
+.pad-hole{fill:var(--board-2)}
+
+/* Chips */
+.chip{position:relative;z-index:1;display:flex;flex-direction:column;gap:6px;background:none;border:0;padding:0 12px;cursor:pointer;text-align:left;min-width:0}
+.chip-ref{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-label);font-size:11px;letter-spacing:.08em;color:var(--silk-2)}
+.chip-body{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:4px 14px;min-height:96px;padding:16px 16px 14px;border-radius:8px;background:linear-gradient(160deg,var(--chip-2),var(--chip) 62%);border:1px solid var(--chip-line);box-shadow:0 8px 0 rgba(0,0,0,.28),0 16px 26px rgba(0,0,0,.35);transition:transform .2s ease,box-shadow .2s ease}
+.chip-body::before,.chip-body::after{content:"";position:absolute;top:12px;bottom:12px;width:9px;background:repeating-linear-gradient(to bottom,var(--pin) 0 5px,transparent 5px 12px)}
+.chip-body::before{left:-10px}
+.chip-body::after{right:-10px}
+.chip-notch{position:absolute;left:50%;top:-1px;width:22px;height:11px;transform:translateX(-50%);border-radius:0 0 11px 11px;background:var(--board-3);border:1px solid var(--chip-line);border-top:0}
+.chip-icon{grid-row:span 2;width:44px;height:44px;display:grid;place-items:center;border-radius:8px;background:rgba(243,240,226,.06);color:var(--silk-2)}
+.chip-icon svg{width:26px;height:26px}
+.chip-title{font-family:var(--f-display);font-weight:600;font-size:17px;line-height:1.15;color:var(--silk);overflow-wrap:anywhere}
+.chip-sub{font-family:var(--f-label);font-size:10px;letter-spacing:.06em;color:var(--silk-3)}
+.chip-sub .stars{font-family:var(--f-body);font-size:14px;letter-spacing:2px;color:var(--gold)}
+.chip-sub .stars s{text-decoration:none;color:rgba(243,240,226,.25)}
+.led{position:absolute;right:10px;top:10px;width:10px;height:10px;border-radius:50%;background:#2A3832;box-shadow:inset 0 0 0 1px rgba(0,0,0,.45)}
+.chip.is-current .led{background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink 1s steps(2,start) infinite}
+.chip.is-done .led{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.chip.is-current .chip-body{border-color:var(--gold);animation:glow 1.8s ease-in-out infinite}
+.chip.is-done .chip-icon{color:var(--gold);background:rgba(243,194,79,.12)}
+.chip.is-locked{cursor:not-allowed}
+.chip.is-locked .chip-body{filter:saturate(.35) brightness(.72)}
+.chip.is-locked .chip-title{color:var(--silk-3)}
+.chip:not(.is-locked):hover .chip-body{transform:translateY(-3px)}
+.chip--cpu{grid-column:1/-1;justify-self:center;width:min(460px,100%)}
+.chip--cpu .chip-body{min-height:122px;background:linear-gradient(135deg,#30383A,#161A1B 55%,#222829)}
+.chip--cpu .chip-title{font-size:20px}
+.chip--cpu .chip-icon{width:56px;height:56px}
+.chip--cpu .chip-icon svg{width:34px;height:34px}
+.pins-tb{position:absolute;left:18px;right:18px;height:9px;background:repeating-linear-gradient(to right,var(--pin) 0 5px,transparent 5px 12px)}
+.pins-tb.t{top:-10px}.pins-tb.b{bottom:-10px}
+@keyframes blink{to{opacity:.3}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 2px rgba(243,194,79,.35),0 0 22px rgba(243,194,79,.3),0 16px 26px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 3px rgba(243,194,79,.6),0 0 40px rgba(243,194,79,.5),0 16px 26px rgba(0,0,0,.35)}}
+.foot{max-width:1100px;margin:26px auto 0;color:var(--silk-3);font-size:13px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+@media (max-width:560px){.board{gap:44px 0;padding:34px 18px 44px}.board-silk{left:40px}}
+</style>
+<style>
+/* Paneles (hojas de datos y pruebas) */
+.overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding-block:calc(12px + env(safe-area-inset-top,0px)) calc(12px + env(safe-area-inset-bottom,0px));padding-inline:12px;background:rgba(3,24,16,.76);backdrop-filter:blur(4px);animation:fade .2s ease-out}
+.overlay--hint{z-index:60}
+.sheet{position:relative;display:flex;flex-direction:column;width:min(800px,100%);max-height:100%;overflow:auto;overscroll-behavior:contain;background:var(--paper);color:var(--ink);border-radius:16px;box-shadow:var(--shadow);animation:rise .3s cubic-bezier(.2,.8,.2,1)}
+.sheet--dark{background:var(--board-2);color:var(--silk);box-shadow:var(--shadow),inset 0 0 0 1px rgba(212,137,74,.4)}
+@keyframes rise{from{transform:translateY(26px);opacity:0}}
+@keyframes fade{from{opacity:0}}
+.sheet-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--board-2);color:var(--silk);border-bottom:3px solid var(--copper)}
+.sheet-head .grow{flex:1;min-width:0}
+.sheet-ref{display:block;font-family:var(--f-label);font-size:11px;letter-spacing:.08em;color:var(--gold)}
+.sheet-title{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.15;margin:0}
+.sheet-head .icon-btn{flex:none}
+.head-chip{flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:8px;background:var(--chip);color:var(--gold);box-shadow:inset 0 0 0 1px var(--chip-line)}
+.head-chip svg{width:24px;height:24px}
+.sheet-body{padding:20px 22px 8px;display:flex;flex-direction:column;gap:18px}
+.sheet-foot{position:sticky;bottom:0;z-index:3;display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;align-items:center;padding:14px 22px 16px;background:linear-gradient(to top,var(--paper) 72%,rgba(240,244,238,0))}
+.sheet--dark .sheet-foot{background:linear-gradient(to top,var(--board-2) 72%,rgba(10,58,43,0))}
+.sheet-foot .note{margin-right:auto;font-size:13px;color:var(--ink-2)}
+.sheet-foot .link-btn{margin-right:auto}
+#fb{scroll-margin-bottom:110px}
+.sheet:not(.sheet--dark) .eyebrow{color:var(--copper-ink)}
+.sheet--dark .ds-label{color:var(--silk-3)}
+.sheet--dark .intro-lead b{color:var(--gold)}
+@media (max-width:560px){.sheet-body{padding:16px 16px 6px}.sheet-foot{padding:12px 16px 14px}.sheet-foot .btn{flex:1}}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 20px;border-radius:10px;border:2px solid transparent;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.05em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:transform .12s ease,background-color .2s ease}
+.btn svg{width:18px;height:18px}
+.btn:active{transform:translateY(2px)}
+.btn-primary{background:var(--gold);color:var(--ink);box-shadow:0 4px 0 var(--gold-ink)}
+.btn-primary:hover{background:var(--gold-2)}
+.btn-primary:active{box-shadow:0 2px 0 var(--gold-ink)}
+.btn-ghost{background:transparent;border-color:var(--paper-3);color:var(--ink)}
+.btn-ghost:hover{background:var(--paper-2)}
+.sheet--dark .btn-ghost{border-color:rgba(243,240,226,.3);color:var(--silk)}
+.sheet--dark .btn-ghost:hover{background:rgba(255,255,255,.08)}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none}
+.link-btn{background:none;border:0;padding:4px 2px;font-size:14px;font-weight:700;color:var(--copper-ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.link-btn svg{width:16px;height:16px}
+
+/* Hoja de datos */
+.ds-lead{font-size:17.5px;line-height:1.55;margin:0;max-width:65ch}
+.ds b,.ds-lead b{color:var(--copper-ink)}
+.ds-label{font-family:var(--f-label);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px}
+.pins{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.pins li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start;max-width:70ch}
+.pin-no{height:26px;display:grid;place-items:center;font-family:var(--f-label);font-size:10px;background:var(--ink);color:var(--gold);border-radius:4px;margin-top:1px}
+.ds-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.ds-card{background:var(--paper-2);border-radius:10px;padding:12px 14px}
+.ds-card h4{margin:0 0 4px;font-family:var(--f-display);font-size:16px;line-height:1.2}
+.ds-card p{margin:0;font-size:15px;color:var(--ink-2)}
+.ds-table-wrap{overflow-x:auto}
+.ds-table{width:100%;border-collapse:collapse;font-size:15px}
+.ds-table th,.ds-table td{padding:8px 10px;border-bottom:1px solid var(--paper-3);text-align:left;vertical-align:top}
+.ds-table th{font-family:var(--f-label);font-size:10px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.ds-table td:first-child{font-weight:700;white-space:nowrap}
+.ds-fig{margin:0;background:#fff;border:1px solid var(--paper-3);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.ds-fig svg{width:100%;max-width:520px;height:auto}
+.ds-fig figcaption{font-size:13px;color:var(--ink-2);text-align:center}
+.ds-videos{display:flex;flex-wrap:wrap;gap:8px}
+.vid{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--ink);color:var(--silk);text-decoration:none;font-size:14px;line-height:1.2}
+.vid svg{width:14px;height:14px;color:var(--gold);flex:none}
+.vid:hover{background:#264134}
+.ds-note{background:var(--note);border-radius:10px;padding:12px 14px;font-size:15px}
+.ds-note b{color:var(--copper-ink)}
+
+/* Pruebas */
+.q-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.q-tag{font-family:var(--f-label);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:4px;background:var(--ink);color:var(--gold)}
+.q-count{font-family:var(--f-label);font-size:10px;letter-spacing:.06em;color:var(--ink-2)}
+.q-steps{display:flex;gap:4px;margin-left:auto}
+.q-steps i{width:18px;height:6px;border-radius:3px;background:var(--paper-3)}
+.q-steps i.ok{background:var(--ok-ink)}.q-steps i.bad{background:var(--red-ink)}.q-steps i.now{background:var(--gold-ink)}
+.q-text{font-family:var(--f-display);font-weight:600;font-size:clamp(19px,2.7vw,24px);line-height:1.25;margin:0;text-wrap:balance}
+.q-help{margin:-8px 0 0;color:var(--ink-2);font-size:14.5px}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:10px;border:2px solid var(--paper-3);background:#fff;color:var(--ink);cursor:pointer;font-size:16px;line-height:1.35;transition:border-color .15s,background-color .15s,transform .12s}
+.opt:hover:not([disabled]){border-color:var(--ink);transform:translateX(3px)}
+.opt .key{width:28px;height:28px;display:grid;place-items:center;border-radius:6px;background:var(--paper-2);font-family:var(--f-label);font-size:11px;color:var(--ink-2)}
+.opt[disabled]{cursor:default}
+.opt.is-dim{opacity:.5}
+.opt.is-right{border-color:var(--ok-ink);background:var(--ok-soft);opacity:1}
+.opt.is-right .key{background:var(--ok-ink);color:#fff}
+.opt.is-wrong{border-color:var(--red-ink);background:var(--red-soft);opacity:1}
+.opt.is-wrong .key{background:var(--red-ink);color:#fff}
+.opt.is-pick{border-color:var(--copper-ink);background:var(--note);opacity:1}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tf .opt{grid-template-columns:1fr;justify-items:center;text-align:center;font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.05em;text-transform:uppercase;padding:20px 12px}
+.tf .opt:hover:not([disabled]){transform:translateY(-2px)}
+.statement{margin:0;font-size:19px;line-height:1.45;background:#fff;border:2px dashed var(--paper-3);border-radius:12px;padding:14px 16px;font-family:var(--f-display);font-weight:600}
+
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 14px}
+.match-col{display:flex;flex-direction:column;gap:8px}
+.m-item{display:flex;align-items:center;gap:10px;min-height:54px;padding:10px 12px;border-radius:10px;border:2px solid var(--paper-3);background:#fff;color:var(--ink);text-align:left;cursor:pointer;font-size:15px;line-height:1.3;transition:border-color .15s,box-shadow .15s}
+.m-item .wire{flex:none;width:16px;height:16px;border-radius:50%;border:2px dashed var(--ink-2);opacity:.6}
+.match-col--l .m-item{font-family:var(--f-display);font-weight:600}
+.m-item.is-sel{border-color:var(--ink);box-shadow:0 0 0 4px rgba(19,34,27,.14)}
+.m-item.is-paired{border-color:var(--wc)}
+.m-item.is-paired .wire{border:0;opacity:1;background:var(--wc);box-shadow:0 0 0 3px color-mix(in srgb,var(--wc) 25%,transparent)}
+.m-item.is-right{background:var(--ok-soft)}
+.m-item.is-wrong{background:var(--red-soft);border-style:dashed}
+.m-item[disabled]{cursor:default}
+@media (max-width:520px){.match{gap:8px}.m-item{font-size:14px;padding:8px 9px;gap:8px}}
+
+.sort{display:flex;flex-direction:column;gap:10px}
+.s-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 14px;padding:10px 12px;border-radius:10px;background:#fff;border:2px solid var(--paper-3)}
+.s-row.is-right{border-color:var(--ok-ink);background:var(--ok-soft)}
+.s-row.is-wrong{border-color:var(--red-ink);background:var(--red-soft)}
+.s-text{font-size:15.5px;line-height:1.35}
+.seg{display:inline-flex;border-radius:8px;overflow:hidden;border:2px solid var(--ink)}
+.seg button{border:0;background:#fff;color:var(--ink);padding:8px 12px;font-family:var(--f-display);font-weight:600;font-size:13.5px;line-height:1.15;cursor:pointer;min-width:48px}
+.seg button+button{border-left:2px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--gold)}
+.seg button[disabled]{cursor:default}
+@media (max-width:600px){.s-row{grid-template-columns:1fr}.seg{display:flex;width:100%}.seg button{flex:1}}
+
+.order{display:flex;flex-direction:column;gap:8px}
+.o-item{display:grid;grid-template-columns:36px minmax(0,1fr);align-items:center;gap:12px;padding:10px 12px;border-radius:10px;border:2px solid var(--paper-3);background:#fff;color:var(--ink);text-align:left;cursor:pointer;font-size:15.5px;line-height:1.35}
+.o-item .num{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:2px dashed var(--ink-2);font-family:var(--f-display);font-weight:700;font-size:16px;opacity:.7}
+.o-item.is-set .num{border:0;background:var(--ink);color:var(--gold);opacity:1}
+.o-item.is-right{border-color:var(--ok-ink);background:var(--ok-soft)}
+.o-item.is-wrong{border-color:var(--red-ink);background:var(--red-soft)}
+.o-item[disabled]{cursor:default}
+
+.fill-text{font-size:19px;line-height:2.25;margin:0;background:#fff;border:2px solid var(--paper-3);border-radius:12px;padding:12px 16px}
+.blank{display:inline-flex;align-items:center;justify-content:center;min-width:120px;min-height:36px;padding:0 10px;margin:0 2px;border:0;border-bottom:3px solid var(--ink);background:var(--paper-2);border-radius:6px 6px 0 0;font-family:var(--f-display);font-weight:600;font-size:17px;line-height:1.2;vertical-align:middle;cursor:pointer;color:var(--ink)}
+.blank.is-active{background:var(--note);border-bottom-color:var(--copper-ink)}
+.blank.is-right{background:var(--ok-soft);border-bottom-color:var(--ok-ink)}
+.blank.is-wrong{background:var(--red-soft);border-bottom-color:var(--red-ink)}
+.blank[disabled]{cursor:default}
+.bank{display:flex;flex-wrap:wrap;gap:8px}
+.word{padding:8px 14px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);font-family:var(--f-display);font-weight:600;font-size:15px;cursor:pointer}
+.word:hover:not([disabled]){background:var(--ink);color:var(--gold)}
+.word[disabled]{opacity:.28;cursor:default}
+
+/* Respuesta */
+.feedback{border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:4px 12px;align-items:start;animation:rise .25s ease-out}
+.feedback.ok{background:var(--ok-soft);border:2px solid var(--ok-ink)}
+.feedback.bad{background:var(--red-soft);border:2px solid var(--red-ink)}
+.feedback.neutral{background:var(--note);border:2px solid var(--copper-ink)}
+.fb-icon{grid-row:span 3;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.fb-icon svg{width:22px;height:22px}
+.ok .fb-icon{background:var(--ok-ink)}.bad .fb-icon{background:var(--red-ink)}.neutral .fb-icon{background:var(--copper-ink)}
+.fb-title{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.2;margin:0}
+.fb-why{margin:0;font-size:15.5px}
+.fb-list{margin:4px 0 0;padding-left:18px;font-size:14.5px}
+.fb-list li+li{margin-top:2px}
+
+/* Contrarreloj de la CPU */
+.timer{display:flex;align-items:center;gap:10px}
+.timer-bar{flex:1;height:10px;border-radius:5px;background:var(--paper-3);overflow:hidden}
+.timer-bar i{display:block;height:100%;width:100%;background:var(--ok-ink);transform-origin:left center}
+.timer-bar i.warn{background:var(--red-ink)}
+.timer-num{font-family:var(--f-display);font-weight:700;font-size:18px;min-width:3ch;text-align:right;font-variant-numeric:tabular-nums}
+
+/* Portada, chip activado, fin de partida */
+.intro{padding:28px 26px 8px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-family:var(--f-label);font-size:11px;letter-spacing:.1em;color:var(--copper);margin:0}
+.mega{overflow-wrap:anywhere;font-family:var(--f-display);font-weight:700;font-size:clamp(42px,9vw,82px);line-height:.92;letter-spacing:.01em;text-transform:uppercase;margin:0;text-wrap:balance}
+.mega em{font-style:normal;color:var(--gold);text-shadow:0 0 22px rgba(243,194,79,.55)}
+.mega.bad em{color:var(--red);text-shadow:0 0 22px rgba(255,90,71,.5)}
+.intro-lead{margin:0;font-size:18px;line-height:1.5;color:var(--silk-2);max-width:56ch}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.rules li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;padding:12px;border-radius:10px;background:rgba(243,240,226,.06);font-size:15px;line-height:1.35}
+.rules svg{width:30px;height:30px;color:var(--gold)}
+.rules b{display:block;font-family:var(--f-display);font-size:16px;color:var(--silk)}
+.types{display:flex;flex-wrap:wrap;gap:6px}
+.types span{font-family:var(--f-label);font-size:10px;letter-spacing:.06em;padding:5px 8px;border-radius:4px;border:1px solid rgba(243,240,226,.25);color:var(--silk-2)}
+.best{font-family:var(--f-label);font-size:11px;letter-spacing:.06em;color:var(--silk-3);margin:0}
+.result{display:flex;flex-direction:column;gap:18px}
+.result-hero{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.big-chip{width:84px;height:84px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(160deg,var(--chip-2),var(--chip));color:var(--gold);box-shadow:0 0 0 3px var(--gold),0 0 34px rgba(243,194,79,.55);animation:powerup .8s ease-out}
+.big-chip svg{width:46px;height:46px}
+@keyframes powerup{0%{transform:scale(.6);box-shadow:0 0 0 0 var(--gold)}60%{transform:scale(1.08)}}
+.result-title{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,38px);line-height:1.05;margin:0;text-transform:uppercase}
+.big-stars{font-size:34px;letter-spacing:6px;color:var(--gold-ink);line-height:1}
+.big-stars s{text-decoration:none;color:var(--paper-3)}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpis.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kpis.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:560px){.kpis.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{padding:8px 10px}.kpi b{font-size:21px}}
+.kpi{background:var(--paper-2);border-radius:10px;padding:10px 14px}
+.sheet--dark .kpi{background:rgba(243,240,226,.07)}
+.kpi span{display:block;font-family:var(--f-label);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.sheet--dark .kpi span{color:var(--silk-3)}
+.kpi b{font-family:var(--f-display);font-size:26px;font-variant-numeric:tabular-nums}
+.fact{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;background:var(--note);border-radius:12px;padding:14px 16px}
+.fact svg{width:30px;height:30px;color:var(--copper-ink)}
+.fact p{margin:0}
+.review{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.review li{background:var(--paper-2);border-radius:10px;padding:12px 14px;font-size:15px}
+.sheet--dark .review li{background:rgba(243,240,226,.07)}
+.review .rq{font-weight:700;display:block;margin-bottom:4px}
+.review .ra{display:block;color:var(--ok-ink);font-weight:700}
+.sheet--dark .review .ra{color:var(--ok)}
+.review .rl{font-family:var(--f-label);font-size:9px;letter-spacing:.08em;color:var(--ink-2)}
+.sheet--dark .review .rl{color:var(--copper)}
+.closing{font-family:var(--f-display);font-weight:700;font-size:22px;margin:0;color:var(--gold)}
+
+/* Efectos */
+.shake{animation:shake .42s ease-in-out}
+@keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:70;background:radial-gradient(circle,rgba(255,90,71,0) 35%,rgba(255,90,71,.5));opacity:0}
+.flash.go{animation:flash .55s ease-out}
+@keyframes flash{15%{opacity:1}}
+.floater{position:fixed;z-index:80;pointer-events:none;font-family:var(--f-display);font-weight:700;font-size:24px;color:var(--ok-ink);text-shadow:0 2px 0 #fff;animation:floatup 1.1s ease-out forwards}
+@keyframes floatup{to{transform:translateY(-60px);opacity:0}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:75}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="hud">
+    <div class="brand">
+      <span class="brand-ref">UT2 · TDH</span>
+      <span class="brand-name">Enciende la placa</span>
+    </div>
+    <div class="hud-play">
+      <div class="lives" id="lives" role="img" aria-label="Vidas"></div>
+      <div class="stat"><span class="stat-label">Puntos</span><span class="stat-val" id="score">0</span></div>
+      <div class="stat"><span class="stat-label">Racha</span><span class="stat-val" id="streak">0</span></div>
+      <div class="stat stat--energy"><span class="stat-label">Energía</span><div class="energy" id="energy"></div></div>
+    </div>
+    <div class="hud-actions">
+      <button class="icon-btn" id="btn-sound" type="button" aria-label="Silenciar el sonido" aria-pressed="false"></button>
+      <button class="icon-btn" id="btn-menu" type="button" aria-label="Abrir el menú de la partida"></button>
+    </div>
+  </header>
+
+  <main class="board-wrap">
+    <div class="board-head">
+      <h1 class="board-title">Tecnologías Digitales <em>Habilitadoras</em></h1>
+      <p class="board-hint" id="board-hint">Toca el chip que parpadea. Lee su hoja de datos y supera sus pruebas para llevar la corriente al siguiente.</p>
+    </div>
+    <div class="board" id="board">
+      <svg class="traces" id="traces" aria-hidden="true"></svg>
+      <span class="board-silk" aria-hidden="true">UT2-TDH · REV 2026/27</span>
+    </div>
+    <footer class="foot">
+      <span>Contenido basado en la presentación de la UT2 «Tecnologías Digitales Habilitadoras» · Digitalización aplicada a los sectores productivos · CIFP Tony Gallardo · Curso 2026/2027.</span>
+      <span>Los apuntes completos están en el Campus Virtual.</span>
+    </footer>
+  </main>
+</div>
+
+<div class="overlay" id="ov" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1"></div></div>
+<div class="overlay overlay--hint" id="ov-hint" hidden><div class="sheet" id="hint-sheet" role="dialog" aria-modal="true" aria-label="Hoja de datos" tabindex="-1"></div></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<div class="sr-only" id="live" aria-live="polite"></div>
+<script>
+'use strict';
+/* ---------- Iconos (SVG en línea) ---------- */
+const svgI = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  spark: svgI('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'),
+  trend: svgI('<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>'),
+  people: svgI('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16.2 14.2c2.8.4 4.8 2.8 4.8 5.8"/>'),
+  signal: svgI('<path d="M12 12v9"/><circle cx="12" cy="10" r="2"/><path d="M8.5 6.5a5 5 0 0 0 0 7M15.5 6.5a5 5 0 0 1 0 7M5.6 3.6a9 9 0 0 0 0 12.8M18.4 3.6a9 9 0 0 1 0 12.8"/>'),
+  brain: svgI('<circle cx="5" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M6.6 7.3l3.8 3.4M6.6 16.7l3.8-3.4M13.6 10.7l3.8-3.4M13.6 13.3l3.8 3.4"/>'),
+  goggles: svgI('<rect x="2.5" y="7" width="19" height="10" rx="3"/><path d="M9.5 17l1.2-2.2h2.6L14.5 17"/><circle cx="7.5" cy="11.8" r="1.7"/><circle cx="16.5" cy="11.8" r="1.7"/>'),
+  arm: svgI('<path d="M4 21h10"/><path d="M9 21v-3.5"/><path d="M9 17.5 6.5 10.5l7-4.5 4.5 4.5"/><circle cx="6.5" cy="10.5" r="1.7"/><circle cx="13.5" cy="6" r="1.7"/><path d="M18 10.5l2.5-.8M18 10.5l.8 2.5"/>'),
+  blocks: svgI('<rect x="1.8" y="8.5" width="6" height="7" rx="1.2"/><rect x="9" y="8.5" width="6" height="7" rx="1.2"/><rect x="16.2" y="8.5" width="6" height="7" rx="1.2"/><path d="M7.8 12H9M15 12h1.2"/>'),
+  chat: svgI('<path d="M4 5h16v11H9.5L4 20.5z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01" stroke-width="2.6"/>'),
+  cpu: svgI('<rect x="6" y="6" width="12" height="12" rx="1.5"/><rect x="9.5" y="9.5" width="5" height="5" rx=".5"/><path d="M9 2.5V6M15 2.5V6M9 18v3.5M15 18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5"/>'),
+  soundOn: svgI('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>'),
+  soundOff: svgI('<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>'),
+  menu: svgI('<path d="M4 7h16M4 12h16M4 17h16"/>'),
+  sheet: svgI('<path d="M5 3.5h10l4 4v13H5z"/><path d="M15 3.5v4h4M8.5 12h7M8.5 16h5"/>'),
+  play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  check: svgI('<path d="M5 12.5l4.5 4.5L19 7.5" stroke-width="2.6"/>'),
+  cross: svgI('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke-width="2.6"/>'),
+  bulb: svgI('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>'),
+  clock: svgI('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9.5 2.5h5"/>'),
+  restart: svgI('<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 3.5v4.5h4.5"/>'),
+  close: svgI('<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>'),
+  arrow: svgI('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  heart: svgI('<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>'),
+  vote: svgI('<path d="M4 20h16"/><path d="M6 20v-6h3v6M10.5 20V9h3v11M15 20v-8h3v8"/>')
+};
+/* Corazón pixelado para las vidas */
+const HEART_PIX = ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...'];
+const HEART_SVG = (() => {
+  let d = '';
+  HEART_PIX.forEach((row, y) => {
+    let x = 0;
+    while (x < row.length) {
+      if (row[x] === 'X') { let n = 0; while (row[x + n] === 'X') n++; d += `M${x} ${y}h${n}v1h-${n}z`; x += n; } else x++;
+    }
+  });
+  return `<svg viewBox="0 0 7 6" shape-rendering="crispEdges" aria-hidden="true"><path class="h" d="${d}"/><path class="hl" d="M1 1h1v1H1z"/></svg>`;
+})();
+
+/* ---------- Ayudas para escribir las hojas de datos ---------- */
+const PINS = (items) => `<ol class="pins">${items.map((t, i) => `<li><span class="pin-no">P${String(i + 1).padStart(2, '0')}</span><span>${t}</span></li>`).join('')}</ol>`;
+const VIDS = (list) => `<div><p class="ds-label">Vídeos de clase</p><div class="ds-videos">${list.map(([t, u]) => `<a class="vid" href="${u}" target="_blank" rel="noopener noreferrer">${ICON.play}${t}</a>`).join('')}</div></div>`;
+const CARDS = (list) => `<div class="ds-grid">${list.map(([h, p]) => `<div class="ds-card"><h4>${h}</h4><p>${p}</p></div>`).join('')}</div>`;
+const TABLE = (head, rows) => `<div class="ds-table-wrap"><table class="ds-table"><thead><tr>${head.map((h) => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const LABEL = (t) => `<p class="ds-label">${t}</p>`;
+/* ---------- Contenidos: niveles U1–U4 ----------
+   Tipos de prueba: mc (test; la 1.ª opción es la correcta y se barajan), tf (verdadero/falso),
+   match (emparejar), sort (clasificar), order (ordenar), fill (completar huecos [[así]]), poll (debate, no resta vidas). */
+const FIG_GNSS = `<figure class="ds-fig"><svg viewBox="0 0 360 180" role="img" aria-label="Tres satélites. Tu posición es el punto donde se cortan las tres distancias.">
+<rect width="360" height="180" fill="#fff"/>
+<g fill="none" stroke-width="2" stroke-dasharray="5 5" opacity=".75"><circle cx="50" cy="34" r="168" stroke="#2E86DE"/><circle cx="310" cy="34" r="168" stroke="#E4572E"/><circle cx="180" cy="18" r="122" stroke="#138D75"/></g>
+<path d="M0 168 Q180 150 360 168" fill="none" stroke="#C6D4CA" stroke-width="2"/>
+<g transform="translate(50 34)"><rect x="-7" y="-5" width="14" height="10" rx="2" fill="#13221B"/><rect x="-24" y="-3" width="15" height="6" fill="#2E86DE"/><rect x="9" y="-3" width="15" height="6" fill="#2E86DE"/></g>
+<g transform="translate(310 34)"><rect x="-7" y="-5" width="14" height="10" rx="2" fill="#13221B"/><rect x="-24" y="-3" width="15" height="6" fill="#E4572E"/><rect x="9" y="-3" width="15" height="6" fill="#E4572E"/></g>
+<g transform="translate(180 18)"><rect x="-7" y="-5" width="14" height="10" rx="2" fill="#13221B"/><rect x="-24" y="-3" width="15" height="6" fill="#138D75"/><rect x="9" y="-3" width="15" height="6" fill="#138D75"/></g>
+<g font-size="11" fill="#3C5146"><text x="30" y="58">Satélite 1</text><text x="282" y="58">Satélite 2</text><text x="196" y="22">Satélite 3</text></g>
+<circle cx="180" cy="140" r="13" fill="none" stroke="#B42318" stroke-width="2"/><circle cx="180" cy="140" r="6" fill="#B42318"/>
+<text x="199" y="145" font-size="13" font-weight="700" fill="#13221B">Tu posición</text>
+</svg><figcaption>Triangulación: cada satélite da una distancia; tu posición está donde se cortan.</figcaption></figure>`;
+
+const LEVELS = [
+{
+  id: 'u1', ref: 'U1', title: 'Qué es una TDH', icon: 'spark',
+  sheet: `<p class="ds-lead">El <b>mundo digital</b> es el entorno en el que se emplean las <b>tecnologías digitales habilitadoras (TDH)</b>: herramientas que permiten a las empresas <b>transformarse digitalmente</b> y formar parte del nuevo modelo de negocio de la <b>Industria 4.0</b>.</p>
+${PINS([
+  'Implantarlas genera <b>beneficios técnicos y económicos</b> para empresas de <b>todos los tamaños</b>, especialmente <b>pequeñas y medianas empresas</b> (pymes).',
+  'Permiten <b>innovaciones revolucionarias</b> en <b>procesos, productos y servicios</b>.',
+  'Facilitan la generación de <b>nuevos negocios y mercados</b>.',
+  'Son <b>transversales</b>: pueden <b>mejorar la productividad</b> del personal y <b>reducir los tiempos de producción</b>.'
+])}
+<div>${LABEL('Ejemplos que ya usas')}${CARDS([
+  ['Banca en el móvil', 'Pagos, transferencias y gestiones desde una app, sin pasar por la oficina.'],
+  ['Supermercado online', 'La compra organizada por categorías (aceite, arroz, bebidas…) y pedida desde casa.']
+])}</div>`,
+  fact: 'Las apps del banco y del supermercado que aparecen en los apuntes son TDH que llevas en el bolsillo: la transformación digital ya forma parte de tu día a día.',
+  challenges: [
+    { t: 'mc', q: '¿Qué son las tecnologías digitales habilitadoras (TDH)?',
+      o: ['Herramientas que permiten a las empresas transformarse digitalmente y formar parte del modelo de negocio de la Industria 4.0', 'Programas de ofimática para redactar documentos y hacer hojas de cálculo', 'Normas legales que obligan a las empresas a tener página web', 'Máquinas industriales que solo pueden comprar las multinacionales'],
+      why: 'Las TDH son las herramientas que permiten a las empresas transformarse digitalmente y entrar en el nuevo modelo de negocio de la Industria 4.0. Se emplean en el llamado mundo digital.' },
+    { t: 'tf', q: 'Las TDH solo aportan beneficios a las grandes empresas.', a: false,
+      why: 'Generan beneficios técnicos y económicos para empresas de todos los tamaños, especialmente para las pequeñas y medianas empresas (pymes).' },
+    { t: 'fill', q: 'Completa la definición con las piezas correctas.',
+      text: 'El [[mundo digital]] es el entorno en el que se emplean las TDH, que forman parte del nuevo modelo de negocio de la [[Industria 4.0]].',
+      extra: ['mundo analógico', 'artesanía tradicional'],
+      why: 'El mundo digital es el entorno donde se usan las TDH, y estas son la base del nuevo modelo de negocio de la Industria 4.0.' },
+    { t: 'mc', q: 'Que las TDH sean «transversales» significa que…',
+      o: ['Sirven en muchos sectores y áreas: mejoran la productividad del personal y reducen tiempos de producción', 'Solo sirven para un sector concreto, como la banca', 'Solo funcionan si se implantan todas a la vez', 'Sustituyen siempre a toda la plantilla de la empresa'],
+      why: 'Al ser transversales se pueden aplicar en cualquier sector, y así mejoran la productividad del personal y reducen los tiempos de producción.' },
+    { t: 'sort', q: '¿Es cierto según los apuntes? Clasifica cada frase sobre las TDH.', bins: ['Verdadero', 'Falso'],
+      items: [['Permiten innovaciones en procesos, productos y servicios', 0], ['Facilitan la generación de nuevos negocios y mercados', 0], ['Pueden reducir los tiempos de producción', 0], ['Hacen innecesario formar al personal', 1], ['Solo benefician a las multinacionales', 1]],
+      why: 'Las TDH permiten innovar, abren nuevos negocios y mercados y reducen tiempos. Pero exigen formar al personal y benefician a empresas de todos los tamaños, sobre todo a las pymes.' }
+  ]
+},
+{
+  id: 'u2', ref: 'U2', title: 'Ventajas para la empresa', icon: 'trend',
+  sheet: `<p class="ds-lead">Cada TDH aporta a la empresa una <b>ventaja principal</b>. Esta es la tabla de ventajas de los apuntes:</p>
+${TABLE(['Tecnología', 'Ventaja para la empresa'], [
+  ['Inteligencia artificial', 'Mayor eficiencia y automatización'],
+  ['Big Data', 'Toma de decisiones basada en datos'],
+  ['Internet de las Cosas (IoT)', 'Mejora de la comunicación y la conectividad'],
+  ['Computación en la nube', 'Reducción de costes'],
+  ['Cloud (la nube)', 'Personalización y mejor atención al cliente'],
+  ['Robótica', 'Innovación en productos y servicios'],
+  ['Fabricación aditiva (3D)', 'Sostenibilidad'],
+  ['Blockchain', 'Seguridad y control']
+])}
+<div class="ds-note"><b>Fíjate:</b> la nube aparece dos veces. <b>Reduce costes</b> y además permite <b>personalizar</b> y <b>atender mejor al cliente</b>.</div>`,
+  fact: 'Una misma tecnología puede aportar varias ventajas: en la infografía de los apuntes, la nube ahorra costes y a la vez mejora la atención al cliente.',
+  challenges: [
+    { t: 'match', q: 'Conecta cada tecnología con la ventaja que aporta a la empresa.',
+      pairs: [['Inteligencia artificial', 'Mayor eficiencia y automatización'], ['Big Data', 'Toma de decisiones basada en datos'], ['Internet de las Cosas', 'Mejor comunicación y conectividad'], ['Blockchain', 'Seguridad y control']],
+      why: 'IA → eficiencia y automatización · Big Data → decisiones basadas en datos · IoT → comunicación y conectividad · Blockchain → seguridad y control.' },
+    { t: 'match', q: 'Segunda ronda: conecta las que faltan.',
+      pairs: [['Computación en la nube', 'Reducción de costes'], ['Robótica', 'Innovación en productos y servicios'], ['Fabricación aditiva', 'Sostenibilidad']],
+      why: 'Nube → reducción de costes · Robótica → innovación en productos y servicios · Fabricación aditiva (impresión 3D) → sostenibilidad.' },
+    { t: 'mc', q: 'Una fábrica conecta sus máquinas para que se envíen datos entre ellas. ¿Qué ventaja principal obtiene?',
+      o: ['Mejora de la comunicación y la conectividad (IoT)', 'Sostenibilidad (fabricación aditiva)', 'Seguridad y control (blockchain)', 'Innovación en productos (robótica)'],
+      why: 'Conectar máquinas y objetos entre sí es Internet de las Cosas (IoT), y su ventaja es mejorar la comunicación y la conectividad.' },
+    { t: 'mc', q: 'Una tienda online quiere recomendar productos a cada cliente y atenderle mejor. ¿Qué tecnología aporta «personalización y mejor atención al cliente»?',
+      o: ['La nube (cloud)', 'La fabricación aditiva', 'La robótica', 'El GPS'],
+      why: 'En la tabla, la nube (cloud) aporta personalización y mejor atención al cliente, además de reducir costes.' },
+    { t: 'tf', q: 'La principal ventaja del blockchain para la empresa es la reducción de costes.', a: false,
+      why: 'El blockchain aporta seguridad y control. La reducción de costes es la ventaja de la computación en la nube.' }
+  ]
+},
+{
+  id: 'u3', ref: 'U3', title: 'TDH y empleo', icon: 'people',
+  sheet: `<p class="ds-lead">La gran pregunta de la unidad: las TDH, ¿<b>hacen perder</b> puestos de trabajo o <b>crean</b> puestos de trabajo? Los apuntes muestran que hacen <b>las dos cosas</b>.</p>
+${TABLE(['Tecnología', 'Empleos que se reducen', 'Empleos que se crean'], [
+  ['IA y automatización', 'Administrativos, contables básicos, call centers', 'Ingenieros de IA, especialistas en procesos'],
+  ['Robótica', 'Operarios de montaje, soldadura y empaquetado', 'Diseñadores, técnicos de mantenimiento'],
+  ['Big Data', 'Procesamiento manual de datos', 'Científicos e ingenieros de datos'],
+  ['Impresión 3D', 'Prototipado y producción simple en serie', 'Diseñadores CAD, operadores de impresión'],
+  ['Blockchain', 'Intermediarios en registros y banca rutinaria', 'Desarrolladores, auditores de seguridad'],
+  ['Nube / e-commerce', '—', 'Administradores cloud, expertos en logística digital']
+])}
+<div class="ds-note"><b>Idea clave:</b> se reducen sobre todo los puestos con tareas <b>repetitivas o rutinarias</b>, y aparecen empleos que piden <b>más formación técnica</b>.</div>`,
+  fact: 'La pregunta de debate de los apuntes (¿destruyen o crean empleo?) no tiene una única respuesta: hacen las dos cosas. Por eso es tan importante formarse en estas tecnologías.',
+  challenges: [
+    { t: 'tf', q: 'Las TDH solo destruyen puestos de trabajo.', a: false,
+      why: 'Eliminan algunos puestos (sobre todo de tareas repetitivas), pero también crean otros: ingenieros de IA, científicos de datos, técnicos de mantenimiento… Hacen las dos cosas.' },
+    { t: 'sort', q: '¿Este empleo tiende a reducirse o a crearse con las TDH?', bins: ['Se reduce', 'Se crea'],
+      items: [['Operario/a de soldadura en cadena', 0], ['Científico/a de datos', 1], ['Contable básico/a', 0], ['Técnico/a de mantenimiento de robots', 1], ['Intermediario/a en registros y banca rutinaria', 0], ['Administrador/a cloud', 1]],
+      why: 'Se reducen los puestos con tareas repetitivas (soldadura, contabilidad básica, intermediación rutinaria) y se crean perfiles técnicos (datos, mantenimiento, cloud).' },
+    { t: 'match', q: 'Conecta cada tecnología con un empleo que CREA.',
+      pairs: [['IA y automatización', 'Ingenieros de IA y especialistas en procesos'], ['Big Data', 'Científicos e ingenieros de datos'], ['Impresión 3D', 'Diseñadores CAD y operadores de impresión'], ['Blockchain', 'Desarrolladores y auditores de seguridad'], ['Nube / e-commerce', 'Administradores cloud y expertos en logística digital']],
+      why: 'Cada tecnología genera sus propios perfiles profesionales: repasa la columna «Empleos que se crean» de la hoja de datos.' },
+    { t: 'mc', q: 'Según los apuntes, ¿qué empleos tiende a reducir la robótica?',
+      o: ['Operarios de montaje, soldadura y empaquetado', 'Diseñadores CAD', 'Científicos de datos', 'Auditores de seguridad'],
+      why: 'La robótica reduce operarios de montaje, soldadura y empaquetado, y a la vez crea diseñadores y técnicos de mantenimiento.' },
+    { t: 'mc', q: 'La impresión 3D reduce la necesidad de…',
+      o: ['Prototipado y producción simple en serie', 'Procesamiento manual de datos', 'Intermediarios en registros', 'Atención telefónica en call centers'],
+      why: 'La impresión 3D reduce el prototipado y la producción simple en serie. El procesamiento manual de datos lo reduce el Big Data; los intermediarios, el blockchain; y los call centers, la IA.' }
+  ]
+},
+{
+  id: 'u4', ref: 'U4', title: 'Big Data, 5G y GNSS', icon: 'signal',
+  sheet: `<p class="ds-lead">Tres tecnologías que <b>sustentan</b> a las demás: los <b>datos</b>, la <b>conexión</b> y la <b>posición</b>.</p>
+<div>${LABEL('Big Data')}${PINS([
+  'Tecnologías de <b>procesamiento masivo de datos</b> e información.',
+  'Ayuda a personas y empresas a <b>resolver problemas</b> al obtener <b>información significativa</b>.',
+  '<b>Personas:</b> una app de salud analiza pasos, ritmo cardíaco y sueño para darte pautas sobre hábitos.',
+  '<b>Empresas:</b> un supermercado estudia las compras de miles de clientes para decidir qué poner en oferta según la temporada.',
+  '<b>Educación:</b> análisis de resultados y de la interacción del alumnado.'
+])}</div>
+<div>${LABEL('Redes 5G')}${PINS([
+  'Permiten <b>interconectar</b> diversos aparatos electrónicos de forma <b>inalámbrica</b>.',
+  'Frente al 4G: <b>consume menos red</b>, es <b>más rápida</b> y tiene <b>menor latencia</b> (menos retardo).',
+  '<b>Aplicaciones:</b> vehículos inteligentes conectados, IoT, streaming de vídeo y realidad virtual.'
+])}</div>
+<div>${LABEL('GPS · GNSS (internet satélite)')}${PINS([
+  'El <b>GNSS</b> es el conjunto de sistemas de satélites que permiten conocer la <b>posición, velocidad y hora exacta</b> en cualquier parte del mundo.',
+  'Funciona por <b>triangulación</b>.',
+  '<b>Precisión:</b> 3–10 m en uso civil; centímetros en uso militar.',
+  '<b>Limitaciones:</b> señal débil en zonas urbanas, montañosas o con mal tiempo.'
+])}</div>
+${FIG_GNSS}
+${VIDS([['¿Qué es Big Data?', 'https://www.youtube.com/watch?v=1oMThuGDZwg'], ['El 5G para simples humanos', 'https://www.youtube.com/watch?v=ACyVZWG3UoY']])}`,
+  fact: 'Gracias a su baja latencia, el 5G permite que los vehículos inteligentes se comuniquen entre sí casi al instante: es una de sus aplicaciones estrella.',
+  challenges: [
+    { t: 'mc', q: '¿Qué es el Big Data?',
+      o: ['Tecnologías de procesamiento masivo de datos que obtienen información significativa para resolver problemas', 'Un disco duro de gran capacidad para guardar copias de seguridad', 'Una red de satélites para conocer la posición', 'Una moneda digital descentralizada'],
+      why: 'El Big Data procesa cantidades masivas de datos para obtener información significativa y ayudar a resolver problemas.' },
+    { t: 'sort', q: '¿Qué tecnología hay detrás de cada ejemplo?', bins: ['Big Data', '5G', 'GNSS'],
+      items: [['Una app de salud que analiza tus pasos, tu ritmo cardíaco y tu sueño', 0], ['Un súper que decide sus ofertas estudiando las compras de miles de clientes', 0], ['Vehículos inteligentes conectados entre sí', 1], ['Streaming de vídeo y realidad virtual sin cortes', 1], ['Saber tu posición, velocidad y hora exactas', 2], ['Un navegador que te guía por la carretera', 2]],
+      why: 'Analizar muchos datos es Big Data; conectar aparatos de forma rápida e inalámbrica es 5G; conocer la posición por satélite es GNSS.' },
+    { t: 'mc', q: 'Frente a la red 4G, la red 5G…',
+      o: ['Es más rápida, tiene menor latencia y consume menos red', 'Es más lenta, pero llega a más distancia', 'Solo sirve para hacer llamadas de voz', 'Necesita cables para conectar los aparatos'],
+      why: 'El 5G interconecta aparatos sin cables; consume menos red, es más rápido y tiene menor latencia que el 4G.' },
+    { t: 'fill', q: 'Completa la ficha técnica del GNSS.',
+      text: 'El GNSS funciona por [[triangulación]]. Su precisión civil es de [[3–10 m]], mientras que la militar llega a [[centímetros]].',
+      extra: ['reflexión', '300 m', 'kilómetros'],
+      why: 'El GNSS calcula la posición por triangulación. Precisión: 3–10 m en uso civil y centímetros en uso militar.' },
+    { t: 'tf', q: 'La señal GPS puede ser débil entre edificios altos, en la montaña o con mal tiempo.', a: true,
+      why: 'Son justo las limitaciones que indican los apuntes: señal débil en zonas urbanas, montañosas o con mal tiempo.' }
+  ]
+}
+];
+/* ---------- Contenidos: niveles U5–U9 ---------- */
+const TOMATO = (x, y, c) => `<circle cx="${x}" cy="${y}" r="12" fill="${c}"/><path d="M${x - 4} ${y - 11}l4 3 4-3" fill="none" stroke="#2E6B2F" stroke-width="2.4" stroke-linecap="round"/>`;
+const RED = '#D94A38', GREEN = '#6AA84F';
+const FIG_ML = `<figure class="ds-fig"><svg viewBox="0 0 420 160" role="img" aria-label="Machine learning: entran tomates mezclados y salen clasificados en rojos y verdes.">
+<rect width="420" height="160" fill="#fff"/>
+<rect x="12" y="22" width="76" height="130" rx="10" fill="none" stroke="#C6D4CA" stroke-width="2"/>
+<text x="50" y="15" font-size="12" text-anchor="middle" fill="#3C5146">Entrada</text>
+${TOMATO(50, 44, RED)}${TOMATO(50, 74, GREEN)}${TOMATO(50, 104, RED)}${TOMATO(50, 134, GREEN)}
+<path d="M96 88h52" stroke="#13221B" stroke-width="2.5"/><path d="M142 82l8 6-8 6" fill="none" stroke="#13221B" stroke-width="2.5"/>
+<rect x="156" y="56" width="108" height="64" rx="10" fill="#13221B"/>
+<text x="210" y="84" font-size="14" font-weight="700" text-anchor="middle" fill="#F3F0E2">Machine</text>
+<text x="210" y="101" font-size="14" font-weight="700" text-anchor="middle" fill="#F3F0E2">learning</text>
+<text x="210" y="138" font-size="12" text-anchor="middle" fill="#9A5117">detecta el patrón «color»</text>
+<path d="M268 76l52-28M268 100l52 28" stroke="#13221B" stroke-width="2.5"/>
+<rect x="326" y="14" width="84" height="56" rx="10" fill="none" stroke="#D94A38" stroke-width="2"/>
+<rect x="326" y="92" width="84" height="56" rx="10" fill="none" stroke="#6AA84F" stroke-width="2"/>
+${TOMATO(352, 46, RED)}${TOMATO(384, 46, RED)}${TOMATO(352, 124, GREEN)}${TOMATO(384, 124, GREEN)}
+<text x="368" y="27" font-size="11" text-anchor="middle" fill="#B42318">Rojos</text>
+<text x="368" y="105" font-size="11" text-anchor="middle" fill="#17744A">Verdes</text>
+</svg><figcaption>El ejemplo de los apuntes: el modelo aprende a separar tomates rojos y verdes.</figcaption></figure>`;
+
+const FIG_XR = `<figure class="ds-fig"><svg viewBox="0 0 420 118" role="img" aria-label="Del mundo real al mundo virtual: realidad aumentada, realidad mixta y realidad virtual.">
+<defs><linearGradient id="xrg" x1="0" x2="1"><stop offset="0" stop-color="#6AA84F"/><stop offset="1" stop-color="#2E86DE"/></linearGradient></defs>
+<rect width="420" height="118" fill="#fff"/>
+<rect x="20" y="54" width="380" height="12" rx="6" fill="url(#xrg)"/>
+<text x="20" y="92" font-size="12" fill="#3C5146">Mundo real</text>
+<text x="400" y="92" font-size="12" text-anchor="end" fill="#3C5146">Mundo 100 % virtual</text>
+<circle cx="130" cy="60" r="9" fill="#fff" stroke="#13221B" stroke-width="3"/>
+<circle cx="245" cy="60" r="9" fill="#fff" stroke="#13221B" stroke-width="3"/>
+<circle cx="375" cy="60" r="9" fill="#fff" stroke="#13221B" stroke-width="3"/>
+<g font-size="13" font-weight="700" fill="#13221B" text-anchor="middle"><text x="130" y="36">RA · aumentada</text><text x="245" y="36">RM · mixta</text><text x="360" y="36">VR · virtual</text></g>
+<g font-size="11" fill="#3C5146" text-anchor="middle"><text x="130" y="112">capa digital sobre lo real</text><text x="258" y="112">real + virtual, interactúas</text></g>
+</svg><figcaption>Cuanto más a la derecha, más digital es lo que ves.</figcaption></figure>`;
+
+const BLOCK = (x, n) => `<g transform="translate(${x} 18)"><rect width="86" height="62" rx="8" fill="#fff" stroke="#13221B" stroke-width="2"/><path d="M0 8a8 8 0 0 1 8-8h70a8 8 0 0 1 8 8v12H0z" fill="#13221B"/><text x="43" y="15" font-size="11" text-anchor="middle" fill="#F3C24F">Bloque ${n}</text><rect x="10" y="30" width="54" height="6" rx="3" fill="#C6D4CA"/><rect x="10" y="42" width="40" height="6" rx="3" fill="#C6D4CA"/><rect x="10" y="54" width="62" height="3" rx="1.5" fill="#D4894A"/></g>`;
+const NODE = (x) => `<g transform="translate(${x} 128)"><circle r="17" fill="#13221B"/><rect x="-7" y="-8" width="14" height="16" rx="2" fill="#F3F0E2"/><path d="M-4 -3h8M-4 1h8M-4 5h5" stroke="#9A5117" stroke-width="1.6"/></g>`;
+const FIG_CHAIN = `<figure class="ds-fig"><svg viewBox="0 0 420 170" role="img" aria-label="Cuatro bloques encadenados y cuatro nodos, cada uno con una copia del libro mayor.">
+<rect width="420" height="170" fill="#fff"/>
+${BLOCK(10, 1)}${BLOCK(113, 2)}${BLOCK(216, 3)}${BLOCK(319, 4)}
+<g fill="none" stroke="#9A5117" stroke-width="3"><rect x="93" y="44" width="23" height="10" rx="5"/><rect x="196" y="44" width="23" height="10" rx="5"/><rect x="299" y="44" width="23" height="10" rx="5"/></g>
+<path d="M53 128H365" stroke="#C6D4CA" stroke-width="3" stroke-dasharray="6 5"/>
+${NODE(53)}${NODE(157)}${NODE(261)}${NODE(365)}
+<text x="210" y="102" font-size="12" text-anchor="middle" fill="#3C5146">Cada nodo guarda una copia del libro mayor (DLT)</text>
+</svg><figcaption>Si alguien cambia un bloque, el resto de nodos lo detecta: por eso no se puede alterar sin dejar rastro.</figcaption></figure>`;
+
+LEVELS.push(
+{
+  id: 'u5', ref: 'U5', title: 'Inteligencia artificial', icon: 'brain',
+  sheet: `<p class="ds-lead">La <b>inteligencia artificial</b> se basa en el desarrollo de <b>métodos y algoritmos</b> que permiten a los ordenadores <b>comportarse de manera inteligente</b>. Requiere un <b>tiempo de entrenamiento</b> para analizar las grandes cantidades de datos que obtiene.</p>
+<div>${LABEL('Subdominios de la IA')}${CARDS([
+  ['Machine learning', 'Métodos o modelos que <b>detectan patrones automáticamente</b> al analizar datos. <b>Necesita los datos previamente estructurados</b> para empezar a aprender.'],
+  ['Deep learning', 'Procesa <b>grandes volúmenes de datos sin estructurar</b> y aprende en profundidad. <b>No necesita</b> los datos estructurados previamente.']
+])}</div>
+${FIG_ML}
+<div>${LABEL('Deep learning en los vídeos de clase')}${PINS([
+  '<b>Detección de coches</b> en vídeo, una pieza clave de la conducción autónoma.',
+  'Un agente de IA que <b>aprende a jugar al pilla-pilla</b>: recibe <b>premios</b> cuando lo hace bien y <b>castigos</b> cuando falla, y su red neuronal mejora tras cada intento.'
+])}</div>
+${VIDS([['Detección de coches', 'https://www.youtube.com/watch?v=4IMd8isHoHQ'], ['Una IA aprende a jugar al pilla-pilla', 'https://www.youtube.com/watch?v=LXosuQEOLn0']])}`,
+  fact: 'El agente del vídeo del pilla-pilla no sabía nada al empezar. Intento tras intento, a base de premios y castigos, su red neuronal aprendió a esquivar a su rival.',
+  challenges: [
+    { t: 'mc', q: 'La inteligencia artificial se basa en…',
+      o: ['Métodos y algoritmos que permiten a los ordenadores comportarse de manera inteligente', 'Robots con forma humana que imitan a las personas', 'Guardar la información en bloques encadenados', 'Conectar aparatos sin cables a gran velocidad'],
+      why: 'La IA se basa en métodos y algoritmos que permiten a los ordenadores comportarse de manera inteligente.' },
+    { t: 'tf', q: 'Una IA funciona perfectamente desde el primer momento, sin necesidad de entrenamiento.', a: false,
+      why: 'La IA requiere un tiempo de entrenamiento para analizar las grandes cantidades de datos que obtiene.' },
+    { t: 'sort', q: '¿Machine learning o deep learning?', bins: ['Machine learning', 'Deep learning'],
+      items: [['Necesita los datos previamente estructurados', 0], ['Procesa grandes volúmenes de datos sin estructurar', 1], ['Detecta patrones en datos ya organizados', 0], ['Aprende en profundidad sin que preparemos los datos', 1], ['Separar tomates rojos y verdes (ejemplo de los apuntes)', 0], ['Detectar coches en vídeo para la conducción autónoma', 1]],
+      why: 'Machine learning: detecta patrones y necesita datos estructurados. Deep learning: aprende de grandes volúmenes de datos sin estructurar.' },
+    { t: 'mc', q: 'En el ejemplo de los apuntes, un sistema recibe tomates y los separa en «rojos» y «verdes». ¿Qué está haciendo?',
+      o: ['Clasificar: detecta patrones en los datos (machine learning)', 'Registrar transacciones en un libro mayor', 'Calcular la posición de cada tomate por triangulación', 'Sumergir al usuario en un entorno virtual'],
+      why: 'Es el ejemplo de machine learning de los apuntes: el modelo detecta un patrón (el color) y clasifica cada tomate.' },
+    { t: 'mc', q: 'En el vídeo del agente de IA que juega al pilla-pilla, ¿cómo aprende?',
+      o: ['Recibe premios cuando acierta y castigos cuando falla, y su red neuronal mejora con cada intento', 'Un programador le escribe a mano cada movimiento', 'Lo maneja una persona con un mando', 'Consulta un mapa GPS del escenario'],
+      why: 'Es deep learning por refuerzo: la red neuronal se actualiza tras cada intento para conseguir más premios y menos castigos.' }
+  ]
+},
+{
+  id: 'u6', ref: 'U6', title: 'Realidades inmersivas', icon: 'goggles',
+  sheet: `<p class="ds-lead">La <b>realidad inmersiva</b> replica el mundo físico a través de una <b>experiencia digitalizada</b> y sirve para <b>mejorar la experiencia del usuario</b>.</p>
+${CARDS([
+  ['Realidad virtual (VR)', '<b>Sumerge completamente</b> al usuario en un entorno digital generado por ordenador, <b>aislándolo del mundo real</b>.'],
+  ['Realidad mixta (RM)', '<b>Combina</b> elementos virtuales con el entorno real y permite <b>interactuar con ambos a la vez</b>.'],
+  ['Realidad aumentada (RA)', '<b>Superpone</b> contenido digital sobre la imagen real, por ejemplo a través de la cámara del móvil.']
+])}
+${FIG_XR}
+<div>${LABEL('Ejemplos de los apuntes')}${PINS([
+  '<b>VR para formación:</b> practicar con extintores en salas con fuego y humo simulados, eligiendo el extintor correcto.',
+  '<b>RM en la industria:</b> gafas que muestran piezas y datos en 3D sobre el puesto de trabajo real.',
+  '<b>RM en educación:</b> ver un esqueleto humano en 3D delante de ti.',
+  '<b>Actividad de clase:</b> escanea el código QR y apunta con el móvil al marcador «AR» para ver aparecer contenido digital.'
+])}</div>
+${VIDS([['Formación con extintores en VR', 'https://www.youtube.com/watch?v=7Ddd920-htk']])}`,
+  fact: 'En el simulador de extintores de los apuntes hay que elegir el extintor correcto entre tres y sentir lo que es estar en una sala llena de humo, sin ningún riesgo real.',
+  challenges: [
+    { t: 'mc', q: 'La realidad inmersiva sirve para…',
+      o: ['Replicar el mundo físico mediante una experiencia digitalizada y mejorar la experiencia del usuario', 'Guardar datos de forma segura en bloques', 'Localizar objetos por satélite', 'Fabricar piezas capa a capa'],
+      why: 'La realidad inmersiva replica el mundo físico con una experiencia digitalizada para mejorar la experiencia del usuario.' },
+    { t: 'sort', q: '¿Realidad virtual o realidad mixta?', bins: ['Virtual (VR)', 'Mixta (RM)'],
+      items: [['Te aísla del mundo real', 0], ['Combina elementos virtuales con el entorno real', 1], ['Todo lo que ves está generado por ordenador', 0], ['Interactúas a la vez con objetos reales y virtuales', 1], ['Entrenar con extintores en una sala 100 % simulada', 0], ['Gafas que muestran una pieza 3D sobre tu puesto de trabajo real', 1]],
+      why: 'VR: entorno totalmente digital que te aísla del mundo real. RM: mezcla lo virtual con lo real y permite interactuar con ambos.' },
+    { t: 'tf', q: 'La realidad virtual combina elementos virtuales con el entorno real.', a: false,
+      why: 'Eso es la realidad mixta. La realidad virtual te sumerge por completo en un entorno digital y te aísla del mundo real.' },
+    { t: 'mc', q: 'En la actividad de clase escaneas un código QR y luego apuntas con el móvil a un marcador «AR». ¿Qué tecnología usas?',
+      o: ['Realidad aumentada: se superpone contenido digital sobre la imagen real', 'Realidad virtual: el móvil te aísla del mundo real', 'Blockchain: el marcador guarda un bloque de datos', 'GNSS: el marcador calcula tu posición por satélite'],
+      why: 'AR significa realidad aumentada: la cámara ve el mundo real y el móvil le superpone contenido digital.' },
+    { t: 'mc', q: '¿Qué uso profesional de la realidad virtual aparece en los apuntes?',
+      o: ['Formación con extintores en salas con fuego y humo simulados', 'Seguimiento de alimentos del origen al supermercado', 'Un chatbot de atención al cliente', 'Taxis sin conductor'],
+      why: 'El vídeo de clase muestra un simulador de VR para aprender a usar extintores sin riesgo.' }
+  ]
+},
+{
+  id: 'u7', ref: 'U7', title: 'Robótica', icon: 'arm',
+  sheet: `<p class="ds-lead">Dos grandes familias de robots: los que <b>colaboran</b> con las personas y los que actúan de forma <b>autónoma</b>.</p>
+<div>${LABEL('Robótica colaborativa (cobots)')}${PINS([
+  '<b>Brazos automatizados</b> capaces de trabajar con seres humanos de forma <b>colaborativa y segura</b>.',
+  'Programados para realizar <b>tareas repetitivas</b> y <b>evitar accidentes y colisiones</b>.',
+  'Se emplean para ejecutar <b>tareas peligrosas o no ergonómicas</b>, liberando al personal de estas funciones.',
+  '<b>Interactúan con el entorno</b> y disponen de <b>IA para aprender</b> a través de patrones.'
+])}</div>
+<div>${LABEL('Robótica autónoma')}${PINS([
+  'Son <b>sistemas ciberfísicos basados en sensores</b>.',
+  '<b>Robots industriales:</b> interactúan con el entorno y realizan <b>tareas específicas</b> en las líneas de producción.',
+  '<b>Robots autónomos:</b> máquinas capaces de <b>moverse, percibir su entorno y tomar decisiones</b> sin intervención humana directa.',
+  'Usan <b>sensores, inteligencia artificial y control en tiempo real</b> para actuar de forma independiente.',
+  '<b>Vehículos autónomos:</b> como los taxis sin conductor de San Francisco.'
+])}</div>
+${VIDS([['Un cobot en acción', 'https://www.youtube.com/watch?v=B6gNHep-bmE'], ['Almacén robotizado de Amazon', 'https://www.youtube.com/watch?v=wgBi1XDzI30'], ['Atlas, robot humanoide', 'https://www.youtube.com/watch?v=HYwekersccY'], ['Taxis sin conductor', 'https://www.youtube.com/watch?v=qK8JhXq3qF8']])}`,
+  fact: 'Según el reportaje de los apuntes, en San Francisco circulan unos 600 taxis sin conductor… y no están libres de polémica.',
+  challenges: [
+    { t: 'mc', q: '¿Qué es la robótica colaborativa (cobots)?',
+      o: ['Brazos automatizados que trabajan junto a personas de forma colaborativa y segura', 'Robots que sustituyen a toda la plantilla de una fábrica', 'Vehículos que circulan sin conductor', 'Programas que conversan con los clientes'],
+      why: 'Los cobots son brazos automatizados que trabajan con personas de forma colaborativa y segura.' },
+    { t: 'sort', q: '¿Robot colaborativo o robot autónomo?', bins: ['Colaborativo', 'Autónomo'],
+      items: [['Trabaja codo con codo con un operario sin ponerle en peligro', 0], ['Se mueve, percibe el entorno y decide sin intervención humana directa', 1], ['Hace la tarea no ergonómica para liberar al trabajador', 0], ['Taxi sin conductor en San Francisco', 1], ['Está programado para evitar colisiones con las personas', 0], ['Robots que mueven estanterías en el almacén de Amazon', 1]],
+      why: 'Cobot: trabaja junto a personas, de forma segura, en tareas repetitivas, peligrosas o no ergonómicas. Robot autónomo: se mueve, percibe y decide por sí mismo.' },
+    { t: 'fill', q: 'Completa: ¿qué usan los robots autónomos?',
+      text: 'Los robots autónomos usan [[sensores]], [[inteligencia artificial]] y control en [[tiempo real]] para actuar de forma independiente.',
+      extra: ['blockchain', 'diferido', 'impresión 3D'],
+      why: 'Los robots autónomos combinan sensores, inteligencia artificial y control en tiempo real.' },
+    { t: 'tf', q: 'Los robots autónomos son sistemas ciberfísicos basados en sensores.', a: true,
+      why: 'Así los definen los apuntes: sistemas ciberfísicos basados en sensores.' },
+    { t: 'mc', q: '¿Para qué se emplea sobre todo la robótica colaborativa?',
+      o: ['Para tareas peligrosas o no ergonómicas, liberando al personal de ellas', 'Para validar transacciones sin intermediarios', 'Para sustituir la formación del personal', 'Para calcular la posición por satélite'],
+      why: 'Los cobots se encargan de las tareas peligrosas o no ergonómicas y así liberan al personal de ellas.' }
+  ]
+},
+{
+  id: 'u8', ref: 'U8', title: 'Blockchain', icon: 'blocks',
+  sheet: `<p class="ds-lead">Una <b>blockchain</b> es una <b>base de datos compartida y segura</b> donde la información se guarda en <b>bloques encadenados</b>, imposibles de modificar sin que todos lo vean. Sirve para las <b>transacciones de datos verificados</b>.</p>
+<div>${LABEL('Aporta tres cosas clave')}${CARDS([
+  ['Transparencia', 'Todos los participantes ven la misma información.'],
+  ['Seguridad', 'Los registros no se pueden alterar sin dejar rastro.'],
+  ['Confianza sin intermediarios', 'No hace falta un tercero central que valide las operaciones.']
+])}</div>
+<div>${LABEL('Proceso de la blockchain')}${PINS([
+  'Los datos se almacenan en una base de datos y las transacciones se registran en un libro de cuentas llamado <b>libro mayor</b>.',
+  'El libro mayor se <b>distribuye entre los nodos</b> (participantes) de una red pública o privada: es la <b>tecnología de contabilidad distribuida (DLT)</b>.',
+  'Los nodos reciben <b>incentivos con tokens digitales</b> por actualizar las cadenas de bloques.'
+])}</div>
+${FIG_CHAIN}
+<div>${LABEL('Ejemplos')}${TABLE(['Proyecto', 'Para qué usa blockchain'], [
+  ['Bitcoin', 'Moneda digital descentralizada, sin bancos ni intermediarios'],
+  ['Everledger', 'Trazabilidad de diamantes y productos de lujo para evitar falsificaciones'],
+  ['IBM Food Trust', 'Seguimiento de alimentos desde el origen hasta el supermercado (Walmart, Nestlé, Carrefour)'],
+  ['Guardtime', 'Protección y verificación de datos en sistemas sanitarios y gubernamentales'],
+  ['UNICEF Blockchain', 'Seguimiento transparente de donaciones y proyectos sociales']
+])}</div>
+${VIDS([['Blockchain: qué es y cómo funciona', 'https://www.youtube.com/watch?v=8rUGRdOi3XM']])}`,
+  fact: 'IBM Food Trust permite seguir un alimento desde su origen hasta el supermercado. Lo usan empresas como Walmart, Nestlé o Carrefour.',
+  challenges: [
+    { t: 'mc', q: '¿Qué es una blockchain?',
+      o: ['Una base de datos compartida y segura donde la información se guarda en bloques encadenados', 'Un robot que encadena tareas en una fábrica', 'Una red de antenas 5G conectadas en cadena', 'Un tipo de impresora 3D que fabrica por bloques'],
+      why: 'La blockchain es una base de datos compartida y segura con la información en bloques encadenados, imposibles de modificar sin que todos lo vean.' },
+    { t: 'match', q: 'Conecta cada aportación clave con su significado.',
+      pairs: [['Transparencia', 'Todos los participantes ven la misma información'], ['Seguridad', 'Los registros no se pueden alterar sin dejar rastro'], ['Confianza sin intermediarios', 'No hace falta un tercero central que valide']],
+      why: 'Transparencia → todos ven lo mismo · Seguridad → nada se altera sin dejar rastro · Confianza sin intermediarios → sin un tercero central que valide.' },
+    { t: 'order', q: 'Ordena el proceso de la blockchain, del primer paso al último.',
+      items: ['Se realiza una transacción (por ejemplo, un pago)', 'La transacción se registra en el libro de cuentas: el libro mayor', 'El libro mayor se distribuye entre los nodos de la red (DLT)', 'Los nodos actualizan la cadena de bloques y reciben tokens como incentivo'],
+      why: 'La transacción se registra en el libro mayor; ese libro se distribuye entre los nodos (DLT), y los nodos que actualizan la cadena reciben tokens como incentivo.' },
+    { t: 'match', q: 'Conecta cada proyecto con su uso de la blockchain.',
+      pairs: [['Bitcoin', 'Moneda digital sin bancos ni intermediarios'], ['Everledger', 'Trazabilidad de diamantes y productos de lujo'], ['IBM Food Trust', 'Seguimiento de alimentos hasta el supermercado'], ['Guardtime', 'Protección de datos sanitarios y gubernamentales'], ['UNICEF Blockchain', 'Seguimiento transparente de donaciones']],
+      why: 'Repasa la tabla de ejemplos: cada proyecto aplica la blockchain a un sector distinto.' },
+    { t: 'mc', q: '¿Cómo se llama la tecnología que reparte el libro mayor entre todos los nodos de la red?',
+      o: ['DLT: tecnología de contabilidad distribuida', 'GNSS: sistema global de navegación por satélite', 'IoT: Internet de las Cosas', 'Deep learning: aprendizaje profundo'],
+      why: 'Distribuir el libro mayor entre los nodos de una red pública o privada se conoce como DLT (tecnología de contabilidad distribuida).' }
+  ]
+},
+{
+  id: 'u9', ref: 'U9', title: 'TDH en los servicios', icon: 'chat',
+  sheet: `<p class="ds-lead">La influencia de las TDH <b>reorganiza los modelos empresariales tradicionales</b> hacia un nuevo paradigma basado en la <b>digitalización</b>.</p>
+${PINS([
+  'Exige una <b>formación del personal</b> en el uso de las máquinas.',
+  'Elimina la necesidad de tener personas en <b>ciertos trabajos tradicionales</b>.',
+  'Ejemplo de los apuntes: el <b>chatbot frente a las teleoperadoras</b> en la atención al cliente (Figura 2.17).'
+])}
+<div>${LABEL('Caso: el chatbot de Jazztel en WhatsApp')}${CARDS([
+  ['Qué hace', 'Personaliza la interacción con los clientes con una <b>sensación completamente humana</b>, tanto para contratar productos como para atraer nuevos clientes. Por ejemplo, te envía tu factura cuando se la pides.'],
+  ['Qué ahorra', 'Ahorra en <b>contratación de personal</b> para gestionar el centro de atención al usuario.']
+])}</div>
+<div class="ds-note"><b>Pregunta de debate:</b> un teleoperador, ¿qué posibilidades tiene de que su profesión sea reemplazada? Piensa tu respuesta, porque te la vamos a preguntar.</div>`,
+  fact: 'En las capturas del chatbot de Jazztel, el cliente pide su factura de septiembre y la recibe en segundos por WhatsApp, sin esperar a que le atienda una persona.',
+  challenges: [
+    { t: 'mc', q: '¿Qué efecto tienen las TDH en los modelos de empresa tradicionales?',
+      o: ['Los reorganizan hacia un nuevo paradigma basado en la digitalización', 'Solo afectan al departamento de informática', 'Los dejan igual: solo añaden ordenadores nuevos', 'Eliminan la necesidad de formar al personal'],
+      why: 'Las TDH reorganizan los modelos empresariales tradicionales hacia un nuevo paradigma basado en la digitalización.' },
+    { t: 'tf', q: 'Implantar TDH exige formar al personal en el uso de las máquinas.', a: true,
+      why: 'Correcto: la digitalización exige formación del personal en el uso de las máquinas.' },
+    { t: 'mc', q: '¿Qué consigue Jazztel con su chatbot de WhatsApp?',
+      o: ['Atender de forma personalizada, con sensación humana, y ahorrar en contratación de personal', 'Fabricar sus productos con impresión 3D', 'Registrar las facturas en una blockchain pública', 'Localizar a sus clientes por GPS'],
+      why: 'El chatbot personaliza la atención con una sensación muy humana y ahorra en contratación de personal para el centro de atención al usuario.' },
+    { t: 'fill', q: 'Completa el caso del chatbot.',
+      text: 'El chatbot de Jazztel personaliza las [[interacciones]] con los clientes y ahorra en [[contratación de personal]] para el centro de atención al usuario.',
+      extra: ['impresoras 3D', 'triangulaciones'],
+      why: 'Personaliza las interacciones con los clientes y ahorra en contratación de personal.' },
+    { t: 'poll', q: 'Debate: un teleoperador, ¿qué posibilidades tiene de que su profesión sea reemplazada?',
+      o: ['Muchas: los chatbots ya resuelven gran parte de las consultas', 'Algunas: la profesión cambiará, pero seguirán haciendo falta personas', 'Pocas: la atención humana es insustituible'],
+      why: 'No hay una única respuesta correcta. Los apuntes muestran que los chatbots ya asumen muchas consultas rutinarias y que las TDH eliminan puestos en ciertos trabajos tradicionales, pero también exigen formar al personal y crean perfiles nuevos. Lo importante es que sepas argumentar tu postura.' }
+  ]
+}
+);
+
+/* ---------- CPU: prueba final contrarreloj ---------- */
+const FINAL = {
+  id: 'cpu', ref: 'CPU', title: 'Prueba final', icon: 'cpu', take: 8, time: 20,
+  pool: [
+    { t: 'tf', q: 'El 5G tiene más latencia que el 4G.', a: false, why: 'Al revés: el 5G tiene menor latencia (menos retardo) que el 4G.' },
+    { t: 'mc', q: '¿Qué permite conocer la posición, la velocidad y la hora exactas en cualquier parte del mundo?', o: ['El GNSS', 'El Big Data', 'La blockchain', 'El deep learning'], why: 'El GNSS es el conjunto de sistemas de satélites que da posición, velocidad y hora exactas.' },
+    { t: 'tf', q: 'El deep learning necesita que los datos estén previamente estructurados.', a: false, why: 'Eso le pasa al machine learning. El deep learning aprende de grandes volúmenes de datos sin estructurar.' },
+    { t: 'mc', q: '¿Qué proyecto usa blockchain para seguir los alimentos hasta el supermercado?', o: ['IBM Food Trust', 'Everledger', 'Guardtime', 'UNICEF Blockchain'], why: 'IBM Food Trust sigue los alimentos desde el origen hasta el supermercado.' },
+    { t: 'tf', q: 'Los cobots están programados para evitar accidentes y colisiones.', a: true, why: 'Sí: trabajan con personas de forma segura, evitando accidentes y colisiones.' },
+    { t: 'mc', q: 'La tecnología que te sumerge por completo en un entorno digital y te aísla del mundo real es…', o: ['La realidad virtual', 'La realidad mixta', 'La realidad aumentada', 'La robótica colaborativa'], why: 'La realidad virtual (VR) te sumerge por completo y te aísla del mundo real.' },
+    { t: 'mc', q: '¿Qué ventaja aporta el Internet de las Cosas a la empresa?', o: ['Mejora de la comunicación y la conectividad', 'Sostenibilidad', 'Reducción de costes', 'Seguridad y control'], why: 'El IoT mejora la comunicación y la conectividad.' },
+    { t: 'tf', q: 'La blockchain elimina la necesidad de un tercero central que valide las operaciones.', a: true, why: 'Es la «confianza sin intermediarios».' },
+    { t: 'mc', q: '¿Qué precisión tiene el GPS de uso civil?', o: ['Entre 3 y 10 metros', 'Unos pocos centímetros', 'Alrededor de 1 kilómetro', 'Exactamente 100 metros'], why: 'Uso civil: 3–10 m. Uso militar: centímetros.' },
+    { t: 'mc', q: '¿Qué empleo crea el Big Data?', o: ['Científicos e ingenieros de datos', 'Operarios de empaquetado', 'Contables básicos', 'Teleoperadores'], why: 'El Big Data crea científicos e ingenieros de datos (y reduce el procesamiento manual de datos).' },
+    { t: 'tf', q: 'Las TDH facilitan la generación de nuevos negocios y mercados.', a: true, why: 'Es una de sus características principales, junto a las innovaciones en procesos, productos y servicios.' },
+    { t: 'mc', q: 'Everledger usa blockchain para…', o: ['Seguir diamantes y productos de lujo y evitar falsificaciones', 'Seguir donaciones y proyectos sociales', 'Proteger datos sanitarios', 'Crear una moneda digital'], why: 'Everledger se dedica a la trazabilidad de diamantes y productos de lujo.' },
+    { t: 'tf', q: 'La IA no necesita entrenamiento: aprende sola desde el primer segundo.', a: false, why: 'La IA necesita un tiempo de entrenamiento para analizar grandes cantidades de datos.' },
+    { t: 'mc', q: '¿Qué reciben los nodos por actualizar la cadena de bloques?', o: ['Tokens digitales como incentivo', 'Un sueldo del banco central', 'Puntos de fidelidad del supermercado', 'Nada: lo hacen sin ningún incentivo'], why: 'Los nodos reciben incentivos en forma de tokens digitales.' },
+    { t: 'mc', q: 'Los robots industriales…', o: ['Realizan tareas específicas en las líneas de producción', 'Validan transacciones sin intermediarios', 'Crean entornos virtuales para formación', 'Miden la posición por satélite'], why: 'Los robots industriales interactúan con el entorno y realizan tareas específicas en las líneas de producción.' },
+    { t: 'tf', q: 'Bitcoin necesita un banco central para funcionar.', a: false, why: 'Bitcoin es una moneda digital descentralizada: funciona sin bancos ni intermediarios.' },
+    { t: 'mc', q: 'La fabricación aditiva (impresión 3D) aporta a la empresa…', o: ['Sostenibilidad', 'Toma de decisiones basada en datos', 'Mejor conectividad', 'Confianza sin intermediarios'], why: 'En la tabla de ventajas, la fabricación aditiva se asocia a la sostenibilidad.' },
+    { t: 'tf', q: 'La realidad mixta permite interactuar a la vez con elementos virtuales y reales.', a: true, why: 'Así es: combina lo virtual con el entorno real.' },
+    { t: 'mc', q: '¿Qué empleos tienden a reducir la IA y la automatización?', o: ['Administrativos, contables básicos y call centers', 'Ingenieros de IA', 'Especialistas en procesos', 'Auditores de seguridad'], why: 'La IA y la automatización reducen administrativos, contables básicos y call centers, y crean ingenieros de IA y especialistas en procesos.' },
+    { t: 'tf', q: 'Un chatbot puede ahorrar a una empresa costes de contratación en su centro de atención al cliente.', a: true, why: 'Es el caso de Jazztel en los apuntes.' }
+  ]
+};
+/* ---------- Motor: estado, sonido, efectos, marcador y placa ---------- */
+const NODES = [...LEVELS, FINAL];
+const MAX_LIVES = 5;
+const SAVE_KEY = 'ut2-enciende-la-placa:partida';
+const BEST_KEY = 'ut2-enciende-la-placa:record';
+const MUTE_KEY = 'ut2-enciende-la-placa:silencio';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const centerOf = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+const fmt = (n) => Number(n).toLocaleString('es-ES');
+
+const store = {
+  get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento: se juega igual */ } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) { /* nada */ } }
+};
+
+const fresh = () => ({ lives: MAX_LIVES, score: 0, streak: 0, bestStreak: 0, unlocked: 0, done: {}, log: [], status: 'idle' });
+let S = fresh();
+let run = null;
+let muted = store.get(MUTE_KEY) === true;
+
+function save() { if (S.status === 'playing') store.set(SAVE_KEY, S); else store.del(SAVE_KEY); }
+function saveBest() { const best = store.get(BEST_KEY) || 0; if (S.score > best) { store.set(BEST_KEY, S.score); return true; } return false; }
+
+/* Sonido sintetizado (Web Audio): solo suena después de una interacción */
+const Sound = {
+  ctx: null,
+  ensure() {
+    if (muted) return null;
+    try {
+      if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) { this.ctx = null; }
+    return this.ctx;
+  },
+  tone(f, d, { type = 'square', vol = 0.045, at = 0, to = 0 } = {}) {
+    const c = this.ensure(); if (!c) return;
+    const t = c.currentTime + at, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + d);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + 0.03);
+  },
+  noise(d, vol = 0.08) {
+    const c = this.ensure(); if (!c) return;
+    const len = Math.floor(c.sampleRate * d), buf = c.createBuffer(1, len, c.sampleRate), ch = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = buf; f.type = 'highpass'; f.frequency.value = 1400; g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(c.destination); src.start();
+  },
+  click() { this.tone(1500, 0.035, { type: 'triangle', vol: 0.03 }); },
+  tick() { this.tone(950, 0.04, { type: 'sine', vol: 0.035 }); },
+  ok() { this.tone(660, 0.09); this.tone(990, 0.16, { at: 0.08 }); },
+  bad() { this.noise(0.28, 0.09); this.tone(190, 0.38, { type: 'sawtooth', vol: 0.06, to: 55 }); },
+  level() { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.15, { at: i * 0.09 })); },
+  over() { [392, 330, 262, 196].forEach((f, i) => this.tone(f, 0.24, { type: 'sawtooth', vol: 0.04, at: i * 0.18 })); },
+  win() { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => this.tone(f, 0.17, { at: i * 0.11 })); }
+};
+
+/* Chispas y confeti en un canvas a pantalla completa */
+const FX = {
+  cv: null, cx: null, parts: [], raf: 0,
+  init() {
+    this.cv = $('#fx'); this.cx = this.cv.getContext('2d');
+    const fit = () => { const dpr = Math.min(window.devicePixelRatio || 1, 2); this.cv.width = innerWidth * dpr; this.cv.height = innerHeight * dpr; this.cx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    fit(); addEventListener('resize', fit);
+  },
+  burst(x, y, colors, n = 24, speed = 5) {
+    if (reduceMotion() || !this.cx) return;
+    for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = 1.5 + Math.random() * speed; this.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1.5, life: 1, c: colors[i % colors.length], s: 1.5 + Math.random() * 2.5 }); }
+    this.loop();
+  },
+  confetti() {
+    if (reduceMotion() || !this.cx) return;
+    const cs = ['#F3C24F', '#D4894A', '#3CCB7F', '#F3F0E2', '#2E86DE', '#FF5A47'];
+    for (let i = 0; i < 170; i++) this.parts.push({ x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * 0.7, vx: (Math.random() - 0.5) * 2, vy: 1.5 + Math.random() * 3, life: 1.6, c: cs[i % cs.length], s: 4 + Math.random() * 5, rect: true, rot: Math.random() * 6 });
+    this.loop();
+  },
+  loop() {
+    if (this.raf) return;
+    const step = () => {
+      const cx = this.cx; cx.clearRect(0, 0, innerWidth, innerHeight);
+      this.parts = this.parts.filter((p) => p.life > 0 && p.y < innerHeight + 30);
+      for (const p of this.parts) {
+        p.x += p.vx; p.y += p.vy; p.vy += p.rect ? 0.03 : 0.16; p.vx *= 0.985; p.life -= p.rect ? 0.004 : 0.024;
+        cx.globalAlpha = Math.max(0, Math.min(1, p.life)); cx.fillStyle = p.c;
+        if (p.rect) { p.rot += 0.08; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot); cx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); cx.restore(); }
+        else { cx.beginPath(); cx.arc(p.x, p.y, p.s, 0, Math.PI * 2); cx.fill(); }
+      }
+      cx.globalAlpha = 1;
+      if (this.parts.length) this.raf = requestAnimationFrame(step); else { this.raf = 0; cx.clearRect(0, 0, innerWidth, innerHeight); }
+    };
+    this.raf = requestAnimationFrame(step);
+  }
+};
+
+function floatText(el, text) {
+  if (!el) return;
+  const r = el.getBoundingClientRect(), f = document.createElement('div');
+  f.className = 'floater'; f.textContent = text;
+  f.style.left = `${Math.max(8, Math.min(innerWidth - 110, r.left + r.width / 2 - 36))}px`;
+  f.style.top = `${Math.max(8, r.top - 12)}px`;
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1200);
+}
+function restartAnim(el, cls) { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+/* Marcador superior */
+function renderHUD(blowIdx = -1) {
+  const lives = $('#lives');
+  if (!lives.children.length) lives.innerHTML = Array.from({ length: MAX_LIVES }, () => `<span class="life">${HEART_SVG}</span>`).join('');
+  [...lives.children].forEach((h, i) => { h.classList.toggle('on', i < S.lives); if (i === blowIdx) restartAnim(h, 'blow'); });
+  lives.setAttribute('aria-label', `Vidas: ${S.lives} de ${MAX_LIVES}`);
+  $('#score').textContent = fmt(S.score);
+  $('#streak').textContent = S.streak;
+  const en = $('#energy');
+  if (!en.children.length) en.innerHTML = NODES.map(() => '<i></i>').join('');
+  const on = NODES.filter((n) => S.done[n.id]).length;
+  [...en.children].forEach((b, i) => b.classList.toggle('on', i < on));
+  en.setAttribute('role', 'img'); en.setAttribute('aria-label', `Energía de la placa: ${on} de ${NODES.length} chips activados`);
+}
+const bump = (sel) => restartAnim($(sel), 'bump');
+
+/* Placa: chips en serpiente y pistas de cobre entre ellos */
+const colsFor = (w) => (w >= 880 ? 3 : w >= 560 ? 2 : 1);
+let lastCols = 0;
+function chipState(i) { if (i < S.unlocked) return 'done'; if (i === S.unlocked && S.status !== 'won') return 'current'; return 'locked'; }
+
+function chipEl(n, i, row, col) {
+  const st = chipState(i), cpu = n === FINAL, d = S.done[n.id];
+  const count = cpu ? `${n.take} preguntas · ${n.time} s` : `${n.challenges.length} pruebas`;
+  const sub = st === 'done' && d ? `<span class="stars">${'★'.repeat(d.stars)}<s>${'★'.repeat(3 - d.stars)}</s></span>` : count;
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = `chip is-${st}${cpu ? ' chip--cpu' : ''}`; b.dataset.i = i;
+  b.style.gridRow = row; if (col) b.style.gridColumn = col;
+  b.innerHTML = `<span class="chip-ref"><span>${n.ref}</span><span>${st === 'done' ? 'ACTIVO' : st === 'current' ? 'LISTO' : 'SIN CORRIENTE'}</span></span>`
+    + `<span class="chip-body">${cpu ? '<span class="pins-tb t"></span><span class="pins-tb b"></span>' : '<span class="chip-notch"></span>'}<span class="chip-icon">${ICON[n.icon]}</span><span class="chip-title">${n.title}</span><span class="chip-sub">${sub}</span><span class="led"></span></span>`;
+  const stTxt = st === 'done' ? `activado, ${d ? d.stars : 0} de 3 estrellas` : st === 'current' ? 'disponible' : 'bloqueado';
+  b.setAttribute('aria-label', `${n.ref}: ${n.title}. ${stTxt}`);
+  if (st === 'locked') b.setAttribute('aria-disabled', 'true');
+  return b;
+}
+
+function renderBoard(chargeIdx = -1) {
+  const board = $('#board');
+  const cols = colsFor(board.clientWidth || innerWidth);
+  lastCols = cols; board.style.setProperty('--cols', cols);
+  board.querySelectorAll('.chip').forEach((c) => c.remove());
+  LEVELS.forEach((lv, i) => {
+    const row = Math.floor(i / cols), k = i % cols;
+    board.appendChild(chipEl(lv, i, row + 1, (row % 2 === 0 ? k : cols - 1 - k) + 1));
+  });
+  board.appendChild(chipEl(FINAL, LEVELS.length, Math.ceil(LEVELS.length / cols) + 1, null));
+  drawTraces(chargeIdx);
+  updateHint();
+}
+
+const pad = ([x, y]) => `<circle class="pad" cx="${x}" cy="${y}" r="6.5"/><circle class="pad-hole" cx="${x}" cy="${y}" r="2.6"/>`;
+function drawTraces(chargeIdx = -1) {
+  const board = $('#board'), svg = $('#traces');
+  const chips = [...board.querySelectorAll('.chip')];
+  svg.setAttribute('viewBox', `0 0 ${board.clientWidth} ${board.clientHeight}`);
+  const box = (el) => { const b = el.querySelector('.chip-body'); return { x: el.offsetLeft + b.offsetLeft, y: el.offsetTop + b.offsetTop, w: b.offsetWidth, h: b.offsetHeight }; };
+  let html = '';
+  for (let i = 0; i < chips.length - 1; i++) {
+    const a = box(chips[i]), b = box(chips[i + 1]);
+    const acx = a.x + a.w / 2, acy = a.y + a.h / 2, bcx = b.x + b.w / 2, bcy = b.y + b.h / 2;
+    let d, p1, p2;
+    if (Math.abs(acy - bcy) < 6) {
+      const s = bcx > acx ? 1 : -1, x1 = s > 0 ? a.x + a.w + 14 : a.x - 14, x2 = s > 0 ? b.x - 14 : b.x + b.w + 14;
+      d = `M${x1} ${acy}H${x2}`; p1 = [x1, acy]; p2 = [x2, bcy];
+    } else {
+      const y1 = a.y + a.h + (chips[i].classList.contains('chip--cpu') ? 16 : 6), y2 = b.y - (chips[i + 1].classList.contains('chip--cpu') ? 16 : 6);
+      const ym = y1 + (y2 - y1) * 0.42;
+      if (Math.abs(acx - bcx) < 4) d = `M${acx} ${y1}V${y2}`;
+      else { const c = Math.min(14, Math.abs(bcx - acx) / 2), s = bcx > acx ? 1 : -1; d = `M${acx} ${y1}V${ym - c}L${acx + s * c} ${ym}H${bcx - s * c}L${bcx} ${ym + c}V${y2}`; }
+      p1 = [acx, y1]; p2 = [bcx, y2];
+    }
+    const on = i < S.unlocked;
+    html += `<g class="${on ? `tr-on${i === chargeIdx ? ' tr-new' : ''}` : 'tr-off'}"><path class="tr-base" d="${d}"/>${on ? `<path class="tr-live" d="${d}"/>` : ''}${pad(p1)}${pad(p2)}</g>`;
+  }
+  svg.innerHTML = html;
+}
+
+function updateHint() {
+  const h = $('#board-hint');
+  if (S.status === 'won') { h.textContent = '¡Placa encendida al 100 %! Toca cualquier chip para repasar su hoja de datos o practicar sin perder vidas.'; return; }
+  const n = NODES[Math.min(S.unlocked, NODES.length - 1)];
+  h.innerHTML = `Siguiente: <b>${n.ref} · ${n.title}</b>. Toca el chip que parpadea, lee su hoja de datos y supera sus pruebas para llevar la corriente al siguiente.`;
+}
+
+function onChip(i) {
+  const el = $(`#board .chip[data-i="${i}"]`), st = chipState(i);
+  Sound.click();
+  if (S.status !== 'playing' && S.status !== 'won') return openIntro();
+  if (st === 'locked') {
+    if (!reduceMotion()) restartAnim(el, 'shake');
+    const n = NODES[S.unlocked];
+    $('#board-hint').innerHTML = `<b>${NODES[i].ref}</b> aún no tiene corriente. Primero activa <b>${n.ref} · ${n.title}</b>.`;
+    $('#live').textContent = `${NODES[i].ref} está bloqueado. Primero activa ${n.ref}.`;
+    return;
+  }
+  if (NODES[i] === FINAL) return openFinalBrief();
+  openSheet(i, st === 'done' ? 'review' : 'play');
+}
+/* ---------- Motor: paneles, pruebas y flujo de la partida ---------- */
+const TYPE_LABEL = { mc: 'Test', tf: 'Verdadero o falso', match: 'Empareja', sort: 'Clasifica', order: 'Ordena', fill: 'Completa', poll: 'Debate' };
+const OK_TITLES = ['¡Conexión correcta!', '¡Corriente estable!', '¡Chip en verde!', '¡Soldadura perfecta!', '¡Señal recibida!'];
+const BAD_TITLES = ['¡Chispazo!', '¡Cortocircuito!', '¡Fusible fundido!', '¡Conexión errónea!'];
+const WIRES = ['var(--w1)', 'var(--w2)', 'var(--w3)', 'var(--w4)', 'var(--w5)'];
+let lastFocus = null, closable = false, timer = 0;
+
+function openOverlay(html, { dark = false, canClose = false } = {}) {
+  const ov = $('#ov'), sh = $('#sheet');
+  if (ov.hidden) { lastFocus = document.activeElement; ov.hidden = false; }
+  closable = canClose;
+  sh.className = 'sheet' + (dark ? ' sheet--dark' : '');
+  sh.innerHTML = html;
+  sh.scrollTop = 0;
+  restartAnim(sh, 'sheet');
+  $('#app').inert = true;
+  document.body.style.overflow = 'hidden';
+  (sh.querySelector('[data-autofocus]') || sh).focus({ preventScroll: true });
+}
+function closeOverlay() {
+  stopTimer();
+  $('#ov').hidden = true; $('#ov-hint').hidden = true;
+  $('#app').inert = false;
+  document.body.style.overflow = '';
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+}
+function sheetHead(n, kicker, closeAct) {
+  return `<div class="sheet-head"><span class="head-chip">${ICON[n.icon]}</span><div class="grow"><span class="sheet-ref">${n.ref} · ${kicker}</span><h2 class="sheet-title" id="sheet-title">${n.title}</h2></div>${closeAct ? `<button class="icon-btn" type="button" data-act="${closeAct}" aria-label="Cerrar y volver a la placa">${ICON.close}</button>` : ''}</div>`;
+}
+
+/* Portada, menú y hojas de datos */
+function openIntro() {
+  const saved = store.get(SAVE_KEY), best = store.get(BEST_KEY) || 0;
+  const canContinue = saved && saved.status === 'playing' && saved.lives > 0;
+  openOverlay(`<div class="intro">
+    <p class="eyebrow">UT2 · TECNOLOGÍAS DIGITALES HABILITADORAS</p>
+    <h2 class="mega" id="sheet-title">Enciende<br><em>la placa</em></h2>
+    <p class="intro-lead">La placa de la unidad está sin corriente. Cada chip es un bloque de los apuntes: lee su hoja de datos, supera sus pruebas y la corriente pasará al siguiente. Al final te espera la CPU.</p>
+    <ul class="rules">
+      <li>${ICON.heart}<span><b>5 vidas</b>Cada fallo es un chispazo y te cuesta una. Sin vidas, la placa hace cortocircuito.</span></li>
+      <li>${ICON.sheet}<span><b>Hoja de datos</b>Cada chip empieza con un resumen de los apuntes. Puedes consultarlo en mitad de una prueba a cambio de la mitad de los puntos.</span></li>
+      <li>${ICON.cpu}<span><b>9 chips y la CPU</b>La CPU es un contrarreloj de ${FINAL.take} preguntas de toda la unidad, con ${FINAL.time} segundos cada una.</span></li>
+    </ul>
+    <div class="types" aria-label="Tipos de prueba">${Object.values(TYPE_LABEL).map((t) => `<span>${t.toUpperCase()}</span>`).join('')}</div>
+    ${best ? `<p class="best">RÉCORD EN ESTE NAVEGADOR: ${fmt(best)} PUNTOS</p>` : ''}
+  </div>
+  <div class="sheet-foot">${canContinue
+    ? `<button class="btn btn-ghost" type="button" data-act="new">Nueva partida</button><button class="btn btn-primary" type="button" data-act="continue" data-autofocus>Continuar partida ${ICON.arrow}</button>`
+    : `<button class="btn btn-primary" type="button" data-act="new" data-autofocus>Empezar ${ICON.arrow}</button>`}</div>`, { dark: true });
+}
+
+function openMenu() {
+  const on = NODES.filter((n) => S.done[n.id]).length;
+  openOverlay(`<div class="intro"><p class="eyebrow">PARTIDA EN PAUSA</p><h2 class="result-title" id="sheet-title">Estado de la placa</h2>
+    <div class="kpis k4"><div class="kpi"><span>Puntos</span><b>${fmt(S.score)}</b></div><div class="kpi"><span>Vidas</span><b>${S.lives}/${MAX_LIVES}</b></div><div class="kpi"><span>Chips activos</span><b>${on}/${NODES.length}</b></div><div class="kpi"><span>Mejor racha</span><b>${S.bestStreak}</b></div></div>
+    <p class="intro-lead">Tu partida se guarda sola en este navegador. Si reinicias, vuelves a U1 con 5 vidas y 0 puntos.</p></div>
+    <div class="sheet-foot"><button class="btn btn-ghost" type="button" data-act="menu-restart">${ICON.restart} Reiniciar partida</button><button class="btn btn-primary" type="button" data-act="close" data-autofocus>Seguir jugando</button></div>`, { dark: true, canClose: true });
+}
+
+function openSheet(i, mode) {
+  const lv = NODES[i], review = mode === 'review';
+  const foot = review
+    ? `<button class="btn btn-ghost" type="button" data-act="close">Volver a la placa</button><button class="btn btn-primary" type="button" data-act="practice" data-i="${i}" data-autofocus>${ICON.restart} Practicar sin vidas</button>`
+    : `<span class="note">${lv.challenges.length} pruebas · cada fallo cuesta una vida</span><button class="btn btn-primary" type="button" data-act="begin" data-i="${i}" data-autofocus>Empezar pruebas ${ICON.arrow}</button>`;
+  openOverlay(sheetHead(lv, review ? 'Hoja de datos · repaso' : 'Hoja de datos', 'close') + `<div class="sheet-body ds">${lv.sheet}</div><div class="sheet-foot">${foot}</div>`, { canClose: true });
+}
+
+function openFinalBrief() {
+  const done = !!S.done[FINAL.id];
+  openOverlay(sheetHead(FINAL, 'Contrarreloj', 'close') + `<div class="sheet-body ds"><p class="ds-lead">Última prueba: la <b>CPU</b> mezcla preguntas de <b>toda la unidad</b>.</p>
+    ${PINS([`<b>${FINAL.take} preguntas</b> rápidas elegidas al azar entre todos los chips.`, `<b>${FINAL.time} segundos</b> por pregunta. Si se agota el tiempo, cuenta como fallo.`, 'Aquí no hay hoja de datos: responde con lo que has aprendido.', 'Cuanto antes respondas, más puntos ganas.'])}
+    ${done ? '' : `<div class="ds-note">Te ${S.lives === 1 ? 'queda <b>1 vida</b>' : `quedan <b>${S.lives} vidas</b>`}. Cada vida que conserves al final vale <b>300 puntos</b>.</div>`}</div>
+    <div class="sheet-foot">${done
+      ? `<button class="btn btn-ghost" type="button" data-act="close">Volver a la placa</button><button class="btn btn-primary" type="button" data-act="practice" data-i="${LEVELS.length}" data-autofocus>${ICON.restart} Practicar sin vidas</button>`
+      : `<button class="btn btn-ghost" type="button" data-act="close">Aún no</button><button class="btn btn-primary" type="button" data-act="final-go" data-autofocus>${ICON.clock} Arrancar la CPU</button>`}</div>`, { canClose: true });
+}
+
+function openHint() {
+  if (!run || run.boss) return;
+  run.hint[run.idx] = true;
+  const ov = $('#ov-hint'), sh = $('#hint-sheet');
+  sh.innerHTML = sheetHead(run.level, 'Hoja de datos', 'hint-close') + `<div class="sheet-body ds">${run.level.sheet}</div><div class="sheet-foot"><span class="note">${run.practice ? 'Modo práctica: consulta todo lo que quieras.' : 'Consultar la hoja reduce a la mitad los puntos de esta prueba.'}</span><button class="btn btn-primary" type="button" data-act="hint-close" data-autofocus>Volver a la prueba</button></div>`;
+  sh.querySelector('.sheet-title').removeAttribute('id');
+  ov.hidden = false; sh.scrollTop = 0; restartAnim(sh, 'sheet');
+  $('#sheet').inert = true;
+  sh.querySelector('[data-autofocus]').focus({ preventScroll: true });
+}
+function closeHint() {
+  $('#ov-hint').hidden = true; $('#sheet').inert = false;
+  const back = $('#sheet [data-act="hint"]'); if (back) back.focus({ preventScroll: true });
+}
+
+/* Pruebas */
+function beginLevel(i, practice = false) {
+  const lv = NODES[i], boss = lv === FINAL;
+  const list = boss ? shuffle(lv.pool).slice(0, lv.take) : lv.challenges.slice();
+  run = { i, level: lv, list, idx: 0, mistakes: 0, correct: 0, practice, boss, hint: {}, results: [], answered: false, cur: null, timeLeft: 0 };
+  showChallenge();
+}
+
+function showChallenge() {
+  const c = run.list[run.idx], lv = run.level;
+  run.answered = false; run.cur = { c };
+  const steps = run.list.map((_, k) => `<i class="${k < run.idx ? (run.results[k] ? 'ok' : 'bad') : k === run.idx ? 'now' : ''}"></i>`).join('');
+  const needsCheck = ['match', 'sort', 'order', 'fill'].includes(c.t);
+  const kicker = run.practice ? 'Práctica sin vidas' : run.boss ? 'Contrarreloj' : 'Pruebas';
+  const body = `<div class="q-meta"><span class="q-tag">${TYPE_LABEL[c.t]}</span><span class="q-count">PRUEBA ${run.idx + 1} DE ${run.list.length}</span><span class="q-steps" aria-hidden="true">${steps}</span></div>`
+    + (run.boss ? `<div class="timer"><div class="timer-bar" aria-hidden="true"><i id="tbar"></i></div><span class="timer-num" id="tnum" aria-label="Segundos restantes">${lv.time}</span></div>` : '')
+    + renderQ(c) + '<div id="fb"></div>';
+  const foot = (run.boss ? '' : `<button class="link-btn" type="button" data-act="hint">${ICON.sheet} Ver hoja de datos</button>`)
+    + (needsCheck ? '<button class="btn btn-primary" type="button" data-act="check" id="btn-check" disabled>Comprobar</button>' : '')
+    + `<button class="btn btn-primary" type="button" data-act="next" id="btn-next" hidden>Siguiente ${ICON.arrow}</button>`;
+  openOverlay(sheetHead(lv, kicker, run.boss && !run.practice ? null : 'quit') + `<div class="sheet-body">${body}</div><div class="sheet-foot">${foot}</div>`);
+  if (c.t === 'match') paintMatch();
+  if (c.t === 'fill') paintFill();
+  const first = $('#sheet .sheet-body button:not([disabled])');
+  if (first) first.focus({ preventScroll: true });
+  if (run.boss) startTimer(lv.time);
+}
+
+function renderQ(c) {
+  const help = (t) => `<p class="q-help">${t}</p>`;
+  const u = run.cur;
+  switch (c.t) {
+    case 'mc': case 'poll': {
+      u.opts = (c.t === 'mc' ? shuffle(c.o.map((t, k) => ({ t, k }))) : c.o.map((t, k) => ({ t, k })));
+      return `<h3 class="q-text">${c.q}</h3>${c.t === 'poll' ? help('Aquí no hay respuesta incorrecta: no pierdes vidas. Elige tu postura y lee la reflexión.') : ''}<div class="opts">${u.opts.map((o, n) => `<button class="opt" type="button" data-opt="${n}"><span class="key">${n + 1}</span><span>${o.t}</span></button>`).join('')}</div>`;
+    }
+    case 'tf':
+      return `<h3 class="q-text">¿Verdadero o falso?</h3><p class="statement">${c.q}</p><div class="opts tf"><button class="opt" type="button" data-tf="1">Verdadero</button><button class="opt" type="button" data-tf="0">Falso</button></div>`;
+    case 'match':
+      u.L = shuffle(c.pairs.map((p, k) => ({ t: p[0], k }))); u.R = shuffle(c.pairs.map((p, k) => ({ t: p[1], k }))); u.map = {}; u.sel = 0;
+      return `<h3 class="q-text">${c.q}</h3>${help('Toca un elemento de la izquierda y después su pareja de la derecha. El cable de color muestra cada conexión.')}<div class="match"><div class="match-col match-col--l">${u.L.map((o, n) => `<button class="m-item" type="button" data-l="${n}"><span class="wire"></span><span>${o.t}</span></button>`).join('')}</div><div class="match-col match-col--r">${u.R.map((o, n) => `<button class="m-item" type="button" data-r="${n}"><span class="wire"></span><span>${o.t}</span></button>`).join('')}</div></div>`;
+    case 'sort':
+      u.items = shuffle(c.items.map(([t, b]) => ({ t, b }))); u.pick = {};
+      return `<h3 class="q-text">${c.q}</h3>${help('Elige una opción en cada fila y pulsa «Comprobar».')}<div class="sort">${u.items.map((it, n) => `<div class="s-row" data-row="${n}"><span class="s-text">${it.t}</span><span class="seg" role="group" aria-label="${esc(it.t)}">${c.bins.map((b, k) => `<button type="button" aria-pressed="false" data-s="${n}:${k}">${b}</button>`).join('')}</span></div>`).join('')}</div>`;
+    case 'order': {
+      u.items = shuffle(c.items.map((t, k) => ({ t, k }))); u.seq = [];
+      if (u.items.every((it, n) => it.k === n)) u.items.reverse();
+      return `<h3 class="q-text">${c.q}</h3>${help('Toca los pasos en el orden correcto. Toca un paso numerado para quitarlo.')}<div class="order">${u.items.map((it, n) => `<button class="o-item" type="button" data-o="${n}"><span class="num"></span><span>${it.t}</span></button>`).join('')}</div>`;
+    }
+    case 'fill': {
+      u.answers = []; let nb = 0;
+      const text = esc(c.text).replace(/\[\[(.+?)\]\]/g, (_, w) => { u.answers.push(w); const n = nb++; return `<button class="blank" type="button" data-b="${n}"></button>`; });
+      u.bank = shuffle([...u.answers, ...(c.extra || [])]); u.fill = u.answers.map(() => null); u.active = 0;
+      return `<h3 class="q-text">${c.q}</h3>${help('Toca una palabra para colocarla en el hueco marcado. Toca un hueco lleno para vaciarlo.')}<p class="fill-text">${text}</p><div class="bank">${u.bank.map((w, n) => `<button class="word" type="button" data-w="${n}">${esc(w)}</button>`).join('')}</div>`;
+    }
+  }
+  return '';
+}
+
+const sheetBtns = (sel) => [...$('#sheet').querySelectorAll(sel)];
+function setCheck(on) { const b = $('#btn-check'); if (b) b.disabled = !on; }
+function lockAnswers() { sheetBtns('.sheet-body button').forEach((b) => { b.disabled = true; }); }
+
+function answerMC(n) {
+  const u = run.cur, c = u.c, btns = sheetBtns('.opt');
+  lockAnswers();
+  if (c.t === 'poll') { btns[n].classList.add('is-pick'); btns.forEach((b, k) => k !== n && b.classList.add('is-dim')); return resolve('neutral', btns[n]); }
+  const right = u.opts.findIndex((o) => o.k === 0);
+  btns.forEach((b, k) => b.classList.add(k === right ? 'is-right' : k === n ? 'is-wrong' : 'is-dim'));
+  resolve(u.opts[n].k === 0, btns[n], { answer: c.o[0] });
+}
+function answerTF(v) {
+  const c = run.cur.c, btns = sheetBtns('.tf .opt'), ok = v === c.a;
+  lockAnswers();
+  btns[c.a ? 0 : 1].classList.add('is-right');
+  if (!ok) btns[v ? 0 : 1].classList.add('is-wrong');
+  resolve(ok, btns[v ? 0 : 1], { answer: c.a ? 'Verdadero' : 'Falso' });
+}
+
+function paintMatch() {
+  const u = run.cur, pairedTo = (r) => Object.keys(u.map).find((k) => u.map[k] === r);
+  sheetBtns('[data-l]').forEach((b) => { const i = +b.dataset.l; b.classList.toggle('is-sel', u.sel === i); b.classList.toggle('is-paired', u.map[i] !== undefined); b.style.setProperty('--wc', WIRES[i % WIRES.length]); b.setAttribute('aria-pressed', String(u.sel === i)); });
+  sheetBtns('[data-r]').forEach((b) => { const l = pairedTo(+b.dataset.r); b.classList.toggle('is-paired', l !== undefined); if (l !== undefined) b.style.setProperty('--wc', WIRES[+l % WIRES.length]); });
+  setCheck(Object.keys(u.map).length === u.L.length);
+}
+function onMatchL(n) { run.cur.sel = n; Sound.click(); paintMatch(); }
+function onMatchR(r) {
+  const u = run.cur;
+  if (u.sel === null) { const l = Object.keys(u.map).find((k) => u.map[k] === r); if (l !== undefined) { delete u.map[l]; u.sel = +l; Sound.click(); paintMatch(); } return; }
+  Object.keys(u.map).forEach((k) => { if (u.map[k] === r) delete u.map[k]; });
+  u.map[u.sel] = r;
+  const next = u.L.findIndex((_, i) => u.map[i] === undefined);
+  u.sel = next >= 0 ? next : null;
+  Sound.click(); paintMatch();
+}
+function checkMatch() {
+  const u = run.cur, c = u.c; let ok = true;
+  u.L.forEach((l, i) => {
+    const good = u.R[u.map[i]].k === l.k; if (!good) ok = false;
+    $(`#sheet [data-l="${i}"]`).classList.add(good ? 'is-right' : 'is-wrong');
+    $(`#sheet [data-r="${u.map[i]}"]`).classList.add(good ? 'is-right' : 'is-wrong');
+  });
+  lockAnswers();
+  const list = c.pairs.map(([a, b]) => `${a} → ${b}`);
+  resolve(ok, $('#btn-check'), { list: ok ? null : list, listTitle: 'Las conexiones correctas:', answer: list.join(' · ') });
+}
+
+function onSort(n, k) {
+  run.cur.pick[n] = k;
+  sheetBtns(`[data-row="${n}"] button`).forEach((b, j) => b.setAttribute('aria-pressed', String(j === k)));
+  Sound.click(); setCheck(Object.keys(run.cur.pick).length === run.cur.items.length);
+}
+function checkSort() {
+  const u = run.cur, c = u.c, wrong = [];
+  u.items.forEach((it, n) => { const good = u.pick[n] === it.b; if (!good) wrong.push(`${it.t} → ${c.bins[it.b]}`); $(`#sheet [data-row="${n}"]`).classList.add(good ? 'is-right' : 'is-wrong'); });
+  lockAnswers();
+  resolve(!wrong.length, $('#btn-check'), { list: wrong.length ? wrong : null, listTitle: 'Estas iban en otro sitio:', answer: wrong.join(' · ') });
+}
+
+function onOrder(n) {
+  const u = run.cur, pos = u.seq.indexOf(n);
+  if (pos >= 0) u.seq.splice(pos, 1); else u.seq.push(n);
+  sheetBtns('[data-o]').forEach((b) => { const p = u.seq.indexOf(+b.dataset.o); b.classList.toggle('is-set', p >= 0); b.querySelector('.num').textContent = p >= 0 ? p + 1 : ''; });
+  Sound.click(); setCheck(u.seq.length === u.items.length);
+}
+function checkOrder() {
+  const u = run.cur, c = u.c; let ok = true;
+  u.seq.forEach((n, pos) => { const good = u.items[n].k === pos; if (!good) ok = false; $(`#sheet [data-o="${n}"]`).classList.add(good ? 'is-right' : 'is-wrong'); });
+  lockAnswers();
+  const list = c.items.map((t, k) => `${k + 1}. ${t}`);
+  resolve(ok, $('#btn-check'), { list: ok ? null : list, listTitle: 'El orden correcto:', answer: list.join(' · ') });
+}
+
+function paintFill() {
+  const u = run.cur;
+  sheetBtns('[data-b]').forEach((b) => { const i = +b.dataset.b, w = u.fill[i]; b.textContent = w === null ? '' : u.bank[w]; b.classList.toggle('is-active', i === u.active); b.setAttribute('aria-label', `Hueco ${i + 1}: ${w === null ? 'vacío' : u.bank[w]}`); });
+  sheetBtns('[data-w]').forEach((b) => { b.disabled = u.fill.includes(+b.dataset.w); });
+  setCheck(u.fill.every((w) => w !== null));
+}
+function onWord(n) {
+  const u = run.cur; if (u.fill.includes(n)) return;
+  let i = u.active; if (i === null || u.fill[i] !== null) i = u.fill.findIndex((w) => w === null);
+  if (i < 0) return;
+  u.fill[i] = n; const nx = u.fill.findIndex((w) => w === null); u.active = nx >= 0 ? nx : null;
+  Sound.click(); paintFill();
+}
+function onBlank(i) { const u = run.cur; u.fill[i] = null; u.active = i; Sound.click(); paintFill(); }
+function checkFill() {
+  const u = run.cur; let ok = true;
+  u.fill.forEach((w, i) => { const good = u.bank[w] === u.answers[i]; if (!good) ok = false; $(`#sheet [data-b="${i}"]`).classList.add(good ? 'is-right' : 'is-wrong'); });
+  lockAnswers();
+  const full = u.c.text.replace(/\[\[(.+?)\]\]/g, '«$1»');
+  resolve(ok, $('#btn-check'), { list: ok ? null : [full], listTitle: 'La frase correcta:', answer: full });
+}
+
+/* Contrarreloj */
+function startTimer(sec) {
+  stopTimer(); run.timeLeft = sec;
+  const t0 = performance.now(), bar = $('#tbar'), num = $('#tnum');
+  const tick = () => {
+    if (!run || run.answered) { timer = 0; return; }
+    const left = Math.max(0, sec - (performance.now() - t0) / 1000), s = Math.ceil(left);
+    if (s !== run.timeLeft) { run.timeLeft = s; num.textContent = s; if (s <= 5 && s > 0) Sound.tick(); }
+    bar.style.transform = `scaleX(${left / sec})`; bar.classList.toggle('warn', left <= 5);
+    if (left <= 0) { timer = 0; return timeUp(); }
+    timer = requestAnimationFrame(tick);
+  };
+  timer = requestAnimationFrame(tick);
+}
+function stopTimer() { if (timer) cancelAnimationFrame(timer); timer = 0; }
+function timeUp() {
+  const u = run.cur, c = u.c;
+  lockAnswers();
+  if (c.t === 'mc') { const r = u.opts.findIndex((o) => o.k === 0); sheetBtns('.opt').forEach((b, k) => b.classList.add(k === r ? 'is-right' : 'is-dim')); }
+  if (c.t === 'tf') sheetBtns('.tf .opt')[c.a ? 0 : 1].classList.add('is-right');
+  resolve(false, $('#sheet .q-text'), { timeout: true, answer: c.t === 'tf' ? (c.a ? 'Verdadero' : 'Falso') : c.o[0] });
+}
+/* ---------- Motor: resultado de cada prueba, fin de nivel y arranque ---------- */
+function zap(anchor) {
+  if (!reduceMotion()) restartAnim($('#sheet'), 'shake');
+  restartAnim($('#flash'), 'go');
+  if (anchor) { const [x, y] = centerOf(anchor); FX.burst(x, y, ['#FF5A47', '#FFB547', '#FFFFFF'], 30, 6); }
+}
+
+function resolve(res, anchor, info = {}) {
+  if (!run || run.answered) return;
+  run.answered = true; stopTimer();
+  const c = run.cur.c, neutral = res === 'neutral', ok = res === true;
+  let gained = 0, lost = false;
+  if (neutral || ok) {
+    run.correct++;
+    if (!run.practice) {
+      if (ok) {
+        S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak);
+        gained = 100 + 20 * Math.min(S.streak - 1, 10);
+        if (run.hint[run.idx]) gained = Math.round(gained / 2);
+        if (run.boss) gained += run.timeLeft * 5;
+      } else gained = 50;
+      S.score += gained;
+    }
+    Sound.ok();
+    if (anchor) { const [x, y] = centerOf(anchor); FX.burst(x, y, ['#3CCB7F', '#F3C24F', '#F3F0E2'], 22, 4); }
+  } else {
+    run.mistakes++;
+    if (!run.practice) {
+      S.streak = 0; S.lives = Math.max(0, S.lives - 1); lost = true;
+      S.log.push({ ref: run.level.ref, q: c.t === 'tf' ? `¿Verdadero o falso? ${c.q}` : c.q, a: info.answer || '', why: c.why });
+    }
+    Sound.bad(); zap(anchor);
+  }
+  run.results[run.idx] = ok || neutral;
+  save(); renderHUD(lost ? S.lives : -1);
+  if (lost) { const h = $('#lives').children[S.lives]; if (h) { const [x, y] = centerOf(h); FX.burst(x, y, ['#FF5A47', '#FFB547'], 16, 3); } }
+  if (gained) { bump('#score'); floatText(anchor, `+${gained}`); }
+  if (ok && !run.practice) bump('#streak');
+
+  const title = neutral ? '¡Buena reflexión!' : ok ? pickOne(OK_TITLES) : info.timeout ? '¡Se acabó el tiempo!' : pickOne(BAD_TITLES);
+  let sub;
+  if (run.practice) sub = ok || neutral ? 'Correcto.' : 'Modo práctica: no pierdes vidas.';
+  else if (neutral) sub = `+${gained} puntos por participar.`;
+  else if (ok) sub = `+${gained} puntos${S.streak > 1 ? ` · racha de ${S.streak}` : ''}${run.hint[run.idx] ? ' (la mitad, por consultar la hoja)' : ''}.`;
+  else sub = S.lives > 0 ? `Pierdes una vida: te ${S.lives === 1 ? 'queda 1' : `quedan ${S.lives}`}.` : 'Era tu última vida.';
+  const list = info.list ? `<div><p class="fb-why"><b>${info.listTitle}</b></p><ul class="fb-list">${info.list.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>` : '';
+  $('#fb').innerHTML = `<div class="feedback ${neutral ? 'neutral' : ok ? 'ok' : 'bad'}" role="status"><span class="fb-icon">${neutral ? ICON.vote : ok ? ICON.check : ICON.spark}</span><p class="fb-title">${title}</p><p class="fb-why"><b>${sub}</b> ${c.why}</p>${list}</div>`;
+
+  const chk = $('#btn-check'); if (chk) chk.hidden = true;
+  const next = $('#btn-next'), last = run.idx === run.list.length - 1;
+  next.hidden = false;
+  next.innerHTML = S.lives === 0 && !run.practice ? `Ver resultado ${ICON.arrow}` : last ? `Terminar ${ICON.arrow}` : `Siguiente ${ICON.arrow}`;
+  next.focus({ preventScroll: true });
+  $('#fb').scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
+}
+
+function nextStep() {
+  if (!run || !run.answered) return;
+  Sound.click();
+  if (S.lives === 0 && !run.practice) return gameOver();
+  run.idx++;
+  if (run.idx >= run.list.length) return finishLevel();
+  showChallenge();
+}
+
+function finishLevel() {
+  const r = run, lv = r.level; run = null;
+  if (r.practice) {
+    Sound.level();
+    return openOverlay(sheetHead(lv, 'Práctica terminada', 'close') + `<div class="sheet-body result">
+      <div class="kpis k2"><div class="kpi"><span>Aciertos</span><b>${r.correct}/${r.list.length}</b></div><div class="kpi"><span>Vidas</span><b>${S.lives}/${MAX_LIVES}</b></div></div>
+      <p class="ds-lead">${r.correct === r.list.length ? 'Pleno. Este chip lo tienes dominado.' : 'Repasa la hoja de datos y vuelve a intentarlo: la práctica no cuesta vidas.'}</p></div>
+      <div class="sheet-foot"><button class="btn btn-ghost" type="button" data-act="close">Volver a la placa</button><button class="btn btn-primary" type="button" data-act="practice" data-i="${r.i}" data-autofocus>${ICON.restart} Repetir práctica</button></div>`, { canClose: true });
+  }
+  const stars = r.mistakes === 0 ? 3 : r.mistakes === 1 ? 2 : 1, bonus = stars * 50;
+  S.score += bonus; S.done[lv.id] = { stars }; S.unlocked = Math.max(S.unlocked, r.i + 1);
+  if (lv === FINAL) return victory();
+  save(); renderHUD(); bump('#score'); Sound.level();
+  openOverlay(`<div class="sheet-body result">
+    <div class="result-hero"><span class="big-chip">${ICON[lv.icon]}</span><div><p class="eyebrow">${lv.ref} · CHIP ACTIVADO</p><h2 class="result-title" id="sheet-title">${lv.title}</h2><div class="big-stars" role="img" aria-label="${stars} de 3 estrellas">${'★'.repeat(stars)}<s>${'★'.repeat(3 - stars)}</s></div></div></div>
+    <div class="kpis"><div class="kpi"><span>Aciertos</span><b>${r.correct}/${r.list.length}</b></div><div class="kpi"><span>Bonus del chip</span><b>+${bonus}</b></div><div class="kpi"><span>Vidas</span><b>${S.lives}/${MAX_LIVES}</b></div></div>
+    <div class="fact">${ICON.bulb}<div><p class="ds-label">Dato curioso</p><p>${lv.fact}</p></div></div></div>
+    <div class="sheet-foot"><button class="btn btn-primary" type="button" data-act="to-board" data-i="${r.i}" data-autofocus>Llevar la corriente a ${NODES[r.i + 1].ref} ${ICON.arrow}</button></div>`);
+  setTimeout(() => { const bc = $('#sheet .big-chip'); if (bc) { const [x, y] = centerOf(bc); FX.burst(x, y, ['#F3C24F', '#FFD978', '#3CCB7F', '#FFFFFF'], 40, 6); } }, 250);
+}
+
+function reviewHTML() {
+  if (!S.log.length) return '<p class="intro-lead">No has fallado ni una sola prueba. ¡Impecable!</p>';
+  return `<div><p class="ds-label">Repasa lo que falló (${S.log.length})</p><ul class="review">${S.log.map((e) => `<li><span class="rl">${e.ref}</span><span class="rq">${esc(e.q)}</span><span class="ra">${esc(e.a)}</span>${esc(e.why)}</li>`).join('')}</ul></div>`;
+}
+
+function gameOver() {
+  run = null; stopTimer();
+  S.status = 'over'; const isBest = saveBest(); save(); renderHUD(); renderBoard();
+  Sound.over();
+  const on = NODES.filter((n) => S.done[n.id]).length;
+  openOverlay(`<div class="intro"><p class="eyebrow">SIN VIDAS · ${on} DE ${NODES.length} CHIPS ACTIVADOS</p><h2 class="mega bad" id="sheet-title">Corto<wbr><em>circuito</em></h2>
+    <p class="intro-lead">Se han fundido tus 5 vidas. Repasa estos conceptos y vuelve a encender la placa: esta vez llegarás más lejos.${isBest ? ' Aun así, has batido tu récord.' : ''}</p>
+    <div class="kpis"><div class="kpi"><span>Puntos</span><b>${fmt(S.score)}</b></div><div class="kpi"><span>Chips activados</span><b>${on}/${NODES.length}</b></div><div class="kpi"><span>Mejor racha</span><b>${S.bestStreak}</b></div></div>
+    ${reviewHTML()}</div>
+    <div class="sheet-foot"><button class="btn btn-primary" type="button" data-act="new" data-autofocus>${ICON.restart} Reiniciar la placa</button></div>`, { dark: true });
+}
+
+function victory() {
+  const lifeBonus = S.lives * 300;
+  S.score += lifeBonus; S.status = 'won';
+  const isBest = saveBest(); save(); renderHUD(); renderBoard();
+  Sound.win(); FX.confetti();
+  const stars = Object.values(S.done).reduce((a, d) => a + d.stars, 0);
+  openOverlay(`<div class="intro"><p class="eyebrow">UT2 COMPLETADA · ${NODES.length} DE ${NODES.length} CHIPS</p><h2 class="mega" id="sheet-title">Placa<br><em>encendida</em></h2>
+    <p class="intro-lead">Has llevado la corriente por todas las tecnologías digitales habilitadoras.${isBest ? ' <b>¡Nuevo récord!</b>' : ''}</p>
+    <div class="kpis k4"><div class="kpi"><span>Puntuación final</span><b>${fmt(S.score)}</b></div><div class="kpi"><span>Vidas restantes</span><b>${S.lives}/${MAX_LIVES}</b></div><div class="kpi"><span>Bonus de vidas</span><b>+${fmt(lifeBonus)}</b></div><div class="kpi"><span>Estrellas</span><b>${stars}/${NODES.length * 3}</b></div></div>
+    ${reviewHTML()}
+    <p class="closing">Podríamos estar todo el día :-)</p>
+    <p class="best">LOS APUNTES COMPLETOS, LOS EJERCICIOS Y LAS RÚBRICAS DE LA UNIDAD ESTÁN EN EL CAMPUS VIRTUAL.</p></div>
+    <div class="sheet-foot"><button class="btn btn-ghost" type="button" data-act="close">Ver la placa</button><button class="btn btn-primary" type="button" data-act="new" data-autofocus>${ICON.restart} Jugar otra vez</button></div>`, { dark: true, canClose: true });
+}
+
+function afterCharge(i) {
+  const next = $(`#board .chip[data-i="${i + 1}"]`);
+  setTimeout(() => { const t = $('#traces .tr-new'); if (t) t.classList.remove('tr-new'); }, 1300);
+  if (!next) return;
+  next.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' });
+  setTimeout(() => { const [x, y] = centerOf(next.querySelector('.led') || next); FX.burst(x, y, ['#F3C24F', '#FFD978', '#FFFFFF'], 26, 3); Sound.tick(); next.focus({ preventScroll: true }); }, 1150);
+}
+
+/* Acciones de los botones */
+const ACT = {
+  new() { S = fresh(); S.status = 'playing'; save(); renderHUD(); renderBoard(); openSheet(0, 'play'); },
+  continue() { const s = store.get(SAVE_KEY); if (s) S = Object.assign(fresh(), s); renderHUD(); renderBoard(); closeOverlay(); const cur = $('#board .chip.is-current'); if (cur) { cur.scrollIntoView({ block: 'center' }); cur.focus({ preventScroll: true }); } },
+  begin(b) { beginLevel(+b.dataset.i); },
+  practice(b) { beginLevel(+b.dataset.i, true); },
+  close() { closeOverlay(); },
+  quit() { run = null; closeOverlay(); renderBoard(); },
+  hint() { openHint(); },
+  'hint-close'() { closeHint(); },
+  check() { if (run && !run.answered) ({ match: checkMatch, sort: checkSort, order: checkOrder, fill: checkFill })[run.cur.c.t](); },
+  next() { nextStep(); },
+  'to-board'(b) { const i = +b.dataset.i; closeOverlay(); renderBoard(i); afterCharge(i); },
+  'final-go'() { beginLevel(LEVELS.length); },
+  'menu-restart'(b) { if (b.dataset.armed) return ACT.new(); b.dataset.armed = '1'; b.textContent = 'Pulsa otra vez para confirmar'; }
+};
+
+document.addEventListener('click', (e) => {
+  Sound.ensure();
+  const a = e.target.closest('[data-act]');
+  if (a) { if (!a.disabled && ACT[a.dataset.act]) ACT[a.dataset.act](a); return; }
+  const chip = e.target.closest('#board .chip');
+  if (chip) return onChip(+chip.dataset.i);
+  if (!run || run.answered) return;
+  const t = e.target.closest('#sheet [data-opt], #sheet [data-tf], #sheet [data-l], #sheet [data-r], #sheet [data-s], #sheet [data-o], #sheet [data-w], #sheet [data-b]');
+  if (!t || t.disabled) return;
+  const d = t.dataset;
+  if (d.opt !== undefined) answerMC(+d.opt);
+  else if (d.tf !== undefined) answerTF(d.tf === '1');
+  else if (d.l !== undefined) onMatchL(+d.l);
+  else if (d.r !== undefined) onMatchR(+d.r);
+  else if (d.s !== undefined) { const [n, k] = d.s.split(':').map(Number); onSort(n, k); }
+  else if (d.o !== undefined) onOrder(+d.o);
+  else if (d.w !== undefined) onWord(+d.w);
+  else if (d.b !== undefined) onBlank(+d.b);
+});
+
+document.addEventListener('keydown', (e) => {
+  const hintOpen = !$('#ov-hint').hidden, ovOpen = !$('#ov').hidden;
+  if (e.key === 'Tab' && (hintOpen || ovOpen)) {
+    const box = hintOpen ? $('#hint-sheet') : $('#sheet');
+    const f = [...box.querySelectorAll('button:not([disabled]), a[href]')].filter((el) => !el.hidden && el.offsetParent !== null);
+    if (f.length) { const first = f[0], last = f[f.length - 1]; if (e.shiftKey && (document.activeElement === first || document.activeElement === box)) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    return;
+  }
+  if (e.key === 'Escape') { if (hintOpen) return closeHint(); if (ovOpen && closable) return closeOverlay(); return; }
+  if (!run || !ovOpen || hintOpen || e.altKey || e.ctrlKey || e.metaKey) return;
+  const c = run.cur && run.cur.c; if (!c) return;
+  if (run.answered) { if (e.key === 'Enter' && document.activeElement !== $('#btn-next')) { e.preventDefault(); nextStep(); } return; }
+  if ((c.t === 'mc' || c.t === 'poll') && /^[1-4]$/.test(e.key) && +e.key <= run.cur.opts.length) answerMC(+e.key - 1);
+  if (c.t === 'tf' && /^[vV1]$/.test(e.key)) answerTF(true);
+  if (c.t === 'tf' && /^[fF2]$/.test(e.key)) answerTF(false);
+});
+
+/* Arranque */
+function paintSound() { const b = $('#btn-sound'); b.innerHTML = muted ? ICON.soundOff : ICON.soundOn; b.setAttribute('aria-pressed', String(!muted)); b.setAttribute('aria-label', 'Sonido'); }
+function boot(data) {
+  FX.init();
+  $('#btn-menu').innerHTML = ICON.menu;
+  paintSound();
+  $('#btn-sound').addEventListener('click', () => { muted = !muted; store.set(MUTE_KEY, muted); paintSound(); if (!muted) Sound.click(); });
+  $('#btn-menu').addEventListener('click', () => { Sound.click(); if (S.status === 'playing' || S.status === 'won') openMenu(); else openIntro(); });
+  const restored = data && data.S && data.S.status === 'playing' ? data.S : null;
+  if (restored) S = Object.assign(fresh(), restored);
+  renderHUD(); renderBoard();
+  if (!restored) openIntro();
+  if (window.ResizeObserver) { let raf = 0; new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (colsFor($('#board').clientWidth) !== lastCols) renderBoard(); else drawTraces(); }); }).observe($('#board')); }
+  else addEventListener('resize', () => renderBoard());
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => drawTraces());
+}
+try { if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === 'function') window.claude.hot.snapshot(() => ({ S })); } catch (e) { /* opcional */ }
+if (window.claude && window.claude.hot && typeof window.claude.hot.ready === 'function') window.claude.hot.ready(boot);
+else boot((window.claude && window.claude.hot && window.claude.hot.data) || {});
+</script>
+</body>
+</html>
