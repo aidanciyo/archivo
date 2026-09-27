@@ -1,0 +1,1736 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Misión Nube</title>
+<meta name="description" content="Juego para repasar la UT3 · Sistemas en la nube (Cloud): 5 niveles, un jefe final y 5 vidas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Baloo+2:wght@600;700;800&display=swap">
+<style>
+:root{
+  --sky-top:#8FCBFF; --sky-bot:#EAF6FF;
+  --ink:#12284F; --ink-2:#34507F; --muted:#5E7299;
+  --surface:#FFFFFF; --surface-2:#F1F7FF; --line:#D3E2F4;
+  --brand:#1F3B73; --brand-ink:#FFFFFF;
+  --accent:#FFB23E; --accent-ink:#3A2400;
+  --ok:#2A9A55; --ok-bg:#E1F5E8; --bad:#D9434C; --bad-bg:#FDE6E7;
+  --heart:#EF4B5C; --heart-empty:#C9D6EA;
+  --cloud:#FFFFFF; --cloud-shade:#D7E8FA;
+  --c-cloud:#3E7BE0; --c-fog:#7C8BA8; --c-edge:#5E9A2A;
+  --saas:#7B5CE0; --paas:#1E9C9C; --iaas:#E07A2E;
+  --shadow:0 12px 32px rgba(18,40,79,.14);
+  --shadow-sm:0 4px 12px rgba(18,40,79,.10);
+  --r:18px;
+  --f-display:"Baloo 2", ui-rounded, "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --f-mono:ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --sky-top:#050C22; --sky-bot:#17295B;
+    --ink:#EAF1FF; --ink-2:#C0D2F4; --muted:#93A8D2;
+    --surface:#13234B; --surface-2:#0F1C3F; --line:#2A4580;
+    --brand:#9CC0FF; --brand-ink:#0A1733;
+    --accent:#FFC857; --accent-ink:#2A1A00;
+    --ok:#4CC27A; --ok-bg:#133A2A; --bad:#FF6F77; --bad-bg:#46161E;
+    --heart:#FF5D6E; --heart-empty:#34497A;
+    --cloud:#2B3F74; --cloud-shade:#1F3163;
+    --c-cloud:#6FA2FF; --c-fog:#A3B1CC; --c-edge:#8CCB4E;
+    --saas:#A88BFF; --paas:#3CC7C7; --iaas:#FF9C55;
+    --shadow:0 12px 32px rgba(0,0,0,.45);
+    --shadow-sm:0 4px 12px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --sky-top:#050C22; --sky-bot:#17295B;
+  --ink:#EAF1FF; --ink-2:#C0D2F4; --muted:#93A8D2;
+  --surface:#13234B; --surface-2:#0F1C3F; --line:#2A4580;
+  --brand:#9CC0FF; --brand-ink:#0A1733;
+  --accent:#FFC857; --accent-ink:#2A1A00;
+  --ok:#4CC27A; --ok-bg:#133A2A; --bad:#FF6F77; --bad-bg:#46161E;
+  --heart:#FF5D6E; --heart-empty:#34497A;
+  --cloud:#2B3F74; --cloud-shade:#1F3163;
+  --c-cloud:#6FA2FF; --c-fog:#A3B1CC; --c-edge:#8CCB4E;
+  --saas:#A88BFF; --paas:#3CC7C7; --iaas:#FF9C55;
+  --shadow:0 12px 32px rgba(0,0,0,.45);
+  --shadow-sm:0 4px 12px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); font-family:var(--f-body); font-size:17px; line-height:1.5;
+  background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bot) 70%) fixed;
+  background-color:var(--sky-bot);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;margin:0;text-wrap:balance}
+p{margin:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Sky decoration ---------- */
+.sky{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.sky .puff{position:absolute;opacity:.85;animation:drift linear infinite}
+.sky .puff svg{display:block;width:100%;height:auto}
+.sky .puff path{fill:var(--cloud)}
+.stars{position:absolute;inset:0;opacity:0;transition:opacity .6s;
+  background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 60%,transparent 61%),
+  radial-gradient(1px 1px at 28% 42%,#fff 60%,transparent 61%),radial-gradient(1.5px 1.5px at 44% 12%,#fff 60%,transparent 61%),
+  radial-gradient(1px 1px at 62% 30%,#fff 60%,transparent 61%),radial-gradient(2px 2px at 78% 16%,#fff 60%,transparent 61%),
+  radial-gradient(1px 1px at 88% 48%,#fff 60%,transparent 61%),radial-gradient(1px 1px at 8% 64%,#fff 60%,transparent 61%),
+  radial-gradient(1.5px 1.5px at 36% 72%,#fff 60%,transparent 61%),radial-gradient(1px 1px at 70% 66%,#fff 60%,transparent 61%),
+  radial-gradient(1px 1px at 94% 80%,#fff 60%,transparent 61%),radial-gradient(1.5px 1.5px at 52% 88%,#fff 60%,transparent 61%);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stars{opacity:.8}}
+:root[data-theme="dark"] .stars{opacity:.8}
+@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+
+/* ---------- App shell ---------- */
+.app{position:relative;z-index:1;min-height:100%;display:flex;flex-direction:column;align-items:center;
+  padding-inline:16px;padding-block:12px 28px}
+.screen{width:100%;max-width:760px;display:flex;flex-direction:column;gap:16px;animation:enter .35s ease both}
+@keyframes enter{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:22px}
+.eyebrow{font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;cursor:pointer;
+  font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:.01em;
+  padding:12px 22px;border-radius:14px;background:var(--brand);color:var(--brand-ink);
+  box-shadow:0 5px 0 rgba(0,0,0,.22);transition:transform .08s ease, box-shadow .08s ease, filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.22)}
+.btn.big{font-size:22px;padding:15px 30px}
+.btn.gold{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.small{font-size:15px;padding:7px 12px;gap:6px;box-shadow:0 3px 0 var(--line)}
+.btn.small svg{width:18px;height:18px}
+.tile small{color:var(--muted);font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.row.center{justify-content:center}
+
+/* ---------- HUD ---------- */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;width:100%;max-width:760px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(8px);
+  border:1px solid var(--line);border-radius:16px;padding:8px 10px;box-shadow:var(--shadow-sm);margin-bottom:14px}
+.hearts{display:flex;gap:3px}
+.heart{width:28px;height:28px}
+.heart path{fill:var(--heart);transition:fill .3s}
+.heart.off path{fill:var(--heart-empty)}
+.heart.break{animation:hbreak .7s ease}
+.heart.gain{animation:hgain .7s ease}
+@keyframes hbreak{0%{transform:scale(1)}20%{transform:scale(1.35) rotate(-12deg)}45%{transform:scale(.8) rotate(10deg)}100%{transform:scale(1)}}
+@keyframes hgain{0%{transform:scale(.4)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-weight:700;font-size:18px;
+  padding:3px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.pill .ico{width:18px;height:18px}
+.pill.streak{color:#C45A00}
+.pill.streak.hot{background:#FFE9C7;border-color:#FFC874}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pill.streak{color:var(--accent)} :root:not([data-theme="light"]) .pill.streak.hot{background:#4A3212;border-color:#8A5A12}}
+:root[data-theme="dark"] .pill.streak{color:var(--accent)}
+:root[data-theme="dark"] .pill.streak.hot{background:#4A3212;border-color:#8A5A12}
+.hud .spacer{flex:1}
+.iconbtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;color:var(--ink)}
+.iconbtn svg{width:22px;height:22px}
+.iconbtn:hover{background:var(--surface-2)}
+.score-pop{position:fixed;z-index:50;font-family:var(--f-display);font-weight:800;font-size:26px;color:var(--ok);
+  pointer-events:none;animation:popup 1s ease forwards;text-shadow:0 2px 0 var(--surface)}
+.score-pop.bad{color:var(--bad)}
+@keyframes popup{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-60px)}}
+
+/* ---------- Mascot ---------- */
+.nubi{width:120px;height:auto;flex:none;filter:drop-shadow(0 8px 10px rgba(18,40,79,.18));animation:bob 3.2s ease-in-out infinite}
+.nubi .body{fill:var(--cloud);stroke:var(--cloud-shade);stroke-width:3}
+.nubi .eye{fill:var(--ink);transform-origin:center;transform-box:fill-box;animation:blink 5s infinite}
+.nubi .cheek{fill:#FF9AA8;opacity:.55}
+.nubi .mouth{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round}
+.nubi .m-sad,.nubi .m-o{display:none}
+.nubi.sad .m-happy,.nubi.think .m-happy{display:none}
+.nubi.sad .m-sad{display:block}
+.nubi.think .m-o{display:block}
+.nubi.sad{animation:shake .5s ease}
+.nubi.happy{animation:hop .6s ease}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-18px)}}
+.bubble{position:relative;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 16px;
+  font-size:16px;box-shadow:var(--shadow-sm);max-width:52ch}
+.bubble::before{content:"";position:absolute;left:-10px;top:24px;width:16px;height:16px;background:var(--surface);
+  border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:rotate(45deg)}
+.guide{display:flex;align-items:center;gap:14px}
+
+/* ---------- Start screen ---------- */
+.hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:18px}
+.hero .nubi{width:170px}
+.logo{font-family:var(--f-display);font-weight:800;font-size:clamp(46px,10vw,78px);line-height:.95;letter-spacing:-.01em;
+  color:var(--brand);text-shadow:0 4px 0 var(--cloud),0 10px 24px rgba(18,40,79,.18)}
+.logo small{display:block;font-size:.34em;letter-spacing:.2em;color:var(--ink-2);text-shadow:none;margin-top:8px}
+.subject{color:var(--ink-2);font-size:16px;max-width:44ch}
+.start-card{width:100%;max-width:520px;display:flex;flex-direction:column;gap:14px;text-align:left}
+.field label{display:block;font-weight:700;margin-bottom:6px}
+.field input{width:100%;font:inherit;font-size:18px;padding:12px 14px;border-radius:12px;border:2px solid var(--line);
+  background:var(--surface-2);color:var(--ink)}
+.field input:focus{outline:none;border-color:var(--brand)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.rule{display:flex;gap:10px;align-items:flex-start;background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:15px}
+.rule svg{flex:none;width:26px;height:26px}
+.best{font-size:14px;color:var(--muted);text-align:center}
+
+/* ---------- Map ---------- */
+.map-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.map-head h2{font-size:32px}
+.map{position:relative;width:100%;max-width:560px;margin-inline:auto;aspect-ratio:560/800;max-height:max(540px,72vh)}
+.map svg.trail{position:absolute;inset:0;width:100%;height:100%}
+.trail .road{fill:none;stroke:var(--surface);stroke-width:16;stroke-linecap:round;opacity:.9}
+.trail .dash{fill:none;stroke:var(--line);stroke-width:4;stroke-dasharray:2 14;stroke-linecap:round}
+.trail .done{fill:none;stroke:var(--ok);stroke-width:6;stroke-linecap:round}
+.stop{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:none;border:0;cursor:pointer;padding:0;width:150px}
+.stop .disc{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:var(--surface);
+  border:4px solid var(--line);box-shadow:0 6px 0 rgba(18,40,79,.18);transition:transform .15s}
+.stop .disc svg{width:40px;height:40px}
+.stop:hover .disc{transform:scale(1.06)}
+.stop .lbl{font-family:var(--f-display);font-weight:700;font-size:15px;line-height:1.1;background:var(--surface);
+  border:1px solid var(--line);border-radius:10px;padding:4px 8px;text-align:center}
+.stop .lbl small{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stop.locked{cursor:not-allowed}
+.stop.locked .disc{filter:grayscale(1);opacity:.6}
+.stop.current .disc{border-color:var(--accent);animation:pulse 1.6s ease-in-out infinite}
+.stop.done .disc{border-color:var(--ok)}
+.stop.boss .disc{width:92px;height:92px;background:#2B1B3F;border-color:#8E5BD6}
+.stop.boss .disc svg{width:52px;height:52px}
+@keyframes pulse{0%,100%{box-shadow:0 6px 0 rgba(18,40,79,.18),0 0 0 0 rgba(255,178,62,.6)}50%{box-shadow:0 6px 0 rgba(18,40,79,.18),0 0 0 14px rgba(255,178,62,0)}}
+.stars3{display:flex;gap:2px}
+.stars3 svg{width:16px;height:16px}
+.stars3 .on{fill:var(--accent)}
+.stars3 .off{fill:var(--heart-empty)}
+.ground{position:absolute;left:0;right:0;bottom:0;height:9%;border-radius:0 0 26px 26px;
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--c-edge) 35%,transparent))}
+.zone{position:absolute;right:4px;font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);writing-mode:vertical-rl;opacity:.8}
+
+/* ---------- Lesson ---------- */
+.lesson-top{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.lesson-top h2{font-size:30px}
+.note{min-height:280px;display:flex;flex-direction:column;gap:14px}
+.note h3{font-size:26px;color:var(--brand)}
+.note p,.note li{max-width:62ch}
+.note ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.note b,.note strong{color:var(--ink)}
+.hl{background:linear-gradient(transparent 55%,color-mix(in srgb,var(--accent) 45%,transparent) 55%);padding:0 2px;font-weight:700}
+.dots{display:flex;gap:8px;justify-content:center}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--brand);width:26px;border-radius:6px}
+.nav-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.tl{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.tl div{background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:15px}
+.tl b{display:block;font-family:var(--f-display);font-size:24px;color:var(--brand)}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.tile{background:var(--surface-2);border-radius:14px;padding:12px 14px;font-size:15px;display:flex;flex-direction:column;gap:6px}
+.tile h4{margin:0;font-family:var(--f-display);font-size:19px}
+.tile .tag{align-self:flex-start;font-family:var(--f-display);font-weight:800;font-size:14px;color:#fff;border-radius:8px;padding:1px 8px}
+.t-saas{background:var(--saas)} .t-paas{background:var(--paas)} .t-iaas{background:var(--iaas)}
+.t-cloud{background:var(--c-cloud)} .t-fog{background:var(--c-fog)} .t-edge{background:var(--c-edge)}
+.meter{display:flex;align-items:center;gap:8px;font-size:14px}
+.meter span.k{min-width:108px;color:var(--muted)}
+.meter .bars{display:flex;gap:3px}
+.meter .bars i{width:14px;height:10px;border-radius:3px;background:var(--line)}
+.meter .bars i.on{background:currentColor}
+.proscons{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.proscons ul{list-style:none;padding:0}
+.proscons li{display:flex;gap:8px}
+.proscons li::before{content:"+";font-weight:800;color:var(--ok)}
+.proscons .cons li::before{content:"−";color:var(--bad)}
+.fact{background:var(--surface-2);border-radius:14px;padding:12px 14px;font-size:15px}
+.layers{display:flex;flex-direction:column;gap:8px}
+.layers div{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;background:var(--surface-2);border-radius:12px;padding:8px 12px;font-size:15px}
+.layers div b{font-family:var(--f-display);font-size:18px}
+
+/* ---------- Play ---------- */
+.progress{height:10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);overflow:hidden;flex:1;min-width:120px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),#7ED957);border-radius:999px;transition:width .4s ease}
+.play-top{display:flex;align-items:center;gap:12px}
+.play-top .lvl{font-family:var(--f-display);font-weight:700;color:var(--ink-2);white-space:nowrap}
+.q{display:flex;flex-direction:column;gap:16px}
+.q .kind{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;font-family:var(--f-display);font-weight:700;
+  font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--brand);background:var(--surface-2);border-radius:999px;padding:3px 12px}
+.q h3{font-size:clamp(22px,4.6vw,28px);font-family:var(--f-body);font-weight:700;line-height:1.3}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;cursor:pointer;background:var(--surface);
+  border:2px solid var(--line);border-radius:14px;padding:12px 14px;font-size:17px;box-shadow:0 4px 0 var(--line);
+  transition:transform .08s, border-color .15s, background .15s}
+.opt:hover{border-color:var(--brand)}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.opt .key{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-family:var(--f-display);
+  font-weight:800;font-size:16px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg);box-shadow:0 4px 0 var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg);box-shadow:0 4px 0 var(--bad);animation:shake .45s}
+.opt[disabled]{cursor:default}
+.opts.locked .opt:not(.right):not(.wrong){opacity:.55}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tf .opt{justify-content:center;flex-direction:column;gap:4px;padding:18px 10px;font-family:var(--f-display);font-weight:800;font-size:22px}
+.tf .opt svg{width:40px;height:40px}
+.blank{display:inline-block;min-width:110px;border-bottom:3px dashed var(--brand);text-align:center;color:var(--brand);padding:0 6px}
+.blank.filled{border-bottom-style:solid}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chips .opt{width:auto;font-family:var(--f-display);font-weight:700;font-size:19px;padding:10px 18px}
+
+/* order */
+.slots{display:grid;gap:8px}
+.slot{min-height:52px;border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:16px;color:var(--muted)}
+.slot b{font-family:var(--f-display);font-size:20px;color:var(--brand);min-width:52px}
+.slot.filled{border-style:solid;border-color:var(--ok);background:var(--ok-bg);color:var(--ink)}
+.pool{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+
+/* match */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;align-items:stretch}
+.match .col{display:flex;flex-direction:column;gap:10px}
+.match .opt{height:100%;font-size:15px;padding:10px 12px}
+.match .opt.sel{border-color:var(--accent);box-shadow:0 4px 0 var(--accent)}
+.match .opt.paired{cursor:default;color:var(--ink)}
+.pair-0{border-color:var(--saas)!important;box-shadow:0 4px 0 var(--saas)!important}
+.pair-1{border-color:var(--paas)!important;box-shadow:0 4px 0 var(--paas)!important}
+.pair-2{border-color:var(--iaas)!important;box-shadow:0 4px 0 var(--iaas)!important}
+.pair-3{border-color:var(--c-cloud)!important;box-shadow:0 4px 0 var(--c-cloud)!important}
+
+/* sort / swipe */
+.sorter{display:flex;flex-direction:column;align-items:center;gap:16px}
+.deck{position:relative;width:100%;max-width:440px;height:170px}
+.scard{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:18px 22px;background:var(--surface);
+  border:2px solid var(--line);border-radius:18px;box-shadow:var(--shadow);font-size:19px;font-weight:700;touch-action:pan-y;
+  user-select:none;transition:transform .35s ease, opacity .35s ease}
+.scard.behind{transform:translateY(10px) scale(.95);opacity:.6}
+.scard.fly-l{transform:translateX(-140%) rotate(-18deg);opacity:0}
+.scard.fly-r{transform:translateX(140%) rotate(18deg);opacity:0}
+.scard.fly-u{transform:translateY(-120%) scale(.8);opacity:0}
+.scard.bad{border-color:var(--bad);animation:shake .45s}
+.bins{display:grid;gap:10px;width:100%;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+.bin{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;cursor:pointer;
+  border:2px solid var(--line);background:var(--surface);box-shadow:0 4px 0 var(--line);font-family:var(--f-display);font-weight:800;font-size:18px}
+.bin svg{width:34px;height:34px}
+.bin small{font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--muted)}
+.bin:active{transform:translateY(3px)}
+.bin.flash-ok{background:var(--ok-bg);border-color:var(--ok)}
+.bin.flash-bad{background:var(--bad-bg);border-color:var(--bad);animation:shake .45s}
+.swipehint{font-size:14px;color:var(--muted)}
+.counter{font-family:var(--f-display);font-weight:700;color:var(--muted)}
+
+/* scene: brake + route */
+.scene{position:relative;width:100%;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.scene svg{display:block;width:100%;height:auto}
+.freeze{position:absolute;left:50%;top:10px;transform:translateX(-50%);font-family:var(--f-display);font-weight:800;font-size:14px;
+  letter-spacing:.12em;text-transform:uppercase;background:var(--brand);color:var(--brand-ink);padding:4px 12px;border-radius:999px}
+.readout{display:block;font-family:var(--f-mono);font-size:14px;background:#0E1A36;color:#E8F0FF;padding:7px 12px}
+.layerbtns{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
+.layerbtns .bin{font-size:17px}
+.bin.l-cloud{color:var(--c-cloud)} .bin.l-fog{color:var(--c-fog)} .bin.l-edge{color:var(--c-edge)}
+.bin.l-cloud b,.bin.l-fog b,.bin.l-edge b{color:var(--ink)}
+.packet{transition:transform .9s cubic-bezier(.5,.05,.3,1)}
+
+/* feedback */
+.feedback{display:flex;gap:14px;align-items:flex-start;border-radius:16px;padding:16px;border:2px solid var(--line);background:var(--surface);animation:enter .3s ease both}
+.feedback.ok{border-color:var(--ok);background:var(--ok-bg)}
+.feedback.ko{border-color:var(--bad);background:var(--bad-bg)}
+.feedback .nubi{width:84px}
+.feedback h4{margin:0 0 4px;font-family:var(--f-display);font-size:24px}
+.feedback.ok h4{color:var(--ok)} .feedback.ko h4{color:var(--bad)}
+.feedback .why{font-size:16px}
+.feedback .fb-body{flex:1;display:flex;flex-direction:column;gap:10px}
+.feedback .btn{align-self:flex-end}
+
+/* boss */
+.boss-arena{display:flex;align-items:center;gap:16px}
+.boss-sprite{width:120px;flex:none}
+.boss-sprite.hit{animation:hit .5s ease}
+.boss-sprite.laugh{animation:hop .6s ease}
+@keyframes hit{0%,100%{transform:none;filter:none}30%{transform:translateX(12px) rotate(8deg);filter:brightness(2)}}
+.hpbar{flex:1;display:flex;flex-direction:column;gap:6px}
+.hpbar .bar{height:16px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.hpbar .bar i{display:block;height:100%;background:linear-gradient(90deg,#8E5BD6,#D14BA0);transition:width .4s}
+.timer{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.timer i{display:block;height:100%;background:var(--accent);width:100%}
+.timer.low i{background:var(--bad)}
+
+/* modal screens */
+.center-card{text-align:center;align-items:center;display:flex;flex-direction:column;gap:14px}
+.big-stars{display:flex;gap:8px;justify-content:center}
+.big-stars svg{width:58px;height:58px}
+.big-stars .on{fill:var(--accent);animation:hgain .6s ease both}
+.big-stars .off{fill:var(--heart-empty)}
+.cromo{width:230px;border-radius:16px;padding:14px;background:linear-gradient(160deg,var(--brand),#4F7BD1);color:#fff;
+  box-shadow:var(--shadow);text-align:left;display:flex;flex-direction:column;gap:8px;animation:flip .8s ease both}
+.cromo .art{height:92px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center}
+.cromo .art svg{width:64px;height:64px}
+.cromo h4{margin:0;font-family:var(--f-display);font-size:20px}
+.cromo p{font-size:14px;line-height:1.35}
+.cromo .n{font-family:var(--f-display);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+@keyframes flip{from{transform:rotateY(90deg)}to{transform:none}}
+.album{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.album .cromo{width:190px;animation:none}
+.album .cromo.lockedc{background:var(--surface-2);color:var(--muted);border:2px dashed var(--line);box-shadow:none}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;width:100%}
+.stat{background:var(--surface-2);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--f-display);font-size:28px;color:var(--brand);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.review{display:flex;flex-direction:column;gap:10px;text-align:left;width:100%}
+.review .item{background:var(--surface-2);border-radius:12px;padding:10px 14px;font-size:15px}
+.review .item b{display:block}
+.review .item .ans{color:var(--ok);font-weight:700}
+.diploma{width:100%;border:3px solid var(--accent);border-radius:20px;padding:22px;background:
+  radial-gradient(circle at 10% 10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 40%),var(--surface);text-align:center;
+  display:flex;flex-direction:column;gap:8px;align-items:center}
+.diploma .who{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,7vw,44px);color:var(--brand)}
+.diploma .rank{font-family:var(--f-display);font-weight:700;font-size:22px;color:var(--ink-2)}
+
+/* overlay */
+.overlay{position:fixed;inset:0;z-index:40;background:rgba(8,18,40,.55);display:flex;justify-content:center;
+  padding-inline:16px;padding-block:calc(env(safe-area-inset-top,0px) + 16px) calc(env(safe-area-inset-bottom,0px) + 16px)}
+.overlay .sheet{width:100%;max-width:760px;max-height:100%;overflow:auto;background:var(--surface);border-radius:20px;padding:20px;
+  display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sheet section{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:14px}
+.sheet section h3{font-size:24px}
+.sheet .note{min-height:0}
+.locked-note{color:var(--muted);font-style:italic}
+
+canvas.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+
+@media (max-width:520px){
+  body{font-size:16px}
+  .card{padding:16px}
+  .nubi{width:92px}
+  .hero .nubi{width:132px}
+  .stop{width:118px}
+  .stop .disc{width:62px;height:62px}
+  .stop .disc svg{width:32px;height:32px}
+  .stop.boss .disc{width:74px;height:74px}
+  .stop .lbl{font-size:13px}
+  .hud{gap:5px;padding:6px 7px;flex-wrap:nowrap}
+  .hearts{gap:1px}
+  .heart{width:19px;height:19px}
+  .pill{font-size:15px;padding:2px 7px;gap:3px}
+  .pill .ico{width:15px;height:15px}
+  .iconbtn{width:34px;height:34px}
+  .iconbtn svg{width:19px;height:19px}
+  .subtxt{display:none}
+  .lesson-top h2{font-size:26px}
+  .match{grid-template-columns:1fr 1fr;gap:8px}
+  .match .opt{font-size:14px;padding:8px}
+  .feedback{flex-direction:column}
+  .feedback .nubi{width:64px}
+  .layers div{grid-template-columns:72px 1fr}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.1c2.1-.2 3.9.9 5.4 2.8 1.5-1.9 3.3-3 5.4-2.8 3.7.4 5.7 4.3 4.2 7.7C19.5 16.4 12 21 12 21z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FFB23E"/><circle cx="12" cy="12" r="7" fill="none" stroke="#C47A00" stroke-width="2"/><path d="M12 8v8M9.5 10.5h5" stroke="#C47A00" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path fill="#FF8A1F" d="M12 2c1 3.5 5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-2.4 1.2-4 2.4-5.3.2 1.6 1 2.8 2.1 3.3C10.3 8.3 11 5 12 2z"/><path fill="#FFD23F" d="M12 12c.6 1.6 2.6 2.6 2.6 4.6a2.6 2.6 0 0 1-5.2 0c0-1.3.8-2 1.5-2.8.3.7.6 1.1 1.1 1.3-.2-1-.3-1.9 0-3.1z"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4.5C4 3.7 4.7 3 5.5 3H11v16H5.5A1.5 1.5 0 0 0 4 20.5zM20 4.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5.7 1.5 1.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#2A9A55"/><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#D9434C"/><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2.5" fill="#8A9BBD"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="#8A9BBD" stroke-width="2.4"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 48 48"><path fill="#3E7BE0" d="M14 38h22a9 9 0 0 0 1.6-17.9A12 12 0 0 0 14.4 17 10.5 10.5 0 0 0 14 38z"/><path fill="#fff" opacity=".35" d="M16 22a7 7 0 0 1 12-4" stroke="#fff" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-server" viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="36" rx="4" fill="#1F3B73"/><rect x="14" y="11" width="20" height="6" rx="2" fill="#5C82C9"/><rect x="14" y="21" width="20" height="6" rx="2" fill="#5C82C9"/><rect x="14" y="31" width="20" height="6" rx="2" fill="#5C82C9"/><circle cx="31" cy="14" r="1.6" fill="#7EE08A"/><circle cx="31" cy="24" r="1.6" fill="#7EE08A"/><circle cx="31" cy="34" r="1.6" fill="#FFB23E"/></symbol>
+    <symbol id="i-cloche" viewBox="0 0 48 48"><path fill="#7B5CE0" d="M8 34a16 16 0 0 1 32 0z"/><rect x="5" y="34" width="38" height="4" rx="2" fill="#4B3A9A"/><circle cx="24" cy="15" r="3" fill="#4B3A9A"/><path d="M15 27a10 10 0 0 1 6-6" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".6"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 48 48"><path fill="#3E7BE0" d="M17 17h16a6 6 0 0 0 .5-12 8 8 0 0 0-15.2 1.6A5.3 5.3 0 0 0 17 17z"/><rect x="9" y="22" width="30" height="7" rx="3.5" fill="#9AA9C2"/><rect x="6" y="31" width="36" height="5" rx="2.5" fill="#B7C3D8" opacity=".8"/><rect x="18" y="39" width="12" height="7" rx="2" fill="#5E9A2A"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 48 48"><path d="M24 7v33M12 40h24M9 15h30" stroke="#1F3B73" stroke-width="3" stroke-linecap="round"/><path fill="#FFB23E" d="M3 27l6-12 6 12a6 6 0 0 1-12 0z"/><path fill="#5E82C4" d="M33 27l6-12 6 12a6 6 0 0 1-12 0z"/></symbol>
+    <symbol id="i-hacker" viewBox="0 0 48 48"><path fill="#8E5BD6" d="M24 4c9 0 16 7 16 17v8c0 8-7 15-16 15S8 37 8 29v-8C8 11 15 4 24 4z"/><path fill="#1B1030" d="M13 22c3-2 7-2 9 0-1 4-8 5-9 0zM35 22c-3-2-7-2-9 0 1 4 8 5 9 0z"/><path d="M18 34c4 3 8 3 12 0" stroke="#1B1030" stroke-width="2.6" fill="none" stroke-linecap="round"/><path fill="#FFD23F" d="M18 9l3 5h-6zM30 9l3 5h-6z" opacity=".9"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 48 48"><circle cx="24" cy="24" r="9" fill="#FFB23E"/><g stroke="#FFB23E" stroke-width="3.5" stroke-linecap="round"><path d="M24 4v6M24 38v6M4 24h6M38 24h6M9.9 9.9l4.2 4.2M33.9 33.9l4.2 4.2M9.9 38.1l4.2-4.2M33.9 14.1l4.2-4.2"/></g></symbol>
+    <symbol id="i-storm" viewBox="0 0 48 48"><path fill="#6B7A99" d="M13 30h22a8 8 0 0 0 1.4-15.9A11 11 0 0 0 15.3 12 9.2 9.2 0 0 0 13 30z"/><path fill="#FFD23F" d="M23 28l-5 10h5l-2 8 9-12h-6l3-6z"/></symbol>
+    <symbol id="i-true" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="#2A9A55"/><path d="M14 25l7 7 13-15" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-false" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="#D9434C"/><path d="M16 16l16 16M32 16L16 32" stroke="#fff" stroke-width="5" stroke-linecap="round"/></symbol>
+    <symbol id="i-fog" viewBox="0 0 48 48"><g stroke="#7C8BA8" stroke-width="4" stroke-linecap="round"><path d="M8 16h26M14 24h28M6 32h24M16 40h20"/></g></symbol>
+    <symbol id="i-chip" viewBox="0 0 48 48"><rect x="12" y="12" width="24" height="24" rx="4" fill="#5E9A2A"/><rect x="18" y="18" width="12" height="12" rx="2" fill="#C9EBA8"/><g stroke="#5E9A2A" stroke-width="3" stroke-linecap="round"><path d="M18 6v5M24 6v5M30 6v5M18 37v5M24 37v5M30 37v5M6 18h5M6 24h5M6 30h5M37 18h5M37 24h5M37 30h5"/></g></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="#FFB23E" d="M13 2L4 14h6l-1 8 9-12h-6z"/></symbol>
+  </defs>
+</svg>
+
+<div class="sky" aria-hidden="true">
+  <div class="stars"></div>
+  <div id="puffs"></div>
+</div>
+
+<main class="app" id="app">
+  <header class="hud" id="hud" hidden>
+    <div class="hearts" id="hearts" role="img" aria-label="Vidas"></div>
+    <span class="pill" title="Puntos"><svg class="ico"><use href="#i-coin"/></svg><span id="score">0</span></span>
+    <span class="pill streak" id="streakPill" title="Racha de aciertos"><svg class="ico"><use href="#i-flame"/></svg><span id="streak">0</span></span>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="btnNotes" type="button" title="Mis apuntes" aria-label="Abrir mis apuntes"><svg><use href="#i-book"/></svg></button>
+    <button class="iconbtn" id="btnSound" type="button" title="Sonido" aria-label="Activar o silenciar el sonido"><svg><use href="#i-sound"/></svg></button>
+  </header>
+  <div id="view" class="screen"></div>
+</main>
+
+<div class="overlay" id="notes" hidden role="dialog" aria-modal="true" aria-labelledby="notesTitle">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="notesTitle">Mis apuntes · UT3</h2>
+      <button class="iconbtn" id="btnCloseNotes" type="button" aria-label="Cerrar apuntes"><svg><use href="#i-close"/></svg></button>
+    </div>
+    <p class="subject">Aquí se guardan los apuntes de cada nivel que desbloqueas. Puedes repasarlos desde el mapa siempre que quieras; durante los retos, toca tirar de memoria.</p>
+    <div id="notesBody"></div>
+  </div>
+</div>
+
+<div class="sr" aria-live="polite" id="live"></div>
+<canvas class="confetti" id="confetti" hidden></canvas>
+<script>
+"use strict";
+(() => {
+/* =========================================================
+   CONTENIDOS · UT3 Sistemas en la nube (Cloud)
+   Tipos de reto: mc (test), fill (completa), tf (verdadero/falso),
+   order (ordenar), match (emparejar), sort (clasificar),
+   brake (mini-juego del coche), route (enrutar datos).
+   En mc/fill, la PRIMERA opción es la correcta (se barajan al jugar).
+   ========================================================= */
+const MORE = {
+  internet:{href:"https://www.youtube.com/watch?v=1CDWKWakX1o",txt:"Vídeo: el origen de internet (y de la nube)"},
+  dc:{href:"https://www.youtube.com/watch?v=F5hnaTySeis",txt:"Vídeo: qué es un data center"},
+  space:{href:"https://www.youtube.com/watch?v=3jtSx8oG5ZI",txt:"Vídeo: ¿centros de datos en el espacio?"},
+  arsys:{href:"https://www.arsys.es/cloud",txt:"Ejemplo: servidores cloud de Arsys"},
+  hack:{href:"https://www.youtube.com/watch?v=G_-KK_TFX_k",txt:"Vídeo: el hackeo al Banco Santander"}
+};
+const meter = (label, sym, n, color) =>
+  `<div class="meter" style="color:${color}"><span class="k">${label}</span><span class="bars">${
+    [1,2,3,4,5,6].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span><b>${sym}</b></div>`;
+
+const LEVELS = [
+/* ---------------- NIVEL 1 ---------------- */
+{
+  id:"nube", title:"¿Qué es la nube?", short:"Qué es la nube", icon:"i-cloud",
+  intro:"Empezamos por lo básico: qué es la nube y de dónde viene.",
+  lesson:[
+    {h:"La nube, en una frase", body:`
+      <p style="font-size:1.2em">La nube es <span class="hl">el ordenador de otra persona, al que accedemos por internet</span>.</p>
+      <p><b>Definición:</b> el <i>cloud</i> o nube es un servicio que ofrece <b>almacenamiento masivo, aplicaciones y mantenimiento de equipos</b> fuera de la empresa o de tu ubicación.</p>
+      <p>Permite acceder a la información <b>desde cualquier lugar o dispositivo</b> con conexión a internet.</p>`},
+    {h:"Breve historia de la nube", body:`
+      <div class="tl">
+        <div><b>1960</b><strong>John McCarthy</strong> gesta la idea: la informática puede <b>venderse como un servicio público</b>, como la luz o el agua.</div>
+        <div><b>1999</b><strong>Salesforce</strong> la pone en práctica: ofrece una aplicación a través de internet. Arranca el crecimiento del cloud.</div>
+        <div><b>2002</b><strong>Amazon</strong> pone en marcha <b>AWS</b> (Amazon Web Services): almacenamiento y computación por internet.</div>
+        <div><b>2009</b><strong>Google, Microsoft</strong> y otras empresas empiezan a ofrecer cloud computing.</div>
+      </div>`, more:["internet"]}
+  ],
+  challenges:[
+    {type:"mc", q:"¿Cuál es la forma más sencilla de explicar qué es «la nube»?",
+      a:["El ordenador de otra persona, al que accedemos por internet","Un programa que se instala en tu ordenador para guardar fotos","Una red de satélites que mide el tiempo","Un disco duro externo que llevas en la mochila"],
+      why:"La nube son ordenadores de otras empresas, en centros de datos, que usamos a través de internet."},
+    {type:"mc", q:"Según la definición, ¿qué ofrece un servicio cloud?",
+      a:["Almacenamiento masivo, aplicaciones y mantenimiento de equipos fuera de la empresa","Ordenadores más baratos para comprar en una tienda","Conexión a internet gratis en cualquier sitio","Copias de seguridad en un pendrive"],
+      why:"Cloud = almacenamiento masivo + aplicaciones + mantenimiento de equipos, todo fuera de la empresa o de tu ubicación."},
+    {type:"tf", q:"Para abrir tus archivos de la nube tienes que estar en la oficina de tu empresa.", v:false,
+      why:"La nube permite acceder a la información desde cualquier lugar o dispositivo con conexión a internet."},
+    {type:"order", q:"Ordena la historia de la nube: toca los hitos del más antiguo al más reciente.",
+      items:[{t:"John McCarthy imagina la informática como un servicio público",tag:"1960"},
+             {t:"Salesforce ofrece una aplicación a través de internet",tag:"1999"},
+             {t:"Amazon pone en marcha AWS",tag:"2002"},
+             {t:"Google, Microsoft y otras empresas ofrecen cloud computing",tag:"2009"}],
+      why:"1960 McCarthy → 1999 Salesforce → 2002 AWS → 2009 Google, Microsoft y compañía."},
+    {type:"fill", q:"En 2002, Amazon puso en marcha ___ para ofrecer almacenamiento y computación por internet.",
+      a:["AWS","Gmail","Dropbox","Salesforce"], why:"AWS significa Amazon Web Services y nació en 2002."},
+    {type:"mc", q:"¿Quién propuso en 1960 que la informática podía venderse como un servicio público?",
+      a:["John McCarthy","Bill Gates","Steve Jobs","Jeff Bezos"],
+      why:"John McCarthy gestó la idea en 1960. Décadas después se hizo realidad con la nube."}
+  ],
+  cromo:{title:"John McCarthy · 1960", icon:"i-cloud", text:"Imaginó que la informática se vendería como la luz o el agua. Hoy lo llamamos cloud."}
+},
+/* ---------------- NIVEL 2 ---------------- */
+{
+  id:"servicios", title:"Servicios y data centers", short:"Servicios", icon:"i-server",
+  intro:"¿Qué hacemos con la nube cada día y dónde está físicamente?",
+  lesson:[
+    {h:"Almacenamiento de ficheros: un disco duro en internet", body:`
+      <p>Tus documentos se guardan en los <b>ordenadores gigantes de otra empresa</b> a través de tu conexión a internet (por ejemplo, Google Drive).</p>
+      <div class="grid3">
+        <div class="tile"><h4>Cero preocupaciones técnicas</h4>La empresa se encarga de que esos ordenadores funcionen bien, no se rompan y estén a salvo de virus.</div>
+        <div class="tile"><h4>Tus cosas viajan contigo</h4>Ábrelas desde el móvil en la guagua, la tablet en el sofá o el portátil del instituto.</div>
+        <div class="tile"><h4>Casi imposible perder nada</h4>El proveedor guarda <b>copias automáticas en diferentes lugares</b>. Si se estropea una máquina, tus datos siguen a salvo en otra.</div>
+        <div class="tile"><h4>El negocio</h4>¿Sin espacio? <b>Pides más con un clic</b> (y pagas por él), como una mochila que crece cuando la necesitas.</div>
+      </div>`},
+    {h:"Cloud computing: se procesa en otro sitio", body:`
+      <p>La computación en la nube <b>entrega recursos informáticos de forma inmediata usando internet</b>. Los servicios están en otras ubicaciones y <span class="hl">no se procesan en tu ordenador</span>.</p>
+      <div class="grid3">
+        <div class="tile"><h4>Streaming</h4><small>Netflix, Spotify, YouTube</small>Reproduces películas y música en tiempo real desde servidores externos, sin descargarlas enteras ni ocupar espacio.</div>
+        <div class="tile"><h4>Redes y mensajería</h4><small>Instagram, WhatsApp</small>Tus fotos y chats viven en los servidores de la empresa. Si cambias de móvil, reaparecen al iniciar sesión.</div>
+        <div class="tile"><h4>Videojuegos en la nube</h4><small>Xbox Cloud, GeForce NOW</small>Un servidor lejano procesa los gráficos pesados y a ti solo te llega el vídeo del juego.</div>
+      </div>`},
+    {h:"¿Dónde funciona todo esto?", body:`
+      <p>En los <span class="hl">data centers o centros de datos</span>: instalaciones con <b>miles de equipos electrónicos</b> que gestionan una enorme cantidad de datos cada día.</p>
+      <div class="fact"><b>Curiosidad: data centers submarinos.</b> Los servidores se meten en un recipiente hermético y se sumergen en el agua.
+        <div class="proscons" style="margin-top:8px">
+          <ul><li>Disipación del calor asegurada y ahorro en refrigeración.</li><li>Pueden abastecerse de energía sostenible (con una fuente de respaldo).</li></ul>
+          <ul class="cons"><li>El mantenimiento es más complicado.</li><li>Alto coste de conectividad.</li></ul>
+        </div></div>
+      <div class="fact"><b>¿Y en el espacio?</b> SpaceX, Google o un consorcio europeo liderado por Thales estudian llevar servidores al espacio para esquivar los límites del suministro energético. Su viabilidad económica está en duda y los lanzamientos de cohetes emiten muchos gases de efecto invernadero.</div>`,
+      more:["dc","space"]}
+  ],
+  challenges:[
+    {type:"mc", q:"Pierdes el móvil y te compras otro. Al iniciar sesión en WhatsApp o Instagram, tus fotos y chats reaparecen. ¿Por qué?",
+      a:["Porque viven en los servidores de la empresa, en la nube","Porque el móvil nuevo los copia del viejo por Bluetooth","Porque se guardan dentro de la tarjeta SIM","Porque la tienda te los pasa al comprar el móvil"],
+      why:"Las redes sociales y la mensajería guardan tus fotos y conversaciones en sus servidores."},
+    {type:"mc", q:"Juegas a un juego muy exigente en un portátil básico con Xbox Cloud o GeForce NOW. ¿Qué pasa en realidad?",
+      a:["Un servidor lejano procesa los gráficos y a ti solo te llega el vídeo del juego","Tu portátil se vuelve más potente al conectarse","El juego se descarga entero y se ejecuta en tu portátil","La tarjeta gráfica se descarga por internet"],
+      why:"En los videojuegos en la nube el trabajo pesado lo hace un servidor remoto; tú recibes el vídeo."},
+    {type:"tf", q:"Con el streaming (Netflix, Spotify, YouTube) tienes que descargar la película entera antes de poder verla.", v:false,
+      why:"Se reproduce en tiempo real desde servidores externos, sin ocupar espacio en tu disco duro."},
+    {type:"mc", q:"En el centro de datos de tu proveedor se estropea una máquina. ¿Qué pasa con tus archivos?",
+      a:["Siguen a salvo: el proveedor guarda copias automáticas en diferentes lugares","Se pierden para siempre","Tienes que ir al centro de datos a recuperarlos","Te los envían impresos por correo"],
+      why:"Es casi imposible perder nada: hay copias automáticas en varios sitios y ni te enteras del fallo."},
+    {type:"fill", q:"La nube se encuentra en ___, formados por miles de equipos electrónicos.",
+      a:["centros de datos","satélites","routers domésticos","pendrives"], why:"La nube vive en los data centers o centros de datos."},
+    {type:"sort", q:"Data center submarino: ¿ventaja o desafío?",
+      bins:[{id:"v",label:"Ventaja",icon:"i-sun"},{id:"d",label:"Desafío",icon:"i-storm"}],
+      cards:[{t:"Disipación del calor asegurada y ahorro en refrigeración",bin:"v"},
+             {t:"El mantenimiento es más complicado",bin:"d"},
+             {t:"Puede abastecerse de energía sostenible",bin:"v"},
+             {t:"Alto coste de conectividad",bin:"d"}],
+      why:"El agua enfría gratis y se puede usar energía sostenible; a cambio, mantener y conectar los equipos es más difícil y caro."},
+    {type:"mc", q:"Te quedas sin espacio en tu almacenamiento en la nube. ¿Qué haces?",
+      a:["Pides más espacio con un clic (y pagas por él)","Compras un disco duro y lo llevas al centro de datos","Borras tu cuenta y creas otra","Nada: el espacio en la nube no se puede ampliar"],
+      why:"Ese es el negocio de la nube: tu «mochila» crece cuando lo necesitas, pagando por el espacio extra."}
+  ],
+  cromo:{title:"Data center submarino", icon:"i-server", text:"Servidores metidos en una cápsula hermética bajo el mar: el agua los refrigera."}
+},
+/* ---------------- NIVEL 3 ---------------- */
+{
+  id:"niveles", title:"SaaS, PaaS e IaaS", short:"Niveles de servicio", icon:"i-cloche",
+  intro:"Hay tres maneras de usar la nube. Te las explico con un restaurante.",
+  lesson:[
+    {h:"Imagina un restaurante", body:`
+      <p>Usuarios y empresas podemos acceder a la nube de <b>3 maneras</b>. Piénsalo como si quisieras organizar una cena:</p>
+      <div class="grid3">
+        <div class="tile"><span class="tag t-saas">SaaS</span><h4>Solo disfrutas</h4>No cocinas ni limpias. No necesitas saber nada de cocina.<span><b>Nube:</b> recibes un servicio directo.</span></div>
+        <div class="tile"><span class="tag t-paas">PaaS</span><h4>Restaurante ya montado</h4>Cocina equipada, horno, mesas… pero las recetas las haces tú.<span><b>Nube:</b> alquilas un servidor premontado.</span></div>
+        <div class="tile"><span class="tag t-iaas">IaaS</span><h4>Local vacío</h4>Alquilas el local y lo montas todo tú.<span><b>Nube:</b> alquilas un servidor vacío.</span></div>
+      </div>`},
+    {h:"SaaS · Software como Servicio", body:`
+      <p><span class="hl">Todo montado: recibimos el servicio.</span> Entras, inicias sesión y lo usas.</p>
+      <p><b>Ejemplos reales:</b> Gmail, Netflix, Dropbox, Spotify.</p>
+      ${meter("Contratación","++",5,"var(--saas)")}${meter("Mantenimiento","−−",2,"var(--saas)")}`},
+    {h:"PaaS · Plataforma como Servicio", body:`
+      <p><span class="hl">Te dan el servidor funcionando y tú creas el software.</span></p>
+      <p>Mantener los servidores funcionando requiere personal de guardia, y de eso se encarga el proveedor. Por ejemplo, las plataformas para crear tu propia web: el servidor ya está listo y tú pones tu proyecto.</p>
+      ${meter("Contratación","−",3,"var(--paas)")}${meter("Mantenimiento","+",4,"var(--paas)")}`},
+    {h:"IaaS · Infraestructura como Servicio", body:`
+      <p><span class="hl">Alquilas un servidor vacío en internet.</span> Tú lo mantienes online y tú instalas el software.</p>
+      <p>Por ejemplo, montas tu propia app (como la de la cafetería del centro) y vigilas tú el disco, la RAM, la CPU y que el servidor web siga activo. Hay empresas, como Arsys, que ofrecen estos servidores a bajo coste.</p>
+      ${meter("Contratación","−−−",1,"var(--iaas)")}${meter("Mantenimiento","+++",6,"var(--iaas)")}
+      <p class="fact"><b>A cambio, ganas privacidad:</b> los datos y el servidor los controlas tú. De SaaS a IaaS baja el coste de contratación y sube el de mantenimiento.</p>`,
+      more:["arsys"]}
+  ],
+  challenges:[
+    {type:"match", q:"Une cada opción del restaurante con su nivel de servicio en la nube.",
+      pairs:[["Solo disfrutas del servicio: no cocinas ni limpias","SaaS"],
+             ["Alquilas un restaurante montado y tú haces las recetas","PaaS"],
+             ["Alquilas el local vacío","IaaS"]],
+      why:"SaaS = recibes un servicio directo. PaaS = servidor premontado. IaaS = servidor vacío."},
+    {type:"match", q:"Descifra las siglas: une cada una con su significado.",
+      pairs:[["SaaS","Software como Servicio"],["PaaS","Plataforma como Servicio"],["IaaS","Infraestructura como Servicio"]],
+      why:"Software, Plataforma e Infraestructura: cuanto más «abajo», más trabajo queda de tu parte."},
+    {type:"sort", q:"Clasifica cada caso en su nivel de servicio.",
+      bins:[{id:"saas",label:"SaaS",sub:"todo montado"},{id:"paas",label:"PaaS",sub:"servidor premontado"},{id:"iaas",label:"IaaS",sub:"servidor vacío"}],
+      cards:[{t:"Gmail",bin:"saas"},{t:"Spotify",bin:"saas"},
+             {t:"Te dan el servidor funcionando y tú creas el software",bin:"paas"},
+             {t:"Alquilas un servidor vacío e instalas tú todo el software",bin:"iaas"},
+             {t:"Tú mantienes el servidor online y vigilas su CPU y su RAM",bin:"iaas"}],
+      why:"Gmail y Spotify son software listo para usar (SaaS). Si te dan el servidor funcionando, es PaaS. Si lo instalas y mantienes todo tú, es IaaS."},
+    {type:"mc", q:"¿Qué nivel tiene el coste de contratación MÁS BAJO (−−−) y el de mantenimiento MÁS ALTO (+++)?",
+      a:["IaaS","SaaS","PaaS","Ninguno: todos cuestan igual"],
+      why:"En IaaS alquilar el servidor vacío es barato, pero mantenerlo corre de tu cuenta."},
+    {type:"mc", q:"Una tienda quiere un programa de correo sin preocuparse de nada técnico: todo montado y sin mantenimiento. ¿Qué elige?",
+      a:["SaaS","PaaS","IaaS","Comprar sus propios servidores"],
+      why:"SaaS: todo montado, recibes el servicio. Contratación ++, mantenimiento −−."},
+    {type:"mc", q:"Una empresa quiere la máxima privacidad y control sobre su servidor, aunque tenga que mantenerlo ella. ¿Qué nivel encaja mejor?",
+      a:["IaaS","SaaS","PaaS","Streaming"],
+      why:"IaaS te da más privacidad y control; a cambio, el mantenimiento es tuyo (+++)."},
+    {type:"tf", q:"En PaaS tienes que montar tú el servidor desde cero.", v:false,
+      why:"En PaaS te dan el servidor funcionando; tú solo creas el software. Montarlo desde cero sería IaaS."}
+  ],
+  cromo:{title:"El restaurante cloud", icon:"i-cloche", text:"SaaS: te sirven la cena. PaaS: cocinas en una cocina equipada. IaaS: montas el restaurante desde cero."}
+},
+/* ---------------- NIVEL 4 ---------------- */
+{
+  id:"capas", title:"Cloud, Fog y Edge", short:"Cloud · Fog · Edge", icon:"i-layers",
+  intro:"¿Dónde se procesan los datos? Depende de lo rápido que haya que decidir.",
+  lesson:[
+    {h:"¿Dónde se gestionan los datos?", body:`
+      <p>No todo se procesa en el mismo sitio. Cuanto más lejos está el ordenador que procesa, más potencia tiene… pero hay <span class="hl">más latencia</span>: el retraso al enviar y recibir datos.</p>
+      <div class="layers">
+        <div><b style="color:var(--c-cloud)">Cloud</b><span>Centros de datos a cientos o miles de km. Mucha potencia, alta latencia.</span></div>
+        <div><b style="color:var(--c-fog)">Fog</b><span>La red local (LAN) de un edificio o fábrica. Hace de intermediario.</span></div>
+        <div><b style="color:var(--c-edge)">Edge</b><span>El propio dispositivo, o a un solo salto de red (antenas 5G). Retraso casi cero.</span></div>
+      </div>`},
+    {h:"Cloud · La nube", body:`
+      <ul>
+        <li><b>Dónde está:</b> en enormes centros de datos centralizados, a cientos o miles de kilómetros (por ejemplo, los servidores de Google o AWS).</li>
+        <li><b>Función:</b> procesamiento masivo, almacenamiento a largo plazo y análisis de Big Data (Machine Learning complejo).</li>
+        <li><b>Problema:</b> <span class="hl">alta latencia</span>. Tarda milisegundos o segundos en enviar y recibir datos, algo inaceptable para decisiones críticas, como un coche autónomo que necesita frenar.</li>
+      </ul>`},
+    {h:"Fog · La niebla", body:`
+      <ul>
+        <li><b>Dónde está:</b> en la red de área local (LAN), en routers, gateways o servidores locales dentro de un edificio o fábrica.</li>
+        <li><b>Función:</b> hace de <span class="hl">intermediario</span>. Recoge los datos de miles de sensores, filtra lo que no sirve, toma decisiones locales que necesitan cierta potencia y solo envía a la nube el resumen o los datos históricos.</li>
+        <li><b>Ejemplo:</b> el servidor de un parque eólico analiza el viento de todos los molinos en tiempo real para girarlos, y solo manda a la nube un informe diario de la energía generada.</li>
+      </ul>`},
+    {h:"Edge · El borde", body:`
+      <ul>
+        <li><b>Dónde está:</b> en el propio dispositivo inteligente o a un solo «salto» de red (antenas 5G).</li>
+        <li><b>Función:</b> procesamiento inmediato <span class="hl">sin depender de internet</span>. Toma decisiones críticas en tiempo real porque el retraso debe ser cero.</li>
+        <li><b>Ejemplo:</b> la cámara inteligente de un Toyota Yaris (sistema PCS) detecta un peatón y clava los frenos al instante. No manda el vídeo a la nube: lo procesa el chip de la propia cámara o del coche en milisegundos.</li>
+      </ul>
+      <p class="fact">Un coche moderno lleva radar/LIDAR, cámaras y ultrasonidos para el frenado de emergencia, el mantenimiento de carril, el control de velocidad adaptativo, el ángulo muerto o el aparcamiento. Todo eso se decide en el borde.</p>`}
+  ],
+  challenges:[
+    {type:"brake", q:"¡La cámara del coche detecta un peatón cruzando! El tiempo se congela: ¿dónde procesas la imagen para decidir si frenar?",
+      why:"Edge: el chip del coche decide en milisegundos y sin depender de internet. Si el vídeo viaja a la nube o a otro servidor, la latencia hace que el coche frene tarde."},
+    {type:"route", q:"Enruta los datos: toca la capa donde debe procesarse cada tarea.",
+      items:[{t:"Entrenar un modelo de Machine Learning con años de datos",layer:"cloud"},
+             {t:"Parque eólico: analizar en tiempo real el viento de todos los molinos para girarlos",layer:"fog"},
+             {t:"Un dispositivo que debe decidir en tiempo real aunque no haya internet",layer:"edge"},
+             {t:"Guardar a largo plazo el histórico de toda la empresa",layer:"cloud"},
+             {t:"Fábrica: filtrar los datos de miles de sensores y enviar solo un resumen a la nube",layer:"fog"}],
+      why:"Cloud: potencia y almacenamiento a largo plazo. Fog: intermediario local que filtra y resume. Edge: decisiones instantáneas en el propio dispositivo."},
+    {type:"mc", q:"¿Cuál es el gran problema de la nube (cloud) para tomar decisiones críticas?",
+      a:["La alta latencia: tarda milisegundos o segundos en enviar y recibir datos","Que no puede almacenar datos durante mucho tiempo","Que tiene muy poca potencia de cálculo","Que solo funciona con cable"],
+      why:"La nube tiene muchísima potencia, pero está lejos: esa latencia es inaceptable para frenar un coche."},
+    {type:"mc", q:"¿Dónde se sitúa el Fog computing?",
+      a:["En la red local (LAN): routers, gateways o servidores de un edificio o fábrica","Dentro del chip de cada sensor","En centros de datos a miles de kilómetros","En satélites en órbita"],
+      why:"La niebla está «a media altura»: en la LAN, entre los dispositivos y la nube."},
+    {type:"tf", q:"El Edge computing puede tomar decisiones aunque no haya conexión a internet.", v:true,
+      why:"Procesa en el propio dispositivo, sin depender de internet. Por eso sirve para decisiones críticas."},
+    {type:"fill", q:"El Edge está en el propio dispositivo o a un solo «salto» de red, como las antenas ___.",
+      a:["5G","de TV","de radio FM","parabólicas"], why:"Las antenas 5G están a un único salto de red del dispositivo."}
+  ],
+  cromo:{title:"Frenada Edge", icon:"i-chip", text:"La cámara del coche ve un peatón y frena en milisegundos, sin preguntar a la nube."}
+},
+/* ---------------- NIVEL 5 ---------------- */
+{
+  id:"riesgos", title:"Ventajas y riesgos", short:"Ventajas y riesgos", icon:"i-scale",
+  intro:"La nube tiene muchas ventajas… y algunos riesgos que conviene conocer.",
+  lesson:[
+    {h:"Ventajas de usar la nube", body:`
+      <div class="proscons"><ul>
+        <li><span><b>Ahorro de costes.</b></span></li>
+        <li><span><b>Tarificación por uso:</b> pagas por lo que usas.</span></li>
+        <li><span><b>Almacenamiento ilimitado.</b></span></li>
+        <li><span><b>Equipos de última gama.</b></span></li>
+        <li><span><b>Seguridad en la red.</b></span></li>
+        <li><span><b>Soporte al cliente 24/7</b> con rápida resolución de problemas.</span></li>
+        <li><span><b>Actualizaciones automáticas,</b> de las que se ocupa el proveedor.</span></li>
+      </ul></div>`},
+    {h:"Desventajas, y quién responde de qué", body:`
+      <div class="proscons"><ul class="cons">
+        <li><span><b>Poco control</b> sobre la infraestructura por parte de la empresa.</span></li>
+        <li><span><b>Riesgos de seguridad:</b> pueden acabar en hackeo si la gestión es deficiente.</span></li>
+        <li><span><b>Dependencia de la conexión a internet,</b> un problema cuando hay cortes eléctricos.</span></li>
+      </ul></div>
+      <p class="fact"><b>Caso real:</b> el Banco Santander informó de un «acceso no autorizado» a una base de datos con información de millones de clientes y trabajadores de España, Chile y Uruguay. Según el banco, no se vieron comprometidos los datos de transacciones ni las contraseñas de la banca online.</p>
+      <p>El proveedor responde de los equipos, las actualizaciones y el soporte. La empresa sigue respondiendo de gestionar bien sus datos y quién accede a ellos.</p>`,
+      more:["hack"]}
+  ],
+  challenges:[
+    {type:"sort", q:"¿Sol o tormenta? Clasifica cada tarjeta: ventaja o desventaja de la nube.", swipe:true,
+      bins:[{id:"d",label:"Desventaja",icon:"i-storm"},{id:"v",label:"Ventaja",icon:"i-sun"}],
+      cards:[{t:"Ahorro de costes",bin:"v"},
+             {t:"Poco control sobre la infraestructura",bin:"d"},
+             {t:"Actualizaciones automáticas del proveedor",bin:"v"},
+             {t:"Dependencia de la conexión a internet",bin:"d"},
+             {t:"Soporte al cliente 24/7",bin:"v"},
+             {t:"Riesgo de hackeo si la gestión es deficiente",bin:"d"}],
+      why:"Ventajas: ahorro, pago por uso, espacio ilimitado, equipos punteros, seguridad, soporte 24/7 y actualizaciones. Desventajas: poco control, riesgo de hackeo y dependencia de internet."},
+    {type:"mc", q:"¿Qué significa «tarificación por uso»?",
+      a:["Pagas solo por los recursos que usas","Pagas una cuota fija aunque no lo uses","Es gratis para siempre","Pagas por cada ordenador que compras"],
+      why:"Como la luz o el agua: si usas más, pagas más; si usas menos, pagas menos."},
+    {type:"mc", q:"Un corte eléctrico deja a tu empresa sin internet y nadie puede trabajar con la nube. ¿Qué desventaja estás sufriendo?",
+      a:["La dependencia de la conexión a internet","La tarificación por uso","Las actualizaciones automáticas","El almacenamiento ilimitado"],
+      why:"Sin conexión no hay nube: la dependencia de internet es una de sus desventajas."},
+    {type:"mc", q:"En un servicio en la nube, ¿quién se ocupa de las actualizaciones?",
+      a:["El proveedor, de forma automática","Cada usuario, una por una y a mano","Nadie: la nube nunca se actualiza","El fabricante de tu móvil"],
+      why:"Las actualizaciones automáticas son una ventaja: de ellas se ocupa el proveedor."},
+    {type:"mc", q:"Caso Banco Santander: «acceso no autorizado» a una base de datos con información de millones de clientes. ¿Qué riesgo de la nube ilustra?",
+      a:["Riesgos de seguridad: hackeo si la gestión es deficiente","El almacenamiento ilimitado","Los equipos de última gama","La tarificación por uso"],
+      why:"Es el ejemplo de la presentación para los riesgos de seguridad: una mala gestión puede acabar en hackeo."},
+    {type:"tf", q:"Al usar la nube, la empresa mantiene un control total sobre la infraestructura.", v:false,
+      why:"Una de las desventajas es precisamente el poco control sobre la infraestructura."}
+  ],
+  cromo:{title:"Escudo cloud", icon:"i-scale", text:"La nube ahorra costes y se actualiza sola, pero exige gestionar bien la seguridad."}
+}
+];
+
+/* ---------------- JEFE FINAL ---------------- */
+const BOSS = {
+  id:"boss", title:"Jefe final: el Hacker", short:"El Hacker", icon:"i-hacker", hp:8, time:20,
+  intro:"¡Un hacker intenta colarse en tu nube! Cada acierto refuerza tu defensa. Cada fallo, o si se acaba el tiempo, te quita una vida.",
+  pool:[
+    {type:"mc", q:"Gmail, Netflix, Dropbox y Spotify son ejemplos de…", a:["SaaS","PaaS","IaaS","Fog computing"], why:"Son software listo para usar: SaaS."},
+    {type:"mc", q:"¿En qué año puso Amazon en marcha AWS?", a:["2002","1960","1999","2009"], why:"Amazon Web Services nació en 2002."},
+    {type:"mc", q:"¿Dónde analizarías todo el Big Data de una empresa con Machine Learning complejo?", a:["En la nube (Cloud)","En el chip de un sensor (Edge)","En el router de casa","En un pendrive"], why:"El procesamiento masivo y el Big Data son cosa de la nube."},
+    {type:"mc", q:"El servidor de un parque eólico que gira los molinos en tiempo real y manda un informe diario a la nube es…", a:["Fog computing","Edge computing","SaaS","Un data center submarino"], why:"Es el ejemplo de Fog: intermediario local que decide y resume."},
+    {type:"mc", q:"IaaS significa…", a:["Infraestructura como Servicio","Internet como Servicio","Información a Servicio","Instalación automática de Software"], why:"IaaS = Infraestructura como Servicio: alquilas un servidor vacío."},
+    {type:"mc", q:"¿Qué es un data center?", a:["Un centro con miles de equipos que gestionan enormes cantidades de datos","Una app para guardar fotos","Un tipo de antena 5G","Un cable submarino"], why:"La nube vive en los data centers."},
+    {type:"mc", q:"¿Qué empresa ofreció en 1999 una aplicación a través de internet y arrancó el crecimiento del cloud?", a:["Salesforce","Netflix","Spotify","Nintendo"], why:"Salesforce, en 1999."},
+    {type:"mc", q:"¿Por qué es casi imposible perder tus archivos en la nube?", a:["Porque el proveedor guarda copias automáticas en diferentes lugares","Porque se imprimen cada noche","Porque se guardan también en tu móvil","Porque la nube nunca se estropea"], why:"Las copias automáticas en varios lugares protegen tus datos."},
+    {type:"mc", q:"La cámara de un coche que frena sola al ver un peatón funciona con…", a:["Edge computing","Cloud computing","PaaS","Streaming"], why:"Decisión crítica en tiempo real: Edge."},
+    {type:"mc", q:"¿En qué nivel de servicio pagas más por mantenimiento (+++)?", a:["IaaS","SaaS","PaaS","En todos por igual"], why:"IaaS: contratación −−−, mantenimiento +++."},
+    {type:"mc", q:"Juegas con GeForce NOW en el móvil. ¿Quién procesa los gráficos?", a:["Un servidor lejano en la nube","La batería del móvil","El router de tu casa","La tarjeta SIM"], why:"A ti solo te llega el vídeo del juego."},
+    {type:"mc", q:"¿Cuál de estas es una DESVENTAJA de la nube?", a:["Dependencia de la conexión a internet","Actualizaciones automáticas","Soporte 24/7","Ahorro de costes"], why:"Sin internet no hay nube."},
+    {type:"mc", q:"¿Qué ventaja tiene sumergir un data center en el agua?", a:["Disipa el calor y ahorra en refrigeración","Los peces vigilan los servidores","Ya no necesita conexión","El mantenimiento es más fácil"], why:"El agua refrigera los equipos. El mantenimiento, en cambio, se complica."},
+    {type:"mc", q:"En PaaS, el proveedor te da…", a:["El servidor funcionando para que tú crees el software","Solo el local vacío","El programa terminado y listo para usar","Un disco duro para la mochila"], why:"PaaS = servidor premontado; el software lo creas tú."},
+    {type:"mc", q:"La nube te permite acceder a tu información…", a:["Desde cualquier lugar o dispositivo con internet","Solo desde el ordenador de la oficina","Solo por la noche","Solo con cable de red"], why:"Cualquier lugar, cualquier dispositivo, siempre que haya internet."}
+  ]
+};
+/* =========================================================
+   MOTOR DEL JUEGO · parte 1 (estado, sonido, HUD, pantallas)
+   ========================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const icon = (id, cls = "") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const reduceMotion = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("misionNube." + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("misionNube." + k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
+};
+
+const MAX_LIVES = 5;
+const ALL = [...LEVELS, BOSS];
+const CLOUD_PATH = "M40 104h84a26 26 0 0 0 4-51.7A38 38 0 0 0 55.5 40 30 30 0 0 0 40 104z";
+
+let S = null;          // estado de la partida
+let P = null;          // estado del nivel en juego
+let keymap = {};       // atajos de teclado de la pantalla actual
+let timers = [];       // temporizadores activos (se limpian al cambiar de pantalla)
+
+function newState(name) {
+  return { name: name || "", lives: MAX_LIVES, score: 0, streak: 0, bestStreak: 0,
+    correct: 0, wrong: 0, unlocked: 1, stars: {}, cromos: [], mistakes: [] };
+}
+function later(fn, ms) { const t = setTimeout(fn, ms); timers.push(t); return t; }
+function clearTimers() { timers.forEach(clearTimeout); timers = []; if (window.__bossTick) { cancelAnimationFrame(window.__bossTick); window.__bossTick = null; } }
+
+/* ---------------- Sonido (sintetizado, sin archivos) ---------------- */
+const Sound = (() => {
+  let ctx = null, on = store.get("sound", true);
+  function ensure() {
+    if (!on) return null;
+    if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+  function tone(freq, dur, type = "sine", vol = 0.14, when = 0, slideTo = null) {
+    const c = ensure(); if (!c) return;
+    const t = c.currentTime + when, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  return {
+    get on() { return on; },
+    toggle() { on = !on; store.set("sound", on); if (on) this.click(); return on; },
+    click() { tone(660, .06, "triangle", .07); },
+    ok() { [523, 659, 784].forEach((f, i) => tone(f, .14, "triangle", .13, i * .07)); },
+    ko() { tone(233, .3, "sawtooth", .08, 0, 110); },
+    gain() { [660, 880, 1175].forEach((f, i) => tone(f, .12, "sine", .12, i * .06)); },
+    level() { [523, 659, 784, 1047].forEach((f, i) => tone(f, .18, "triangle", .13, i * .1)); tone(1047, .5, "sine", .09, .42); },
+    over() { [392, 330, 262, 196].forEach((f, i) => tone(f, .28, "triangle", .12, i * .2)); },
+    win() { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, .16, "triangle", .13, i * .1)); },
+    hit() { tone(170, .14, "square", .1, 0, 80); tone(900, .08, "triangle", .07, .03); },
+    tick() { tone(1250, .03, "square", .035); },
+    whoosh() { tone(260, .5, "sine", .05, 0, 1300); },
+    brake() { tone(900, .35, "sawtooth", .04, 0, 400); }
+  };
+})();
+
+/* ---------------- Mascota «Nubi» ---------------- */
+function nubi(mood = "", extra = "") {
+  return `<svg class="nubi ${mood} ${extra}" viewBox="0 0 160 120" aria-hidden="true">
+    <path class="body" d="${CLOUD_PATH}"/>
+    <circle class="eye" cx="66" cy="70" r="6.5"/><circle class="eye" cx="100" cy="70" r="6.5"/>
+    <circle cx="68.5" cy="67.5" r="2.2" fill="#fff"/><circle cx="102.5" cy="67.5" r="2.2" fill="#fff"/>
+    <ellipse class="cheek" cx="55" cy="83" rx="7" ry="4"/><ellipse class="cheek" cx="111" cy="83" rx="7" ry="4"/>
+    <path class="mouth m-happy" d="M73 84q10 10 20 0"/>
+    <path class="mouth m-sad" d="M73 93q10-9 20 0"/>
+    <ellipse class="mouth m-o" cx="83" cy="89" rx="5" ry="6"/>
+  </svg>`;
+}
+
+/* ---------------- Cielo animado ---------------- */
+function buildSky() {
+  const box = $("#puffs"); if (!box) return;
+  let html = "";
+  for (let i = 0; i < 7; i++) {
+    const w = 120 + Math.random() * 180, top = Math.random() * 85, dur = 70 + Math.random() * 80;
+    html += `<div class="puff" style="top:${top}%;width:${w}px;animation-duration:${dur}s;animation-delay:-${Math.random() * dur}s;opacity:${.35 + Math.random() * .45}">
+      <svg viewBox="10 0 150 110"><path d="${CLOUD_PATH}"/></svg></div>`;
+  }
+  box.innerHTML = html;
+}
+
+/* ---------------- HUD ---------------- */
+function renderHUD(change) {
+  const h = $("#hearts");
+  h.innerHTML = Array.from({ length: MAX_LIVES }, (_, i) => {
+    const off = i >= S.lives;
+    let anim = "";
+    if (change === "lose" && i === S.lives) anim = "break";
+    if (change === "gain" && i === S.lives - 1) anim = "gain";
+    return `<svg class="heart ${off ? "off" : ""} ${anim}" viewBox="0 0 24 24"><use href="#i-heart"/></svg>`;
+  }).join("");
+  h.setAttribute("aria-label", `Vidas: ${S.lives} de ${MAX_LIVES}`);
+  $("#score").textContent = S.score.toLocaleString("es-ES");
+  $("#streak").textContent = S.streak;
+  $("#streakPill").classList.toggle("hot", S.streak >= 3);
+  $("#btnSound").innerHTML = icon(Sound.on ? "i-sound" : "i-mute");
+}
+function hudMode(mode) {
+  // mode: "map" | "lesson" | "play" | "none"
+  $("#hud").hidden = mode === "none";
+  $("#btnNotes").hidden = mode === "play";
+}
+function announce(msg) { const l = $("#live"); l.textContent = ""; setTimeout(() => (l.textContent = msg), 30); }
+
+function popScore(text, anchor, bad = false) {
+  const r = anchor ? anchor.getBoundingClientRect() : { left: innerWidth / 2, width: 0, top: innerHeight / 2 };
+  const d = document.createElement("div");
+  d.className = "score-pop" + (bad ? " bad" : "");
+  d.textContent = text;
+  d.style.left = (r.left + r.width / 2) + "px";
+  d.style.top = Math.max(60, r.top - 10) + "px";
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 1000);
+}
+
+/* Acierto / fallo de un paso. pts = puntos base del paso */
+function scoreStep(ok, anchor, pts = 100, mistake) {
+  if (ok) {
+    S.correct++; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak);
+    const gained = pts + 20 * Math.min(S.streak - 1, 5);
+    S.score += gained;
+    popScore("+" + gained, anchor);
+    Sound.ok();
+    renderHUD();
+  } else {
+    S.wrong++; S.streak = 0;
+    if (P) P.lost++;
+    S.lives = Math.max(0, S.lives - 1);
+    if (mistake) S.mistakes.push(mistake);
+    popScore("−1 ♥", anchor, true);
+    Sound.ko();
+    renderHUD("lose");
+  }
+}
+
+/* ---------------- Cambio de pantalla ---------------- */
+function setView(html, mode = "play") {
+  clearTimers();
+  keymap = {};
+  hudMode(mode);
+  const v = $("#view");
+  v.style.animation = "none"; void v.offsetWidth; v.style.animation = "";
+  v.innerHTML = html;
+  window.scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" });
+  if (S) renderHUD();
+}
+
+/* ---------------- Portada ---------------- */
+function screenStart() {
+  const best = store.get("best", null);
+  const last = store.get("name", "");
+  setView(`
+    <section class="hero">
+      ${nubi("", "")}
+      <h1 class="logo">Misión Nube<small>UT3 · Sistemas en la nube</small></h1>
+      <p class="subject">Recorre los apuntes de la unidad, supera los retos de cada nivel y derrota al hacker final. Tienes <b>5 vidas</b> para toda la misión.</p>
+      <div class="card start-card">
+        <div class="field">
+          <label for="playerName">¿Cómo te llamas?</label>
+          <input id="playerName" type="text" maxlength="28" autocomplete="off" placeholder="Tu nombre para el diploma" value="${esc(last)}">
+        </div>
+        <div class="rules">
+          <div class="rule">${icon("i-heart")}<span><b>5 vidas</b> para toda la misión. Cada fallo resta una.</span></div>
+          <div class="rule">${icon("i-book")}<span>Antes de cada nivel, <b>lee los apuntes</b>: los retos salen de ahí.</span></div>
+          <div class="rule">${icon("i-star")}<span>¿Nivel <b>sin fallos</b>? Ganas 3 estrellas y <b>recuperas una vida</b>.</span></div>
+          <div class="rule">${icon("i-flame")}<span>Encadena aciertos: la <b>racha</b> multiplica tus puntos.</span></div>
+        </div>
+        <button class="btn big gold" id="btnGo" type="button">Empezar la misión</button>
+        ${best ? `<p class="best">Tu mejor puntuación en este navegador: <b>${Number(best.score).toLocaleString("es-ES")}</b> puntos${best.name ? ` (${esc(best.name)})` : ""}</p>` : ""}
+      </div>
+      <p class="best">Basado en la presentación «UT3 · Sistemas en la nube (Cloud)» de Digitalización aplicada a los sectores productivos · CIFP Tony Gallardo · Curso 2026/2027</p>
+    </section>`, "none");
+  const go = () => {
+    const name = $("#playerName").value.trim();
+    store.set("name", name);
+    S = newState(name);
+    Sound.gain();
+    screenMap();
+  };
+  $("#btnGo").addEventListener("click", go);
+  $("#playerName").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+}
+
+/* ---------------- Mapa ---------------- */
+const STOPS = [[28, 88], [70, 73], [30, 57], [70, 41], [30, 25], [62, 9]];
+const TRAIL = "M157 757 C 260 757 392 700 392 628 S 168 560 168 490 S 392 420 392 353 S 168 285 168 215 S 347 150 347 77";
+
+function starsHTML(n, cls = "stars3") {
+  return `<span class="${cls}">${[1, 2, 3].map(i => `<svg viewBox="0 0 24 24" class="${i <= n ? "on" : "off"}"><use href="#i-star"/></svg>`).join("")}</span>`;
+}
+function screenMap() {
+  const done = ALL.filter((_, i) => i < S.unlocked - 1).length;
+  const cur = ALL[S.unlocked - 1];
+  const tip = S.unlocked > ALL.length ? "¡Misión cumplida!"
+    : cur === BOSS ? "¡Último paso! El hacker te espera en lo más alto de la nube."
+    : S.unlocked === 1 ? "¡Hola! Soy Nubi. Toca el nivel 1 para empezar: primero te enseño los apuntes y luego vienen los retos."
+    : `Siguiente parada: <b>Nivel ${S.unlocked} · ${cur.title}</b>. Puedes repasar los niveles superados tocándolos.`;
+  const stops = ALL.map((L, i) => {
+    const [x, y] = STOPS[i];
+    const state = i < S.unlocked - 1 ? "done" : i === S.unlocked - 1 ? "current" : "locked";
+    const isBoss = L === BOSS;
+    return `<button class="stop ${state} ${isBoss ? "boss" : ""}" style="left:${x}%;top:${y}%" data-i="${i}" type="button"
+        aria-label="${isBoss ? "Jefe final" : "Nivel " + (i + 1)}: ${esc(L.title)}${state === "locked" ? " (bloqueado)" : state === "done" ? " (superado)" : ""}">
+      <span class="disc">${state === "locked" ? icon("i-lock") : icon(L.icon)}</span>
+      <span class="lbl"><small>${isBoss ? "Jefe final" : "Nivel " + (i + 1)}</small>${esc(L.short)}</span>
+      ${state === "done" && !isBoss ? starsHTML(S.stars[L.id] || 0) : ""}
+    </button>`;
+  }).join("");
+  setView(`
+    <div class="map-head">
+      <div><p class="eyebrow">UT3 · Sistemas en la nube</p><h2>Mapa de la misión</h2></div>
+    </div>
+    <div class="guide">${nubi("", "")}<div class="bubble" id="tip">${tip}</div></div>
+    <div class="map" role="group" aria-label="Mapa de niveles">
+      <div class="ground"></div>
+      <div style="position:absolute;left:0;right:0;top:36%;height:30%;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--cloud) 45%,transparent),transparent);pointer-events:none"></div>
+      <span class="zone" style="bottom:3%">Edge · suelo</span>
+      <span class="zone" style="top:44%">Fog · niebla</span>
+      <span class="zone" style="top:2%">Cloud · nube</span>
+      <svg class="trail" viewBox="0 0 560 860" preserveAspectRatio="none" aria-hidden="true">
+        <path class="road" d="${TRAIL}" vector-effect="non-scaling-stroke"/><path class="dash" d="${TRAIL}" vector-effect="non-scaling-stroke"/>
+        <path class="done" d="${TRAIL}" vector-effect="non-scaling-stroke" pathLength="100" stroke-dasharray="${(done / (ALL.length - 1)) * 100} 100"/>
+      </svg>
+      ${stops}
+    </div>`, "map");
+  $(".guide .nubi").classList.add("happy");
+  const curStop = $(".stop.current");
+  if (curStop) requestAnimationFrame(() => curStop.scrollIntoView({ block: "nearest", behavior: reduceMotion() ? "auto" : "smooth" }));
+  $$(".stop").forEach(b => b.addEventListener("click", () => {
+    const i = +b.dataset.i;
+    Sound.click();
+    if (i > S.unlocked - 1) {
+      b.animate([{ transform: "translate(-50%,-50%)" }, { transform: "translate(calc(-50% - 6px),-50%)" }, { transform: "translate(calc(-50% + 6px),-50%)" }, { transform: "translate(-50%,-50%)" }], { duration: 300 });
+      $("#tip").innerHTML = "Ese nivel aún está bloqueado. ¡Supera antes el anterior!";
+      return;
+    }
+    if (ALL[i] === BOSS) return screenBossIntro();
+    screenLesson(i, i < S.unlocked - 1);
+  }));
+}
+
+/* ---------------- Apuntes (lección) ---------------- */
+function moreLinks(card) {
+  if (!card.more) return "";
+  return `<div class="row">${card.more.map(k => `<a class="btn ghost" style="font-size:15px;padding:8px 14px" href="${MORE[k].href}" target="_blank" rel="noopener">${esc(MORE[k].txt)} ↗</a>`).join("")}</div>`;
+}
+function screenLesson(idx, review = false, page = 0) {
+  const L = LEVELS[idx], card = L.lesson[page], last = page === L.lesson.length - 1;
+  setView(`
+    <div class="lesson-top">
+      <div><p class="eyebrow">Nivel ${idx + 1} · Apuntes ${page + 1}/${L.lesson.length}</p><h2>${esc(L.title)}</h2></div>
+      <button class="btn ghost small" id="toMap" type="button">${icon("i-map")}Mapa</button>
+    </div>
+    ${page === 0 ? `<div class="guide">${nubi("", "")}<div class="bubble">${esc(L.intro)} ${review ? "Estás repasando: aquí no se pierden vidas." : "Lee con calma: <b>en los retos te lo voy a preguntar</b>."}</div></div>` : ""}
+    <article class="card note">
+      <h3>${esc(card.h)}</h3>
+      ${card.body}
+      ${moreLinks(card)}
+    </article>
+    <div class="dots" aria-hidden="true">${L.lesson.map((_, i) => `<i class="${i === page ? "on" : ""}"></i>`).join("")}</div>
+    <div class="nav-row">
+      <button class="btn ghost" id="prev" type="button" ${page === 0 ? "disabled" : ""}>← Anterior</button>
+      ${last
+        ? (review ? `<button class="btn" id="next" type="button">Volver al mapa</button>`
+                  : `<button class="btn gold" id="next" type="button">¡A por los retos! →</button>`)
+        : `<button class="btn" id="next" type="button">Siguiente →</button>`}
+    </div>`, "lesson");
+  const prev = () => { if (page > 0) { Sound.click(); screenLesson(idx, review, page - 1); } };
+  const next = () => {
+    Sound.click();
+    if (!last) return screenLesson(idx, review, page + 1);
+    if (review) return screenMap();
+    startLevel(idx);
+  };
+  $("#toMap").addEventListener("click", () => { Sound.click(); screenMap(); });
+  $("#prev").addEventListener("click", prev);
+  $("#next").addEventListener("click", next);
+  keymap = { ArrowLeft: prev, ArrowRight: next };
+}
+
+/* ---------------- Cuaderno de apuntes (overlay) ---------------- */
+function openNotes() {
+  const reached = S ? Math.min(S.unlocked, LEVELS.length) : 1;
+  $("#notesBody").innerHTML = LEVELS.map((L, i) => i < reached
+    ? `<section><p class="eyebrow">Nivel ${i + 1}</p><h3>${esc(L.title)}</h3>${L.lesson.map(c => `<div class="note"><h4 style="margin:0;font-family:var(--f-display);font-size:20px;color:var(--brand)">${esc(c.h)}</h4>${c.body}${moreLinks(c)}</div>`).join("")}</section>`
+    : `<section><p class="eyebrow">Nivel ${i + 1}</p><h3>${esc(L.title)}</h3><p class="locked-note">Se desbloquea al llegar a este nivel.</p></section>`).join("");
+  $("#notes").hidden = false;
+  $("#btnCloseNotes").focus();
+}
+function closeNotes() { $("#notes").hidden = true; }
+/* =========================================================
+   MOTOR DEL JUEGO · parte 2 (retos)
+   ========================================================= */
+const KIND = { mc: "Test", fill: "Completa la frase", tf: "¿Verdadero o falso?", order: "Línea del tiempo",
+  match: "Empareja", sort: "Clasifica", brake: "Mini-juego · ¡Frena a tiempo!", route: "Mini-juego · Enruta los datos" };
+const OK_T = ["¡Correcto!", "¡Bien visto!", "¡Exacto!", "¡Eso es!", "¡Perfecto!"];
+const KO_T = ["¡Ups! Pierdes una vida", "Casi… pierdes una vida", "¡Vaya! Una vida menos"];
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const stripTags = s => String(s).replace(/<[^>]+>/g, "");
+
+function startLevel(idx) {
+  P = { idx, L: LEVELS[idx], i: 0, lost: 0, list: LEVELS[idx].challenges };
+  renderChallenge();
+}
+function renderChallenge() {
+  const c = P.list[P.i];
+  ({ mc: rMC, fill: rFill, tf: rTF, order: rOrder, match: rMatch, sort: rSort, brake: rBrake, route: rRoute })[c.type](c);
+}
+function next() {
+  P.i++;
+  if (P.i >= P.list.length) return levelComplete();
+  renderChallenge();
+}
+function frame(inner) {
+  const n = P.list.length;
+  return `<div class="play-top"><span class="lvl">Nivel ${P.idx + 1}</span>
+      <div class="progress" role="progressbar" aria-label="Progreso del nivel" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${P.i}"><i style="width:${(P.i / n) * 100}%"></i></div>
+      <span class="counter">${P.i + 1}/${n}</span></div>
+    <article class="card q" id="qcard">${inner}</article><div id="fb"></div>`;
+}
+function mistake(q, a, why) { return { lvl: P.L === BOSS ? "Jefe final" : `Nivel ${P.idx + 1} · ${P.L.short}`, q, a, why }; }
+
+/* Panel de explicación tras cada reto */
+function feedback(ok, why, opts = {}) {
+  const fb = $("#fb");
+  const dead = S.lives <= 0;
+  const bar = $(".progress i");
+  if (bar && P.list) bar.style.width = ((P.i + 1) / P.list.length) * 100 + "%";
+  const title = opts.title || (ok ? pick(OK_T) : pick(KO_T));
+  fb.innerHTML = `<div class="feedback ${ok ? "ok" : "ko"}">${nubi(ok ? "happy" : "sad")}
+    <div class="fb-body"><h4>${title}</h4><p class="why">${why}</p>
+    <button class="btn ${dead ? "" : "gold"}" id="cont" type="button">${dead ? "Ver resultado" : (opts.nextLabel || "Continuar →")}</button></div></div>`;
+  announce(title + ". " + stripTags(why));
+  let used = false;
+  const go = () => {
+    if (used) return; used = true;
+    Sound.click();
+    if (S.lives <= 0) return screenGameOver();
+    (opts.onNext || next)();
+  };
+  $("#cont").addEventListener("click", go);
+  keymap = { Enter: go, " ": go };
+  $("#cont").focus({ preventScroll: true });
+  fb.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "nearest" });
+}
+function finishMulti(errs, c) {
+  $$("#qcard button").forEach(b => (b.disabled = true));
+  const ok = errs === 0;
+  const title = ok ? pick(OK_T) : S.lives <= 0 ? "¡Te has quedado sin vidas!" : `Reto completado con ${errs} ${errs === 1 ? "fallo" : "fallos"}`;
+  feedback(ok, esc(c.why), { title });
+}
+function restartAnim(elm, cls) { elm.classList.remove(cls); void elm.getBoundingClientRect(); elm.classList.add(cls); }
+
+/* ---------- Test y Completa la frase ---------- */
+function rMC(c, fill = false) {
+  const opts = shuffle(c.a.map((t, k) => ({ t, ok: k === 0 })));
+  const good = opts.find(o => o.ok);
+  const qHTML = fill ? esc(c.q).replace("___", `<span class="blank" id="blank">?</span>`) : esc(c.q);
+  setView(frame(`<span class="kind">${KIND[c.type]}</span><h3>${qHTML}</h3>
+    <div class="${fill ? "chips" : "opts"}" id="opts">${opts.map((o, k) =>
+      `<button class="opt" type="button">${fill ? "" : `<span class="key">${k + 1}</span>`}<span>${esc(o.t)}</span></button>`).join("")}</div>`));
+  const box = $("#opts"), btns = $$("#opts .opt");
+  const choose = k => {
+    if (box.classList.contains("locked")) return;
+    box.classList.add("locked");
+    btns.forEach(b => (b.disabled = true));
+    const o = opts[k], b = btns[k];
+    btns[opts.indexOf(good)].classList.add("right");
+    if (fill) { const bl = $("#blank"); bl.textContent = good.t; bl.classList.add("filled"); }
+    if (!o.ok) b.classList.add("wrong");
+    scoreStep(o.ok, b, 100, o.ok ? null : mistake(c.q.replace("___", "…"), good.t, c.why));
+    feedback(o.ok, (o.ok ? "" : `La respuesta correcta es <b>${esc(good.t)}</b>. `) + esc(c.why));
+  };
+  btns.forEach((b, k) => b.addEventListener("click", () => choose(k)));
+  opts.forEach((_, k) => (keymap[String(k + 1)] = () => choose(k)));
+}
+function rFill(c) { rMC(c, true); }
+
+/* ---------- Verdadero o falso ---------- */
+function rTF(c) {
+  setView(frame(`<span class="kind">${KIND.tf}</span><h3>${esc(c.q)}</h3>
+    <div class="tf" id="opts">
+      <button class="opt" type="button">${icon("i-true")}Verdadero</button>
+      <button class="opt" type="button">${icon("i-false")}Falso</button>
+    </div><p class="swipehint">Atajos de teclado: V o F.</p>`));
+  const btns = $$("#opts .opt");
+  let locked = false;
+  const choose = v => {
+    if (locked) return; locked = true;
+    btns.forEach(b => (b.disabled = true));
+    const ok = v === c.v, b = btns[v ? 0 : 1];
+    btns[c.v ? 0 : 1].classList.add("right");
+    if (!ok) b.classList.add("wrong");
+    $("#opts").classList.add("locked");
+    const truth = c.v ? "Verdadero" : "Falso";
+    scoreStep(ok, b, 100, ok ? null : mistake(c.q, truth, c.why));
+    feedback(ok, `<b>${truth}.</b> ${esc(c.why)}`);
+  };
+  btns[0].addEventListener("click", () => choose(true));
+  btns[1].addEventListener("click", () => choose(false));
+  keymap = { v: () => choose(true), f: () => choose(false), 1: () => choose(true), 2: () => choose(false) };
+}
+
+/* ---------- Ordenar (línea del tiempo) ---------- */
+function rOrder(c) {
+  const items = c.items.map((it, k) => ({ ...it, k }));
+  setView(frame(`<span class="kind">${KIND.order}</span><h3>${esc(c.q)}</h3>
+    <div class="slots" id="slots">${items.map((_, k) => `<div class="slot" data-k="${k}"><b>${k + 1}.</b><span>Toca el hito que va aquí…</span></div>`).join("")}</div>
+    <div class="pool" id="pool">${shuffle(items).map(it => `<button class="opt" type="button" data-k="${it.k}">${esc(it.t)}</button>`).join("")}</div>`));
+  let want = 0, errs = 0;
+  $$("#pool .opt").forEach(b => b.addEventListener("click", () => {
+    if (S.lives <= 0) return;
+    const k = +b.dataset.k;
+    if (k === want) {
+      const slot = $(`#slots .slot[data-k="${k}"]`);
+      slot.classList.add("filled");
+      slot.innerHTML = `<b>${esc(items[k].tag)}</b><span>${esc(items[k].t)}</span>`;
+      b.remove();
+      scoreStep(true, slot, 60);
+      want++;
+      if (want === items.length) finishMulti(errs, c);
+    } else {
+      errs++;
+      restartAnim(b, "wrong");
+      later(() => b.classList.remove("wrong"), 650);
+      scoreStep(false, b, 0, errs === 1 ? mistake(c.q, items.map(i => `${i.tag}: ${i.t}`).join(" → "), c.why) : null);
+      if (S.lives <= 0) finishMulti(errs, c);
+    }
+  }));
+}
+
+/* ---------- Emparejar ---------- */
+function rMatch(c) {
+  const left = c.pairs.map((p, k) => ({ t: p[0], k }));
+  const right = shuffle(c.pairs.map((p, k) => ({ t: p[1], k })));
+  setView(frame(`<span class="kind">${KIND.match}</span><h3>${esc(c.q)}</h3>
+    <p class="swipehint">Toca un elemento de cada columna para unirlos.</p>
+    <div class="match">
+      <div class="col">${left.map(o => `<button class="opt" type="button" data-k="${o.k}" data-side="L">${esc(o.t)}</button>`).join("")}</div>
+      <div class="col">${right.map(o => `<button class="opt" type="button" data-k="${o.k}" data-side="R">${esc(o.t)}</button>`).join("")}</div>
+    </div>`));
+  let sel = null, matched = 0, errs = 0;
+  $$(".match .opt").forEach(b => b.addEventListener("click", () => {
+    if (b.classList.contains("paired") || S.lives <= 0) return;
+    if (!sel || sel.dataset.side === b.dataset.side) {
+      if (sel) sel.classList.remove("sel");
+      sel = b; b.classList.add("sel"); Sound.click();
+      return;
+    }
+    const a = sel; sel = null; a.classList.remove("sel");
+    if (a.dataset.k === b.dataset.k) {
+      [a, b].forEach(x => { x.classList.add("paired", "pair-" + (+x.dataset.k % 4)); x.disabled = true; });
+      matched++;
+      scoreStep(true, b, 60);
+      if (matched === c.pairs.length) finishMulti(errs, c);
+    } else {
+      errs++;
+      [a, b].forEach(x => restartAnim(x, "wrong"));
+      later(() => [a, b].forEach(x => x.classList.remove("wrong")), 650);
+      scoreStep(false, b, 0, errs === 1 ? mistake(c.q, c.pairs.map(p => `${p[0]} = ${p[1]}`).join(" · "), c.why) : null);
+      if (S.lives <= 0) finishMulti(errs, c);
+    }
+  }));
+}
+
+/* ---------- Clasificar (con deslizamiento si hay 2 cajas) ---------- */
+function rSort(c) {
+  const cards = shuffle(c.cards), bins = c.bins;
+  setView(frame(`<span class="kind">${KIND.sort}</span><h3>${esc(c.q)}</h3>
+    <div class="sorter">
+      <span class="counter" id="cnt"></span>
+      <div class="deck" id="deck"></div>
+      ${c.swipe ? `<p class="swipehint">Desliza la tarjeta hacia un lado o toca un botón. Con teclado: ← y →.</p>` : ""}
+      <div class="bins" id="bins">${bins.map(b => `<button class="bin" type="button">${b.icon ? icon(b.icon) : ""}<span>${esc(b.label)}</span>${b.sub ? `<small>${esc(b.sub)}</small>` : ""}</button>`).join("")}</div>
+    </div>`));
+  const deck = $("#deck"), binBtns = $$("#bins .bin");
+  let i = 0, errs = 0, busy = false;
+  const flyFor = id => bins.length === 2 ? (bins[0].id === id ? "fly-l" : "fly-r") : "fly-u";
+  function draw() {
+    const pair = cards.slice(i, i + 2);
+    deck.innerHTML = pair.map((cd, j) => `<div class="scard ${j === 1 ? "behind" : ""}">${esc(cd.t)}</div>`).reverse().join("");
+    $("#cnt").textContent = `Tarjeta ${i + 1} de ${cards.length}`;
+    if (c.swipe) enableSwipe(deck.lastElementChild);
+  }
+  function advance() { i++; busy = false; if (i >= cards.length) finishMulti(errs, c); else draw(); }
+  function choose(k) {
+    if (busy || i >= cards.length || S.lives <= 0) return;
+    busy = true;
+    const cd = cards[i], top = deck.lastElementChild, btn = binBtns[k];
+    const ok = bins[k].id === cd.bin;
+    if (ok) {
+      restartAnim(btn, "flash-ok"); later(() => btn.classList.remove("flash-ok"), 450);
+      top.classList.add(flyFor(cd.bin));
+      scoreStep(true, btn, 60);
+      later(advance, 380);
+    } else {
+      errs++;
+      restartAnim(btn, "flash-bad"); later(() => btn.classList.remove("flash-bad"), 550);
+      const good = bins.find(b => b.id === cd.bin);
+      top.classList.add("bad");
+      top.innerHTML = `<span>${esc(cd.t)}<small style="display:block;margin-top:8px;color:var(--bad);font-size:15px">Va en: ${esc(good.label)}</small></span>`;
+      scoreStep(false, btn, 0, mistake(cd.t, good.label, c.why));
+      if (S.lives <= 0) { busy = false; return finishMulti(errs, c); }
+      later(() => { top.classList.remove("bad"); top.classList.add(flyFor(cd.bin)); }, 1300);
+      later(advance, 1700);
+    }
+  }
+  function enableSwipe(card) {
+    let x0 = null, dx = 0;
+    card.addEventListener("pointerdown", e => { if (busy) return; x0 = e.clientX; dx = 0; card.setPointerCapture(e.pointerId); card.style.transition = "none"; });
+    card.addEventListener("pointermove", e => { if (x0 === null) return; dx = e.clientX - x0; card.style.transform = `translateX(${dx}px) rotate(${dx / 16}deg)`; });
+    const end = () => {
+      if (x0 === null) return;
+      x0 = null; card.style.transition = "";
+      if (Math.abs(dx) > 70) choose(dx < 0 ? 0 : 1);
+      card.style.transform = "";
+    };
+    card.addEventListener("pointerup", end);
+    card.addEventListener("pointercancel", end);
+  }
+  binBtns.forEach((b, k) => b.addEventListener("click", () => choose(k)));
+  bins.forEach((_, k) => (keymap[String(k + 1)] = () => choose(k)));
+  if (bins.length === 2) { keymap.ArrowLeft = () => choose(0); keymap.ArrowRight = () => choose(1); }
+  draw();
+}
+
+/* ---------- Mini-juego: ¡Frena a tiempo! (Edge) ---------- */
+function brakeSVG() {
+  const stripes = [0, 1, 2, 3, 4].map(n => `<rect x="${472 + n * 9}" y="140" width="5" height="80" fill="#EEF2F8" opacity=".9"/>`).join("");
+  return `<svg viewBox="0 0 640 240" role="img" aria-label="Un coche se acerca a un paso de peatones mientras cruza una persona">
+    <rect width="640" height="240" fill="var(--surface-2)"/>
+    <g transform="translate(40 8) scale(.62)"><path d="${CLOUD_PATH}" fill="var(--c-cloud)" opacity=".9"/></g>
+    <text class="subtxt" x="84" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink-2)" font-family="var(--f-body)">Data center · 1.000 km</text>
+    <g transform="translate(305 34)"><rect width="50" height="44" rx="4" fill="var(--c-fog)"/><rect x="8" y="8" width="10" height="8" fill="var(--surface)"/><rect x="30" y="8" width="10" height="8" fill="var(--surface)"/><rect x="8" y="24" width="10" height="8" fill="var(--surface)"/><rect x="30" y="24" width="10" height="8" fill="var(--surface)"/><path d="M25 0v-14" stroke="var(--c-fog)" stroke-width="3"/><circle cx="25" cy="-16" r="4" fill="var(--c-fog)"/></g>
+    <text class="subtxt" x="330" y="100" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink-2)" font-family="var(--f-body)">Servidor local (Fog)</text>
+    <rect x="0" y="136" width="640" height="88" fill="#3A4458"/>
+    <path d="M0 180h640" stroke="#E9C46A" stroke-width="3" stroke-dasharray="22 16"/>
+    ${stripes}
+    <g id="ped" style="transition:transform .6s ease">
+      <g transform="translate(494 118)">
+        <circle cx="0" cy="0" r="7" fill="#F2C29B"/><path d="M0 7v20M0 13l-9 8M0 13l9 6M0 27l-7 13M0 27l7 13" stroke="#1F3B73" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <text id="uf" x="512" y="104" font-size="15" font-weight="800" fill="var(--bad)" font-family="var(--f-display)" opacity="0">¡Uf!</text>
+    </g>
+    <g id="car" style="transition:transform 1.2s cubic-bezier(.2,.7,.3,1)">
+      <path d="M12 196v-16c0-5 3-8 8-9l20-3 16-15c3-3 6-4 10-4h28c4 0 7 2 9 5l12 15c10 1 16 5 16 12v15z" fill="#E5484D"/>
+      <path d="M58 166l12-12h22l10 12z" fill="#CFE6FF"/>
+      <circle cx="98" cy="160" r="3.5" fill="#1B1030"/>
+      <rect x="62" y="176" width="10" height="10" rx="2" fill="var(--c-edge)"/>
+      <circle cx="40" cy="198" r="10" fill="#15171C"/><circle cx="40" cy="198" r="4" fill="#9AA3B2"/>
+      <circle cx="112" cy="198" r="10" fill="#15171C"/><circle cx="112" cy="198" r="4" fill="#9AA3B2"/>
+      <path d="M130 180h6" stroke="#FFE08A" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <circle id="pkt" r="7" fill="var(--accent)" stroke="#fff" stroke-width="2" opacity="0" style="transition:transform .7s ease-in-out, opacity .2s"/>
+  </svg>`;
+}
+function rBrake(c) {
+  setView(frame(`<span class="kind">${KIND.brake}</span><h3>${esc(c.q)}</h3>
+    <div class="scene">${brakeSVG()}<span class="freeze" id="freeze" hidden>‖ Tiempo congelado</span><span class="readout" id="readout" hidden></span></div>
+    <div class="layerbtns" id="bins" hidden>
+      <button class="bin l-cloud" type="button">${icon("i-cloud")}<b>Nube</b><small>data center a 1.000 km</small></button>
+      <button class="bin l-fog" type="button">${icon("i-fog")}<b>Fog</b><small>servidor de la red local</small></button>
+      <button class="bin l-edge" type="button">${icon("i-chip")}<b>Edge</b><small>chip del propio coche</small></button>
+    </div>
+    <p class="swipehint">Los tiempos de la simulación son orientativos, para comparar.</p>`));
+  const car = $("#car"), pkt = $("#pkt"), ped = $("#ped");
+  const setCar = (x, dur) => { car.style.transitionDuration = dur + "s"; car.style.transform = `translateX(${x}px)`; };
+  const setPkt = (x, y, dur = .7) => { pkt.style.transitionDuration = `${dur}s, .2s`; pkt.style.transform = `translate(${x}px,${y}px)`; };
+  pkt.style.transition = "none"; pkt.style.transform = "translate(288px,160px)";
+  requestAnimationFrame(() => requestAnimationFrame(() => { pkt.style.transition = ""; setCar(190, 1.2); }));
+  later(() => { $("#freeze").hidden = false; $("#bins").hidden = false; Sound.click(); }, 1250);
+  const plans = {
+    cloud: { stop: 470, carDur: 2.6, path: [[84, 60, 1.1], [578, 160, 1.1]], lat: "Latencia ≈ 1 s (ida y vuelta a la nube)" },
+    fog: { stop: 400, carDur: 1.9, path: [[330, 60, .7], [508, 160, .7]], lat: "Latencia ≈ 0,1 s + depende de la red" },
+    edge: { stop: 330, carDur: .9, path: [[256, 181, .25]], lat: "Latencia ≈ 0,01 s (en el propio coche)" }
+  };
+  let done = false;
+  const choose = layer => {
+    if (done) return; done = true;
+    $$("#bins .bin").forEach(b => (b.disabled = true));
+    $("#freeze").hidden = true;
+    const p = plans[layer];
+    Sound.whoosh();
+    pkt.style.opacity = "1";
+    let t = 0;
+    p.path.forEach(([x, y, d]) => { later(() => setPkt(x, y, d), t * 1000); t += d; });
+    later(() => (pkt.style.opacity = "0"), t * 1000 + 100);
+    setCar(p.stop, p.carDur);
+    const ro = $("#readout"); ro.hidden = false; ro.textContent = p.lat;
+    later(() => Sound.brake(), (p.carDur - .4) * 1000);
+    const ok = layer === "edge";
+    later(() => {
+      if (ok) ped.style.transform = "translateY(46px)";
+      else { ped.style.transform = "translateY(-26px)"; $("#uf").setAttribute("opacity", "1"); }
+    }, p.carDur * 1000 - 200);
+    later(() => {
+      scoreStep(ok, $("#bins"), 100, ok ? null : mistake("¿Dónde procesa el coche la imagen para frenar ante un peatón?", "Edge: en el chip del propio coche", c.why));
+      feedback(ok, (ok ? "¡Frenazo a tiempo! " : "¡Frenada tardía! Por suerte, el peatón dio un salto atrás. ") + esc(c.why));
+    }, p.carDur * 1000 + 250);
+  };
+  $$("#bins .bin").forEach((b, k) => b.addEventListener("click", () => choose(["cloud", "fog", "edge"][k])));
+  keymap = { 1: () => !$("#bins").hidden && choose("cloud"), 2: () => !$("#bins").hidden && choose("fog"), 3: () => !$("#bins").hidden && choose("edge") };
+}
+
+/* ---------- Mini-juego: Enruta los datos (Cloud / Fog / Edge) ---------- */
+function routeSVG() {
+  const band = (id, y, color, title, sub) => `<g id="band-${id}">
+      <rect x="0" y="${y}" width="640" height="66" fill="${color}" opacity=".14" class="bandbg"/>
+      <text x="16" y="${y + 30}" font-size="24" font-weight="800" fill="${color}" font-family="var(--f-display)">${title}</text>
+      <text class="subtxt" x="16" y="${y + 53}" font-size="15" fill="var(--ink-2)" font-family="var(--f-body)">${sub}</text></g>`;
+  return `<svg viewBox="0 0 640 200" role="img" aria-label="Tres capas: Cloud arriba, Fog en medio y Edge abajo">
+    <rect width="640" height="200" fill="var(--surface-2)"/>
+    ${band("cloud", 0, "var(--c-cloud)", "CLOUD", "Centros de datos lejanos · mucha potencia · alta latencia")}
+    ${band("fog", 67, "var(--c-fog)", "FOG", "Red local (LAN): routers, gateways, servidores locales")}
+    ${band("edge", 134, "var(--c-edge)", "EDGE", "El propio dispositivo · decisión inmediata")}
+    <g transform="translate(538 4) scale(.52)"><path d="${CLOUD_PATH}" fill="var(--c-cloud)"/></g>
+    <g transform="translate(560 80)"><rect width="40" height="34" rx="4" fill="var(--c-fog)"/><circle cx="12" cy="17" r="3" fill="var(--surface)"/><circle cx="28" cy="17" r="3" fill="var(--surface)"/></g>
+    <g transform="translate(566 146)"><rect width="28" height="40" rx="5" fill="var(--c-edge)"/><rect x="5" y="6" width="18" height="22" rx="2" fill="var(--surface)"/></g>
+    <circle id="rpkt" cx="0" cy="0" r="9" fill="var(--accent)" stroke="#fff" stroke-width="2" style="transition:transform .6s cubic-bezier(.5,.05,.3,1)" transform="translate(520 190)"/>
+  </svg>`;
+}
+function rRoute(c) {
+  const items = shuffle(c.items);
+  const Y = { cloud: 33, fog: 100, edge: 167 }, NAME = { cloud: "Cloud", fog: "Fog", edge: "Edge" };
+  setView(frame(`<span class="kind">${KIND.route}</span><h3>${esc(c.q)}</h3>
+    <div class="sorter"><span class="counter" id="cnt"></span><div class="deck" id="deck" style="height:120px"></div></div>
+    <div class="scene">${routeSVG()}</div>
+    <div class="layerbtns" id="bins">
+      <button class="bin l-cloud" type="button">${icon("i-cloud")}<b>Cloud</b></button>
+      <button class="bin l-fog" type="button">${icon("i-fog")}<b>Fog</b></button>
+      <button class="bin l-edge" type="button">${icon("i-chip")}<b>Edge</b></button>
+    </div>`));
+  const deck = $("#deck"), pkt = $("#rpkt"), binBtns = $$("#bins .bin");
+  let i = 0, errs = 0, busy = false;
+  const movePkt = y => { pkt.style.transform = `translate(520px,${y}px)`; };
+  function draw() {
+    deck.innerHTML = `<div class="scard">${esc(items[i].t)}</div>`;
+    $("#cnt").textContent = `Tarea ${i + 1} de ${items.length}`;
+    pkt.style.transition = "none"; movePkt(190); void pkt.getBoundingClientRect(); pkt.style.transition = "";
+  }
+  function flash(layer, ok) {
+    const bg = $(`#band-${layer} .bandbg`);
+    bg.setAttribute("opacity", ".45"); bg.setAttribute("fill", ok ? "var(--ok)" : "var(--bad)");
+    later(() => { bg.setAttribute("opacity", ".14"); bg.setAttribute("fill", `var(--c-${layer})`); }, 900);
+  }
+  function choose(layer, k) {
+    if (busy || S.lives <= 0) return;
+    busy = true;
+    const it = items[i], ok = it.layer === layer;
+    Sound.whoosh();
+    movePkt(Y[layer]);
+    later(() => {
+      flash(layer, ok);
+      if (ok) { scoreStep(true, binBtns[k], 60); $(".scard", deck).classList.add("fly-u"); }
+      else {
+        errs++;
+        flash(it.layer, true);
+        const top = $(".scard", deck); top.classList.add("bad");
+        top.innerHTML = `<span>${esc(it.t)}<small style="display:block;margin-top:8px;color:var(--bad);font-size:15px">Va en: ${NAME[it.layer]}</small></span>`;
+        scoreStep(false, binBtns[k], 0, mistake(it.t, NAME[it.layer], c.why));
+        if (S.lives <= 0) return finishMulti(errs, c);
+      }
+      later(() => { i++; busy = false; if (i >= items.length) finishMulti(errs, c); else draw(); }, ok ? 650 : 1700);
+    }, 620);
+  }
+  ["cloud", "fog", "edge"].forEach((l, k) => { binBtns[k].addEventListener("click", () => choose(l, k)); keymap[String(k + 1)] = () => choose(l, k); });
+  draw();
+}
+/* =========================================================
+   MOTOR DEL JUEGO · parte 3 (fin de nivel, jefe final, finales)
+   ========================================================= */
+function cromoHTML(L, i, locked = false) {
+  return `<div class="cromo ${locked ? "lockedc" : ""}">
+    <span class="n">Cromo ${i + 1}/${LEVELS.length}</span>
+    <div class="art">${icon(locked ? "i-lock" : L.cromo.icon)}</div>
+    <h4>${locked ? "Sin conseguir" : esc(L.cromo.title)}</h4>
+    <p>${locked ? "Supera este nivel para conseguirlo." : esc(L.cromo.text)}</p></div>`;
+}
+function stat(value, label) { return `<div class="stat"><b>${value}</b><span>${label}</span></div>`; }
+function totalStars() { return LEVELS.reduce((n, L) => n + (S.stars[L.id] || 0), 0); }
+function saveBest() {
+  const best = store.get("best", null);
+  if (!best || S.score > best.score) store.set("best", { score: S.score, name: S.name });
+}
+
+function levelComplete() {
+  const L = P.L, lost = P.lost;
+  const stars = lost === 0 ? 3 : lost === 1 ? 2 : 1;
+  S.stars[L.id] = Math.max(S.stars[L.id] || 0, stars);
+  let bonusLife = false, bonusPts = 0;
+  if (lost === 0) { bonusPts = 300; S.score += bonusPts; if (S.lives < MAX_LIVES) { S.lives++; bonusLife = true; } }
+  if (!S.cromos.includes(L.id)) S.cromos.push(L.id);
+  S.unlocked = Math.max(S.unlocked, P.idx + 2);
+  setView(`<div class="card center-card">
+      <p class="eyebrow">Nivel ${P.idx + 1} superado</p>
+      <h2 style="font-size:clamp(28px,6vw,38px)">${esc(L.title)}</h2>
+      <div class="big-stars" aria-label="${stars} de 3 estrellas">${[1, 2, 3].map(n => `<svg viewBox="0 0 24 24" class="${n <= stars ? "on" : "off"}" style="animation-delay:${n * .18}s"><use href="#i-star"/></svg>`).join("")}</div>
+      <p>${lost === 0 ? "¡Nivel perfecto, sin ningún fallo!" : `Has fallado ${lost} ${lost === 1 ? "vez" : "veces"} en este nivel. Si lo haces sin fallos, recuperas una vida.`}</p>
+      <div class="row center">
+        ${bonusPts ? `<span class="pill">${icon("i-coin", "ico")}+${bonusPts} de bonus</span>` : ""}
+        ${bonusLife ? `<span class="pill">${icon("i-heart", "ico")}¡Recuperas una vida!</span>` : ""}
+      </div>
+      <p class="eyebrow">Nuevo cromo para tu álbum</p>
+      ${cromoHTML(L, P.idx)}
+      <button class="btn big gold" id="cont" type="button">${P.idx + 1 < LEVELS.length ? "Seguir la misión →" : "¡Al jefe final! →"}</button>
+    </div>`, "map");
+  renderHUD(bonusLife ? "gain" : null);
+  Sound.level();
+  if (bonusLife) later(() => Sound.gain(), 650);
+  confetti(stars === 3 ? 140 : 70);
+  announce(`Nivel superado con ${stars} estrellas.`);
+  const go = () => { Sound.click(); screenMap(); };
+  $("#cont").addEventListener("click", go);
+  $("#cont").focus({ preventScroll: true });
+}
+
+/* ---------------- Jefe final ---------------- */
+let B = null;
+function bossSprite(extra = "") { return `<svg class="boss-sprite ${extra}" id="boss" viewBox="0 0 48 48" role="img" aria-label="El Hacker"><use href="#i-hacker"/></svg>`; }
+function screenBossIntro() {
+  setView(`<div class="card center-card">
+      ${bossSprite()}
+      <p class="eyebrow">Jefe final</p>
+      <h2 style="font-size:clamp(30px,6vw,40px)">El Hacker</h2>
+      <p style="max-width:52ch">${esc(BOSS.intro)}</p>
+      <div class="rules" style="width:100%;text-align:left">
+        <div class="rule">${icon("i-bolt")}<span>Tienes <b>${BOSS.time} segundos</b> por pregunta.</span></div>
+        <div class="rule">${icon("i-hacker")}<span>Acierta <b>${BOSS.hp} preguntas</b> para expulsarlo.</span></div>
+        <div class="rule">${icon("i-coin")}<span>Cuanto antes respondas, <b>más puntos</b>.</span></div>
+        <div class="rule">${icon("i-heart")}<span>Mezcla preguntas de <b>toda la unidad</b>.</span></div>
+      </div>
+      <button class="btn big gold" id="go" type="button">¡A por él!</button>
+    </div>`, "map");
+  $("#go").addEventListener("click", () => { Sound.click(); startBoss(); });
+  $("#go").focus({ preventScroll: true });
+}
+function startBoss() {
+  P = { idx: LEVELS.length, L: BOSS, lost: 0, list: null };
+  B = { hp: BOSS.hp, qs: shuffle(BOSS.pool), i: 0 };
+  bossQuestion();
+}
+function bossQuestion() {
+  if (B.i >= B.qs.length) B.qs = B.qs.concat(shuffle(BOSS.pool));
+  const c = B.qs[B.i];
+  const opts = shuffle(c.a.map((t, k) => ({ t, ok: k === 0 })));
+  const good = opts.find(o => o.ok);
+  setView(`<div class="boss-arena">${bossSprite()}
+      <div class="hpbar"><span class="eyebrow">Defensa del hacker</span>
+        <div class="bar" role="progressbar" aria-label="Defensa del hacker" aria-valuemin="0" aria-valuemax="${BOSS.hp}" aria-valuenow="${B.hp}"><i style="width:${(B.hp / BOSS.hp) * 100}%"></i></div>
+        <span class="counter">Le quedan ${B.hp} de ${BOSS.hp} · Ataque ${B.i + 1}</span></div></div>
+    <article class="card q" id="qcard">
+      <div class="timer" id="timer"><i></i></div>
+      <span class="kind">Pregunta relámpago</span>
+      <h3>${esc(c.q)}</h3>
+      <div class="opts" id="opts">${opts.map((o, k) => `<button class="opt" type="button"><span class="key">${k + 1}</span><span>${esc(o.t)}</span></button>`).join("")}</div>
+    </article><div id="fb"></div>`, "play");
+  const btns = $$("#opts .opt"), bar = $("#timer i"), total = BOSS.time * 1000, t0 = performance.now();
+  let over = false, lastSec = BOSS.time;
+  const tick = now => {
+    if (over) return;
+    const left = Math.max(0, total - (now - t0));
+    bar.style.width = (left / total) * 100 + "%";
+    const sec = Math.ceil(left / 1000);
+    if (left <= 5000) { $("#timer").classList.add("low"); if (sec < lastSec) Sound.tick(); }
+    lastSec = sec;
+    if (left <= 0) return resolve(-1, 0);
+    window.__bossTick = requestAnimationFrame(tick);
+  };
+  window.__bossTick = requestAnimationFrame(tick);
+  function resolve(k, leftMs) {
+    if (over) return; over = true;
+    cancelAnimationFrame(window.__bossTick);
+    $("#opts").classList.add("locked");
+    btns.forEach(b => (b.disabled = true));
+    btns[opts.indexOf(good)].classList.add("right");
+    const ok = k >= 0 && opts[k].ok;
+    if (k >= 0 && !ok) btns[k].classList.add("wrong");
+    const boss = $("#boss");
+    if (ok) {
+      B.hp--;
+      const bonus = Math.round(leftMs / 1000) * 10;
+      scoreStep(true, btns[k], 100 + bonus);
+      Sound.hit(); restartAnim(boss, "hit");
+      $(".hpbar .bar i").style.width = (B.hp / BOSS.hp) * 100 + "%";
+    } else {
+      scoreStep(false, k >= 0 ? btns[k] : $("#timer"), 0, mistake(c.q, good.t, c.why));
+      restartAnim(boss, "laugh");
+    }
+    B.i++;
+    const win = B.hp <= 0;
+    const title = ok ? (win ? "¡Hacker expulsado!" : "¡Golpe crítico!") : k < 0 ? "¡Se acabó el tiempo! Pierdes una vida" : pick(KO_T);
+    feedback(ok, (ok ? "" : `La respuesta correcta es <b>${esc(good.t)}</b>. `) + esc(c.why),
+      { title, nextLabel: win ? "Ver mi diploma →" : "Siguiente ataque →", onNext: win ? screenWin : bossQuestion });
+  }
+  btns.forEach((b, k) => b.addEventListener("click", () => resolve(k, total - (performance.now() - t0))));
+  opts.forEach((_, k) => (keymap[String(k + 1)] = () => resolve(k, total - (performance.now() - t0))));
+}
+
+/* ---------------- Game over ---------------- */
+function screenGameOver() {
+  Sound.over();
+  saveBest();
+  const idx = Math.min(S.unlocked - 1, ALL.length - 1), reached = ALL[idx];
+  const where = reached === BOSS ? "el jefe final" : `el nivel ${idx + 1} · ${esc(reached.title)}`;
+  setView(`<div class="card center-card">
+      ${nubi("sad")}
+      <p class="eyebrow">Fin de la partida</p>
+      <h2 style="font-size:clamp(28px,6vw,38px)">¡Te has quedado sin vidas!</h2>
+      <p style="max-width:54ch">Has llegado hasta <b>${where}</b>. Repasa tus fallos y vuelve a intentarlo: seguro que esta vez llegas más lejos.</p>
+      <div class="stats">
+        ${stat(S.score.toLocaleString("es-ES"), "puntos")}
+        ${stat(S.correct, "aciertos")}
+        ${stat(S.bestStreak, "mejor racha")}
+        ${stat(totalStars() + "/" + LEVELS.length * 3, "estrellas")}
+      </div>
+      <h3 style="font-size:24px">Lo que tienes que repasar</h3>
+      <div class="review">${S.mistakes.map(m => `<div class="item"><span class="eyebrow">${esc(m.lvl)}</span>
+        <b>${esc(m.q)}</b><span>Respuesta correcta: <span class="ans">${esc(m.a)}</span></span>
+        <p style="font-size:14px;color:var(--ink-2);margin-top:4px">${esc(m.why)}</p></div>`).join("")}</div>
+      <div class="row center">
+        <button class="btn ghost" id="rev" type="button">Repasar apuntes</button>
+        <button class="btn big gold" id="retry" type="button">Reintentar la misión</button>
+      </div>
+    </div>`, "none");
+  $("#rev").addEventListener("click", openNotes);
+  $("#retry").addEventListener("click", () => { S = newState(S.name); Sound.gain(); screenMap(); });
+  $("#retry").focus({ preventScroll: true });
+}
+
+/* ---------------- Victoria ---------------- */
+function screenWin() {
+  S.unlocked = ALL.length + 1;
+  const acc = Math.round((S.correct / Math.max(1, S.correct + S.wrong)) * 100);
+  const rank = acc >= 95 ? "Leyenda de la Nube" : acc >= 85 ? "Maestría Cloud" : acc >= 70 ? "Guía de la Niebla" : "Patrulla del Borde";
+  const lifeBonus = S.lives * 200;
+  S.score += lifeBonus;
+  saveBest();
+  const date = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+  setView(`<div class="card center-card">
+      <div class="diploma">
+        ${nubi("happy")}
+        <p class="eyebrow">Diploma · Misión Nube · UT3</p>
+        <p>Se certifica que</p>
+        <p class="who">${esc(S.name || "Piloto sin nombre")}</p>
+        <p style="max-width:46ch">ha completado la misión <b>Sistemas en la nube (Cloud)</b> y ha expulsado al hacker con el rango de</p>
+        <p class="rank">${rank}</p>
+        ${starsHTML(Math.max(1, Math.round(totalStars() / LEVELS.length)), "big-stars")}
+        <p class="best">${date}</p>
+      </div>
+      <div class="stats">
+        ${stat(S.score.toLocaleString("es-ES"), "puntos")}
+        ${stat(acc + "%", "precisión")}
+        ${stat(S.bestStreak, "mejor racha")}
+        ${stat(S.lives + "/" + MAX_LIVES, "vidas restantes")}
+        ${stat(totalStars() + "/" + LEVELS.length * 3, "estrellas")}
+      </div>
+      <p>Bonus por vidas restantes: <b>+${lifeBonus}</b> puntos.</p>
+      <h3 style="font-size:24px">Tu álbum de cromos</h3>
+      <div class="album">${LEVELS.map((L, i) => cromoHTML(L, i, !S.cromos.includes(L.id))).join("")}</div>
+      <div class="row center">
+        <button class="btn ghost" id="rev" type="button">Ver apuntes</button>
+        <button class="btn big gold" id="again" type="button">Jugar otra vez</button>
+      </div>
+    </div>`, "none");
+  Sound.win();
+  confetti(240);
+  announce(`¡Misión cumplida! Rango: ${rank}. ${S.score} puntos.`);
+  $("#rev").addEventListener("click", openNotes);
+  $("#again").addEventListener("click", () => { Sound.click(); screenStart(); });
+}
+
+/* ---------------- Confeti ---------------- */
+function confetti(n = 120) {
+  if (reduceMotion()) return;
+  const cv = $("#confetti"), ctx = cv.getContext("2d");
+  const W = innerWidth, H = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
+  cv.hidden = false; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ["#FFB23E", "#3E7BE0", "#2A9A55", "#EF4B5C", "#7B5CE0", "#1E9C9C", "#FFFFFF"];
+  const parts = Array.from({ length: n }, () => ({
+    x: W / 2 + (Math.random() - .5) * W * .5, y: H * .38,
+    vx: (Math.random() - .5) * 13, vy: -Math.random() * 13 - 4,
+    s: 6 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .35,
+    c: colors[(Math.random() * colors.length) | 0]
+  }));
+  const t0 = performance.now();
+  const id = (confetti.id = (confetti.id || 0) + 1);
+  (function loop(t) {
+    if (id !== confetti.id) return;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of parts) {
+      p.vy += .32; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
+    }
+    if (t - t0 < 3200) requestAnimationFrame(loop);
+    else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+  })(t0);
+}
+
+/* ---------------- Arranque ---------------- */
+function boot() {
+  buildSky();
+  $("#btnSound").addEventListener("click", () => { Sound.toggle(); renderHUD(); });
+  $("#btnNotes").addEventListener("click", () => { Sound.click(); openNotes(); });
+  $("#btnCloseNotes").addEventListener("click", closeNotes);
+  $("#notes").addEventListener("click", e => { if (e.target.id === "notes") closeNotes(); });
+  document.addEventListener("keydown", e => {
+    if (!$("#notes").hidden) { if (e.key === "Escape") closeNotes(); return; }
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest && e.target.closest("input, textarea")) return;
+    if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest("button, a")) return;
+    const f = keymap[e.key] || keymap[e.key.toLowerCase()];
+    if (f) { e.preventDefault(); f(); }
+  });
+  screenStart();
+}
+boot();
+})();
+</script>
+</body>
+</html>
