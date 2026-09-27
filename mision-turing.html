@@ -1,0 +1,2173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Misión Turing</title>
+<meta name="description" content="Juego de repaso de la UT4 · Aplicación de la inteligencia artificial: entrena a TURI y supera el Test de Turing con 5 vidas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Mundo visual: una placa de circuito impreso (máscara verde, pistas de cobre, serigrafía blanca).
+   Diseño deliberadamente de un solo tema oscuro: todos los colores se definen aquí. */
+:root{
+  color-scheme: dark;
+  --board:#0B3A2C;
+  --board-deep:#062519;
+  --panel:#0A1511;
+  --chip:#121816;
+  --chip-line:#2C3A35;
+  --gold:#F4C152;
+  --gold-2:#FFD983;
+  --gold-ink:#241A04;
+  --gold-deep:#9C7422;
+  --silk:#EDF3EA;
+  --silk-2:#BFD3C7;
+  --silk-3:#93B3A4;
+  --red:#FF5A4F;
+  --red-soft:#FF9A92;
+  --mint:#74F2A8;
+  --mint-ink:#052416;
+  --cyan:#62D8F0;
+  --paper:#EDF3EA;
+  --paper-ink:#0C1A14;
+  --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{min-height:100%}
+body{
+  margin:0;
+  background-color:var(--board);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cg fill='none' stroke='%23104a37' stroke-width='3' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M0 40H96l30 30h68l30-30h96'/%3E%3Cpath d='M320 250h-40l-30 30v40'/%3E%3Cpath d='M250 0v14'/%3E%3Cpath d='M0 250h60l30-30h60'/%3E%3Cpath d='M170 100v60l30 30h36'/%3E%3Cpath d='M20 120v60l20 20'/%3E%3Cpath d='M300 90v50l-20 20'/%3E%3C/g%3E%3Cg fill='%23072a1e' stroke='%237d6533' stroke-width='2'%3E%3Ccircle cx='150' cy='220' r='4'/%3E%3Ccircle cx='250' cy='14' r='4'/%3E%3Ccircle cx='170' cy='100' r='4'/%3E%3Ccircle cx='236' cy='190' r='4'/%3E%3Ccircle cx='20' cy='120' r='4'/%3E%3Ccircle cx='40' cy='200' r='4'/%3E%3Ccircle cx='300' cy='90' r='4'/%3E%3Ccircle cx='280' cy='160' r='4'/%3E%3Ccircle cx='110' cy='150' r='3'/%3E%3Ccircle cx='210' cy='300' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:320px 320px;
+  color:var(--silk);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -10%,rgba(70,180,130,.16),transparent 70%),
+    radial-gradient(ellipse 120% 80% at 50% 115%,rgba(0,0,0,.5),transparent 62%);
+}
+body.sheet-open main{padding-bottom:62vh}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:default}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+h1[tabindex="-1"]:focus{outline:none}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+svg{flex:none}
+
+.wrap{width:100%;max-width:780px;margin-inline:auto;padding-inline:16px}
+.wrap--wide{max-width:1040px}
+main.screen{padding-block:20px 48px;animation:screenIn .35s ease-out both}
+@keyframes screenIn{from{opacity:.55;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.eyebrow{margin:0;font:600 12px/1.3 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.lbl{display:flex;align-items:center;gap:6px;margin:0 0 6px;font:600 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--silk-3)}
+.lbl svg{width:14px;height:14px}
+.pos{color:var(--mint)}
+.neg{color:var(--red-soft)}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:8px;border:1px solid transparent;font:600 16px/1.1 var(--f-display);letter-spacing:.02em;text-align:center;transition:transform .12s ease,background-color .15s,box-shadow .15s,border-color .15s,opacity .15s}
+.btn svg{width:20px;height:20px}
+.btn:active:not(:disabled){transform:translateY(2px)}
+.btn:disabled{opacity:.42}
+.btn-primary{background:var(--gold);color:var(--gold-ink);box-shadow:0 3px 0 var(--gold-deep)}
+.btn-primary:hover:not(:disabled){background:var(--gold-2);box-shadow:0 3px 0 var(--gold-deep),0 0 24px rgba(244,193,82,.35)}
+.btn-ghost{background:rgba(6,37,25,.65);color:var(--silk);border-color:rgba(237,243,234,.3)}
+.btn-ghost:hover:not(:disabled){border-color:var(--silk)}
+.btn-danger{background:rgba(255,90,79,.08);color:#FFC2BD;border-color:rgba(255,90,79,.55)}
+.btn-danger:hover:not(:disabled){background:rgba(255,90,79,.18)}
+.btn-sm{min-height:40px;padding:0 14px;font-size:14px}
+.btn-block{width:100%}
+.btn-hint{background:rgba(98,216,240,.1);color:#C4F1FB;border-color:rgba(98,216,240,.5)}
+.btn-hint:hover:not(:disabled){background:rgba(98,216,240,.18)}
+.btn-hint .n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--cyan);color:#05222A;font:600 12px/1 var(--f-mono)}
+.icon-btn{display:grid;place-items:center;width:42px;height:42px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid rgba(237,243,234,.22);color:var(--silk)}
+.icon-btn:hover{border-color:var(--silk)}
+.icon-btn svg{width:22px;height:22px}
+.link{background:none;border:0;padding:4px 2px;color:var(--silk-2);text-decoration:underline;text-underline-offset:3px;font-size:15px}
+.link:hover{color:var(--silk)}
+
+/* HUD */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:rgba(5,31,22,.93);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgba(244,193,82,.22)}
+.hud-in{display:flex;align-items:center;gap:12px;min-height:62px}
+.hud-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.hud-mod{display:flex;align-items:baseline;gap:8px;min-width:0}
+.hud-mod .ref{flex:none;font:600 12px/1 var(--f-mono);letter-spacing:.1em;color:var(--gold)}
+.hud-t{font:600 15px/1.2 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-stars{display:flex;align-items:center;gap:4px;font:600 12px/1 var(--f-mono);color:var(--silk-2)}
+.hud-stars svg{width:14px;height:14px;color:var(--gold)}
+.segs{display:flex;gap:4px;max-width:260px}
+.segs i{flex:1;height:5px;border-radius:2px;background:rgba(237,243,234,.16)}
+.segs i.done{background:var(--gold)}
+.segs i.cur{background:rgba(244,193,82,.55);animation:segBlink 1.2s ease-in-out infinite}
+@keyframes segBlink{50%{opacity:.35}}
+.hud-right{display:flex;align-items:center;gap:12px}
+.lives{display:flex;gap:1px}
+.heart{display:block;line-height:0}
+.heart svg{width:21px;height:21px;display:block}
+.heart.on{color:var(--red);filter:drop-shadow(0 0 5px rgba(255,90,79,.7))}
+.heart.off{color:#3F2A28}
+.heart.breaking{animation:heartBreak .65s ease-out}
+.heart.gain{animation:heartGain .8s ease-out}
+@keyframes heartBreak{0%{transform:scale(1.5) rotate(0)}40%{transform:scale(.7) rotate(-18deg)}70%{transform:scale(1.1) rotate(8deg)}100%{transform:none}}
+@keyframes heartGain{0%{transform:scale(.2)}60%{transform:scale(1.45)}100%{transform:none}}
+.score{display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:52px}
+.score .lbl{margin:0;font-size:10px}
+.score .val{font:600 18px/1 var(--f-mono);color:var(--gold);font-variant-numeric:tabular-nums}
+@media (max-width:420px){
+  .hud-in{gap:8px}
+  .heart svg{width:18px;height:18px}
+  .score .lbl{display:none}
+  .score{min-width:0}
+  .icon-btn{width:38px;height:38px}
+}
+
+/* TURI */
+.turi{display:block;overflow:visible}
+.turi .eye{fill:var(--gold)}
+.turi .eye-l{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.turi .mouth{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round}
+.turi .turi-led{fill:var(--gold);animation:ledPulse 2.2s ease-in-out infinite}
+.turi--happy .eye-l,.turi--happy .mouth{stroke:var(--mint)}
+.turi--happy .turi-led{fill:var(--mint)}
+.turi--sad .eye-l,.turi--sad .mouth{stroke:var(--red)}
+.turi--sad .turi-led{fill:var(--red)}
+.turi--think .eye{fill:var(--cyan)}
+.turi--think .mouth{stroke:var(--cyan)}
+.turi--think .turi-led{fill:var(--cyan)}
+.turi--off .eye-l,.turi--off .mouth{stroke:#46534D}
+.turi--off .turi-led{fill:#46534D;animation:none}
+.turi--idle .eye,.turi--think .eye{transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.12)}}
+@keyframes ledPulse{50%{opacity:.45}}
+.bounce{animation:bounce .55s ease-out}
+.hurt{animation:shake .42s}
+@keyframes bounce{0%,100%{transform:none}35%{transform:translateY(-10px)}65%{transform:translateY(2px)}}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+.shake{animation:shake .42s}
+
+.bubble{position:relative;margin:0;padding:12px 15px;background:var(--paper);color:var(--paper-ink);border-radius:12px;font-size:16px;line-height:1.42;box-shadow:0 4px 0 rgba(0,0,0,.28)}
+.bubble strong{color:#073D28}
+.bubble::after{content:"";position:absolute;left:-9px;top:18px;border:9px solid transparent;border-right-color:var(--paper);border-left:0}
+.bubble--down::after{left:50%;top:auto;bottom:-11px;transform:translateX(-50%);border:11px solid transparent;border-top-color:var(--paper);border-bottom:0}
+
+/* Portada */
+.start-bar{display:flex;justify-content:flex-end;padding-top:12px}
+.start-grid{display:grid;gap:28px;align-items:center;padding-top:4px}
+@media (min-width:780px){.start-grid{grid-template-columns:1.2fr .8fr;gap:40px}}
+.title{margin:12px 0 16px;font-family:var(--f-display);line-height:.88}
+.title-sm{display:block;margin-bottom:8px;font:600 clamp(18px,3.4vw,26px)/1 var(--f-mono);letter-spacing:.42em;text-transform:uppercase;color:var(--silk-2)}
+.title-lg{display:block;font-weight:700;font-size:clamp(66px,17vw,132px);letter-spacing:-.02em;color:var(--gold);text-shadow:0 0 26px rgba(244,193,82,.42),0 0 2px rgba(255,236,180,.9);animation:powerOn 1.7s steps(1) both}
+@keyframes powerOn{0%{opacity:.2}8%{opacity:1}12%{opacity:.3}20%{opacity:1}24%{opacity:.5}32%,100%{opacity:1}}
+.lead{max-width:58ch;margin:0;font-size:18px;color:var(--silk-2)}
+.lead strong{color:var(--silk)}
+.start-form{display:grid;gap:10px;margin-top:22px;max-width:540px}
+.start-form label{font:600 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--silk-3)}
+.start-row{display:flex;flex-wrap:wrap;gap:10px}
+.start-row input{flex:1 1 200px;min-width:0;min-height:48px;padding:0 14px;border-radius:8px;border:1px solid rgba(237,243,234,.32);background:var(--board-deep);color:var(--silk);font:400 17px var(--f-body)}
+.start-row input::placeholder{color:#6F8D80}
+.start-row input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(244,193,82,.25)}
+.start-row .btn{flex:1 1 auto}
+.start-alt{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.start-visual{display:flex;flex-direction:column;align-items:center;gap:16px}
+.start-visual .turi{width:min(200px,52vw);height:auto;animation:float 3.4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+.start-visual .bubble{max-width:300px;text-align:center}
+
+.datasheet{margin-top:36px;border:1px solid rgba(237,243,234,.22);border-radius:10px;background:rgba(4,25,17,.78);overflow:hidden}
+.ds-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 12px;padding:12px 16px;border-bottom:1px solid rgba(237,243,234,.14)}
+.datasheet .ds-head h2{margin:0;font:600 18px/1.2 var(--f-display)}
+.ds-head span{font:500 12px/1 var(--f-mono);letter-spacing:.1em;color:var(--silk-3)}
+.ds-scroll{overflow-x:auto}
+.datasheet table{width:100%;border-collapse:collapse;font-size:15.5px}
+.datasheet th,.datasheet td{padding:10px 16px;text-align:left;vertical-align:top;border-top:1px solid rgba(237,243,234,.08)}
+.datasheet tr:first-child th,.datasheet tr:first-child td{border-top:0}
+.datasheet th{width:36%;font:600 12.5px/1.35 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--silk-2)}
+.foot{margin:18px 0 0;font:500 12px/1.5 var(--f-mono);color:var(--silk-3);letter-spacing:.04em}
+
+/* Mapa */
+.map-top{display:flex;gap:12px;align-items:flex-start}
+.map-top .turi{width:84px;height:84px}
+.map-talk{flex:1;min-width:0;display:grid;gap:12px}
+.meter-line{display:flex;align-items:center;gap:10px;font:600 12px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--silk-3)}
+.meter-line .bar{display:flex;gap:3px;flex:1;max-width:230px}
+.meter-line .bar i{flex:1;height:10px;border-radius:2px;background:rgba(237,243,234,.13)}
+.meter-line .bar i.on{background:var(--gold);box-shadow:0 0 8px rgba(244,193,82,.5)}
+.meter-line .v{color:var(--gold);font-variant-numeric:tabular-nums}
+.map-tools{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 8px}
+.hint-count{display:inline-flex;align-items:center;gap:6px;font:600 13px/1 var(--f-mono);color:#C4F1FB}
+.hint-count svg{width:18px;height:18px;color:var(--cyan)}
+.board{position:relative;margin-top:4px}
+.board-svg{position:absolute;left:0;top:0;overflow:visible}
+.trace{fill:none;stroke:#5C4424;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.trace-lit{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.trace-flow{fill:none;stroke:#FFF4CC;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:3 17;animation:flow 1.3s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-40}}
+.pad-end{fill:#C9A04C}
+.j1 rect{fill:#16191B;stroke:rgba(237,243,234,.35)}
+.j1 .pin{fill:#D6B25E;stroke:none}
+.board-svg text{font-family:var(--f-mono);font-weight:600}
+.j1 text,.decor .silk-t{fill:rgba(237,243,234,.55);font-size:10.5px}
+.decor .pad{fill:#B9924A}
+.decor .silk-o{fill:none;stroke:rgba(237,243,234,.38);stroke-width:1.4}
+.decor .led-ring{fill:none;stroke:rgba(237,243,234,.38);stroke-width:1.4}
+.decor .led{fill:#1C3A2E}
+.decor.lit .led{fill:var(--mint)}
+
+.chip{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 16px 10px 18px;text-align:left;color:var(--silk);border:1px solid #2E3B36;border-radius:6px;background:radial-gradient(circle at 12px 12px,#34413C 0 3px,transparent 3.6px),linear-gradient(180deg,#1C2320,#101513);box-shadow:0 6px 0 rgba(0,0,0,.38),0 12px 26px rgba(0,0,0,.35);transition:transform .15s ease,box-shadow .15s}
+.chip::before,.chip::after{content:"";position:absolute;top:12px;bottom:12px;width:7px;background:repeating-linear-gradient(to bottom,#C3CAC6 0 6px,transparent 6px 12px)}
+.chip::before{left:-8px}
+.chip::after{right:-8px}
+.chip:hover:not(.chip--locked){transform:translateY(-2px)}
+.chip-ref{display:flex;justify-content:space-between;gap:8px;font:600 12px/1 var(--f-mono);letter-spacing:.12em;color:var(--silk-3)}
+.chip-ref em{font-style:normal;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.chip-name{font:600 17px/1.15 var(--f-display)}
+.chip-meta{display:flex;align-items:center;gap:6px;font:600 12px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.chip-meta svg{width:14px;height:14px}
+.chip--current{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 26px rgba(244,193,82,.38),0 6px 0 rgba(0,0,0,.38);animation:chipPulse 2.2s ease-in-out infinite}
+.chip--current .chip-ref{color:var(--gold)}
+.chip--current .chip-meta{color:var(--gold)}
+@keyframes chipPulse{50%{box-shadow:0 0 0 1px var(--gold),0 0 38px rgba(244,193,82,.55),0 6px 0 rgba(0,0,0,.38)}}
+.chip--done .chip-ref{color:var(--mint)}
+.chip--locked{opacity:.58;cursor:not-allowed}
+.chip--locked .chip-meta{color:var(--silk-3)}
+.stars{display:inline-flex;gap:1px}
+.stars .st{line-height:0;color:#39463F}
+.stars .st.on{color:var(--gold)}
+.stars svg{width:15px;height:15px}
+.chip--cpu{align-items:center;text-align:center;padding:16px 24px;border-radius:8px}
+.chip--cpu .chip-name{font-size:22px}
+.chip--cpu .chip-ref{justify-content:center}
+.cpu-pins{position:absolute;left:14px;right:14px;height:7px;background:repeating-linear-gradient(to right,#C3CAC6 0 6px,transparent 6px 12px);pointer-events:none}
+.cpu-pins--t{top:-8px}
+.cpu-pins--b{bottom:-8px}
+
+/* Carga de datos (apuntes) */
+.intro-head{display:flex;gap:14px;align-items:center}
+.ref-badge{flex:none;display:grid;place-items:center;min-width:58px;height:58px;padding:0 8px;border-radius:8px;background:var(--chip);border:1px solid rgba(244,193,82,.65);color:var(--gold);font:600 18px/1 var(--f-mono);box-shadow:0 0 18px rgba(244,193,82,.2)}
+.ref-badge.sm{display:inline-grid;min-width:44px;height:30px;font-size:13px;box-shadow:none}
+.intro-title{margin:0;font:700 clamp(27px,5vw,38px)/1.05 var(--f-display);text-wrap:balance}
+.intro-src{margin:5px 0 0;font:500 13px/1.2 var(--f-mono);color:var(--silk-3);letter-spacing:.05em}
+.talk{display:flex;gap:12px;align-items:center;margin:20px 0 16px}
+.talk .turi{width:64px;height:64px}
+.load{display:flex;align-items:center;gap:10px;margin-bottom:12px;font:600 12px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--silk-3)}
+.load .bar{display:flex;gap:4px;flex:1;max-width:260px}
+.load .bar i{flex:1;height:8px;border-radius:2px;background:rgba(237,243,234,.13)}
+.load .bar i.on{background:var(--cyan);box-shadow:0 0 8px rgba(98,216,240,.5)}
+.note{background:var(--panel);border:1px solid rgba(237,243,234,.14);border-radius:12px;padding:20px 20px 18px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.note + .note{margin-top:14px}
+.note-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px}
+.note-head h2,.note-head h3,.note-head h4{margin:0;font:700 22px/1.2 var(--f-display);text-wrap:balance}
+.note-src{font:500 12px/1 var(--f-mono);color:var(--silk-3);letter-spacing:.06em}
+.note-list{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:12px}
+.note-list li{position:relative;padding-left:22px;font-size:17.5px;line-height:1.55;max-width:66ch}
+.note-list li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:1px;background:var(--gold);box-shadow:0 0 6px rgba(244,193,82,.55)}
+.note-list strong,.sheet strong,.review strong{color:var(--gold-2)}
+.note-key{margin:16px 0 0;padding:12px 14px;border-radius:8px;background:rgba(98,216,240,.08);border:1px dashed rgba(98,216,240,.5);color:#D6F5FB}
+.note-key span{display:block;margin-bottom:6px;font:600 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.note-key strong{color:#fff}
+.intro-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+.intro-nav .btn{flex:1 1 0;max-width:260px}
+.intro-skip{margin:14px 0 0;text-align:center}
+
+/* Retos */
+.q-head{display:flex;gap:12px;align-items:flex-start}
+.q-turi{flex:none;width:64px}
+.q-turi .turi{width:64px;height:64px}
+.q-meta{flex:1;min-width:0}
+.q-tags{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 8px}
+.q-type{display:inline-flex;align-items:center;gap:6px;font:600 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.q-type svg{width:16px;height:16px}
+.q-streak{font:600 12px/1 var(--f-mono);padding:4px 8px;border-radius:4px;background:rgba(255,159,90,.14);color:#FFBE8C;border:1px solid rgba(255,159,90,.45)}
+.q-text{margin:0;font:700 clamp(20px,3.6vw,24px)/1.3 var(--f-body);text-wrap:balance}
+.q-text strong{color:var(--gold-2)}
+.q-body{margin-top:18px}
+.count-line{margin:0 0 10px;font:600 12.5px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--silk-3)}
+.count-line strong{color:var(--gold)}
+.count-line.nudge{animation:shake .42s;color:var(--red-soft)}
+.help{margin:10px 0 0;font-size:14.5px;color:var(--silk-3)}
+.help strong{color:var(--silk-2)}
+
+.opts{display:grid;gap:10px}
+.opt{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:12px 14px;text-align:left;color:var(--silk);background:var(--chip);border:1.5px solid var(--chip-line);border-radius:10px;font:400 17px/1.35 var(--f-body);transition:border-color .15s,background-color .15s,opacity .15s}
+.opt:hover:not(:disabled){border-color:rgba(244,193,82,.65)}
+.opt-k{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:6px;background:#1E2724;font:600 14px/1 var(--f-mono);color:var(--silk-2)}
+.opt-t{flex:1}
+.opt-mark{flex:none;color:var(--mint);line-height:0}
+.opt-mark svg{width:22px;height:22px}
+.opt.is-sel{border-color:var(--gold);background:#1D1B10;box-shadow:0 0 0 3px rgba(244,193,82,.18)}
+.opt.is-sel .opt-k{background:var(--gold);color:var(--gold-ink)}
+.opt.is-right{border-color:var(--mint);background:rgba(116,242,168,.12)}
+.opt.is-right .opt-k{background:var(--mint);color:var(--mint-ink)}
+.opt.is-wrong{border-color:var(--red);background:rgba(255,90,79,.13)}
+.opt.is-wrong .opt-k{background:var(--red);color:#fff}
+.opt.is-dim{opacity:.5}
+.opt.is-removed{opacity:.28}
+.opt.is-removed .opt-t{text-decoration:line-through}
+
+.tf-term{display:flex;gap:12px;align-items:flex-start;padding:16px 18px;border-radius:10px;background:#050B09;border:1px solid #23312C}
+.tf-term p{margin:0;font:700 19px/1.45 var(--f-body);color:#E3F5EA}
+.tf-pr{flex:none;font:600 16px/1.7 var(--f-mono);color:var(--gold)}
+.tf-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.opt--tf{flex-direction:column;justify-content:center;gap:6px;min-height:88px;text-align:center;font:600 17px/1.2 var(--f-display)}
+.opt--tf svg{width:28px;height:28px}
+
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.pick{display:flex;align-items:center;gap:12px;min-height:54px;padding:10px 14px;text-align:left;background:var(--chip);border:1.5px solid var(--chip-line);border-radius:10px;font:400 16.5px/1.3 var(--f-body)}
+.pick:hover:not(:disabled){border-color:rgba(244,193,82,.65)}
+.pick .box{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:5px;border:2px solid #4D5E57}
+.pick .box svg{width:16px;height:16px;opacity:0}
+.pick.is-sel{border-color:var(--gold);background:#1D1B10}
+.pick.is-sel .box{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.pick.is-sel .box svg{opacity:1}
+.pick.is-locked{border-color:var(--cyan)}
+.pick.is-right{border-color:var(--mint);background:rgba(116,242,168,.12)}
+.pick.is-right .box{background:var(--mint);border-color:var(--mint);color:var(--mint-ink)}
+.pick.is-right .box svg{opacity:1}
+.pick.is-missed{border-color:var(--mint);border-style:dashed}
+.pick.is-wrong{border-color:var(--red);background:rgba(255,90,79,.13)}
+.pick.is-wrong .box{background:var(--red);border-color:var(--red);color:#fff}
+.pick.is-wrong .box svg{opacity:1}
+.pick.is-dim{opacity:.5}
+
+.belt{position:relative;display:grid;place-items:center;min-height:156px;padding:18px 12px 46px;border-radius:12px;background:#08100D;border:1px solid #23312C;overflow:hidden}
+.belt-track{position:absolute;left:0;right:0;bottom:14px;height:22px;border-block:2px solid #2E3C37;background:repeating-linear-gradient(90deg,#1B2521 0 18px,#111815 18px 36px);animation:belt 1.1s linear infinite}
+@keyframes belt{to{background-position:36px 0}}
+.belt-item{position:relative;z-index:1;max-width:90%;padding:14px 18px;border-radius:10px;background:var(--paper);color:var(--paper-ink);font:700 18px/1.3 var(--f-body);text-align:center;box-shadow:0 6px 0 rgba(0,0,0,.38);animation:itemIn .35s ease-out}
+.belt-item.fly{animation:itemOut .36s ease-in forwards}
+.belt-item.wrong{background:#FFD6D1;animation:shake .42s}
+@keyframes itemIn{from{transform:translateX(-60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes itemOut{to{transform:translateY(90px) scale(.6);opacity:0}}
+.belt-count,.belt-err{position:absolute;top:10px;font:600 12px/1 var(--f-mono)}
+.belt-count{right:12px;color:var(--silk-3)}
+.belt-err{left:12px;color:var(--red-soft)}
+.bins{display:grid;gap:10px;margin-top:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.bins--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (min-width:640px){.bins--4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bin{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:96px;padding:18px 8px 12px;border-radius:10px;background:linear-gradient(180deg,#17211D,#0E1512);border:1.5px solid #36473F;color:var(--silk);font:600 15.5px/1.2 var(--f-display);text-align:center;transition:border-color .15s,box-shadow .15s,transform .1s}
+.bin:hover:not(:disabled){border-color:rgba(244,193,82,.7)}
+.bin:active:not(:disabled){transform:translateY(2px)}
+.bin-k{position:absolute;top:7px;left:9px;font:600 11px/1 var(--f-mono);color:var(--silk-3)}
+.bin-n{font:600 12px/1 var(--f-mono);color:var(--gold)}
+.bin-name{overflow-wrap:anywhere}
+.bin--ok{border-color:var(--mint);box-shadow:0 0 18px rgba(116,242,168,.4)}
+.bin--bad{border-color:var(--red);box-shadow:0 0 18px rgba(255,90,79,.35)}
+.bin--reveal{border-color:var(--cyan);box-shadow:0 0 18px rgba(98,216,240,.45)}
+.sort-msg{min-height:1.5em;margin:10px 0 0;font-size:15.5px;color:var(--red-soft);text-align:center}
+
+.slots{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:8px}
+.slot{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:8px 12px;text-align:left;border-radius:10px;border:1.5px dashed #3B4C45;background:rgba(0,0,0,.2);color:var(--silk-3);font:400 16px/1.3 var(--f-body)}
+.slot.filled{border-style:solid;border-color:#4B5E56;background:var(--chip);color:var(--silk)}
+.slot.filled:hover:not(:disabled){border-color:rgba(244,193,82,.65)}
+.slot-n{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#1E2724;font:600 13px/1 var(--f-mono);color:var(--gold)}
+.slot.is-locked{border-color:var(--cyan)}
+.slot.is-right{border-color:var(--mint);background:rgba(116,242,168,.1)}
+.slot.is-wrong{border-color:var(--red);background:rgba(255,90,79,.1)}
+.pool,.bank{display:flex;flex-wrap:wrap;gap:8px}
+.tok{min-height:44px;padding:9px 14px;border:0;border-radius:8px;background:var(--paper);color:var(--paper-ink);font:700 15.5px/1.25 var(--f-body);text-align:left;box-shadow:0 3px 0 rgba(0,0,0,.4);transition:transform .1s}
+.tok:hover:not(:disabled){transform:translateY(-1px)}
+.tok:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.tok:disabled{opacity:.5}
+
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.m-col{display:grid;gap:8px;align-content:start}
+.m-item{display:flex;align-items:center;gap:8px;min-height:56px;padding:10px;text-align:left;background:var(--chip);border:1.5px solid var(--chip-line);border-radius:10px;font:400 15.5px/1.3 var(--f-body);overflow-wrap:anywhere}
+.m-item:hover:not(:disabled){border-color:rgba(244,193,82,.65)}
+.m-badge{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#1E2724;border:1px dashed #4D5E57;font:600 12px/1 var(--f-mono);color:var(--paper-ink)}
+.m-item.is-paired{border-color:var(--pc)}
+.m-item.is-paired .m-badge{background:var(--pc);border-color:var(--pc)}
+.m-item.is-sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(244,193,82,.25);background:#1D1B10}
+.m-item.is-locked{box-shadow:0 0 0 2px var(--cyan)}
+.m-item.is-right{border-color:var(--mint);background:rgba(116,242,168,.1)}
+.m-item.is-wrong{border-color:var(--red);background:rgba(255,90,79,.12)}
+
+.fill-text{margin:0 0 16px;padding:14px 18px;border-radius:12px;background:#08100D;border:1px solid #23312C;font:400 19px/2.15 var(--f-body)}
+.gap{display:inline-flex;align-items:center;justify-content:center;min-width:104px;min-height:38px;margin:0 3px;padding:2px 12px;vertical-align:middle;border:0;border-bottom:3px solid var(--silk-3);border-radius:6px 6px 0 0;background:rgba(237,243,234,.07);color:var(--gold-2);font:700 18px/1.2 var(--f-body)}
+.gap.active{border-bottom-color:var(--gold);background:rgba(244,193,82,.14);animation:gapPulse 1.4s ease-in-out infinite}
+@keyframes gapPulse{50%{background:rgba(244,193,82,.28)}}
+.gap.filled{background:rgba(244,193,82,.15)}
+.gap.is-locked{border-bottom-color:var(--cyan)}
+.gap.is-right{border-bottom-color:var(--mint);color:var(--mint);background:rgba(116,242,168,.1)}
+.gap.is-wrong{border-bottom-color:var(--red);color:var(--red-soft);background:rgba(255,90,79,.1)}
+
+.q-hint .hintbox{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 14px;border-radius:10px;background:rgba(98,216,240,.09);border:1px solid rgba(98,216,240,.5);color:#D6F5FB}
+.hintbox svg{width:20px;height:20px;color:var(--cyan);margin-top:2px}
+.hintbox p{margin:0}
+.q-actions{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px;padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--board) 72%,rgba(11,58,44,0))}
+.q-actions #checkBtn{flex:1;max-width:340px}
+.q-note{font:600 12.5px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--silk-3);text-align:right}
+
+/* Hoja de respuesta */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);box-shadow:0 -14px 40px rgba(0,0,0,.5)}
+.sheet.open{transform:none}
+.sheet-in{max-height:72vh;max-height:72dvh;overflow:auto;padding-block:18px calc(18px + env(safe-area-inset-bottom,0px))}
+.sheet--ok{background:#0D3121;border-top:1px solid rgba(116,242,168,.5)}
+.sheet--bad{background:#2C100D;border-top:1px solid rgba(255,90,79,.55)}
+.sheet-head{display:flex;align-items:center;gap:10px;font:700 23px/1.2 var(--f-display)}
+.sheet-head svg{width:30px;height:30px}
+.sheet--ok .sheet-head{color:var(--mint)}
+.sheet--bad .sheet-head{color:var(--red-soft)}
+.sheet-pts{margin-left:auto;font:600 16px/1 var(--f-mono);color:var(--gold)}
+.sheet--bad .sheet-pts{color:var(--red-soft)}
+.sheet-turi{margin:6px 0 12px;color:var(--silk-2);font-style:italic}
+.sheet-box{margin-top:10px;padding:12px 14px;border-radius:10px;background:rgba(0,0,0,.28)}
+.sheet-box p{margin:0}
+.sheet-box ul,.sheet-box ol{margin:0;padding-left:20px;display:grid;gap:4px}
+.sheet .btn-block{margin-top:14px}
+
+/* Capas */
+.overlay{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(2,14,10,.74);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.panel{width:100%;max-width:520px;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:auto;padding:22px;border-radius:14px;background:var(--panel);border:1px solid rgba(237,243,234,.18);box-shadow:0 22px 60px rgba(0,0,0,.55);animation:panelIn .25s ease-out}
+@keyframes panelIn{from{transform:translateY(14px) scale(.98)}to{transform:none}}
+.panel h2{margin:6px 0 12px;font:700 26px/1.15 var(--f-display);text-wrap:balance}
+.panel p{margin:0 0 12px}
+.panel .row{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:6px}
+.plain{margin:0 0 16px;padding-left:20px;display:grid;gap:6px}
+.menu-list{display:grid;gap:10px}
+.panel--notes{max-width:780px;height:calc(100vh - 32px);height:calc(100dvh - 32px);display:flex;flex-direction:column;padding:0}
+.n-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 12px}
+.n-top h2{display:flex;align-items:center;gap:8px;margin:0;font-size:22px}
+.n-top h2 svg{color:var(--gold)}
+.ntabs{display:flex;gap:6px;padding:0 18px 12px;overflow-x:auto;border-bottom:1px solid rgba(237,243,234,.12)}
+.ntab{flex:none;min-width:48px;min-height:36px;padding:0 10px;border-radius:6px;border:1px solid rgba(237,243,234,.25);background:transparent;font:600 13px/1 var(--f-mono);color:var(--silk-2)}
+.ntab.on{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.ntab:disabled{opacity:.35}
+.n-body{flex:1;overflow:auto;padding:16px 18px 24px}
+.n-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.n-head h3{margin:0;font:700 24px/1.15 var(--f-display)}
+.n-head p{margin:2px 0 0;font:500 12.5px/1.2 var(--f-mono);color:var(--silk-3)}
+.n-body .note{box-shadow:none}
+.empty{color:var(--silk-2)}
+.done-top{display:flex;align-items:center;gap:12px}
+.big-stars{display:flex;justify-content:center;gap:10px;margin:14px 0 10px}
+.bs{line-height:0;color:#35423C;animation:starPop .5s ease-out both;animation-delay:var(--d)}
+.bs.on{color:var(--gold);filter:drop-shadow(0 0 10px rgba(244,193,82,.6))}
+.bs svg{width:52px;height:52px}
+@keyframes starPop{0%{transform:scale(.3) rotate(-30deg)}70%{transform:scale(1.2)}100%{transform:none}}
+.stat-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.stat{padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.28);border:1px solid rgba(237,243,234,.1)}
+.stat dt{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--silk-3)}
+.stat dd{margin:6px 0 0;font:600 22px/1 var(--f-mono);color:var(--gold);font-variant-numeric:tabular-nums}
+.bonus{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:rgba(116,242,168,.1);border:1px solid rgba(116,242,168,.4);color:#D2FBE3}
+.bonus svg{width:22px;height:22px;color:var(--red)}
+.bonus--muted{background:rgba(0,0,0,.2);border-color:rgba(237,243,234,.14);color:var(--silk-2)}
+
+/* Test de Turing */
+.boss-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px}
+.boss-h{margin:4px 0 0;font:700 clamp(30px,6vw,42px)/1 var(--f-display);color:var(--gold)}
+.meter{display:grid;gap:7px;flex:1 1 220px;max-width:340px}
+.meter-l{display:flex;justify-content:space-between;gap:8px;font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--silk-3)}
+.meter-l b{color:var(--mint)}
+.meter-bar{display:flex;gap:4px}
+.meter-bar i{flex:1;height:14px;border-radius:3px;background:rgba(237,243,234,.13)}
+.meter-bar i.on{background:var(--mint);box-shadow:0 0 10px rgba(116,242,168,.55)}
+.chat{display:grid;gap:12px;margin-top:18px}
+.chat-row{display:flex;gap:10px;align-items:flex-end}
+.chat-row--turi{justify-content:flex-end}
+.judge-av{flex:none;display:grid;place-items:center;align-content:center;gap:3px;width:56px;height:56px;border-radius:10px;background:#050B09;border:1px solid #2C3A35;color:var(--cyan);font:600 9px/1 var(--f-mono);letter-spacing:.14em}
+.judge-av svg{width:24px;height:24px}
+.turi-av{flex:none;width:56px}
+.turi-av .turi{width:56px;height:56px}
+.msg{max-width:min(82%,560px);padding:12px 15px;border-radius:12px 12px 12px 4px;background:#050B09;border:1px solid #2C3A35}
+.msg p{margin:0;min-height:1.5em;font:700 18px/1.45 var(--f-body)}
+.msg-k{display:block;margin-bottom:4px;font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.msg--turi{border-radius:12px 12px 4px 12px;background:var(--paper);color:var(--paper-ink);border-color:transparent;font:700 16.5px/1.4 var(--f-body)}
+.dots{display:inline-flex;gap:4px;padding:6px 2px}
+.dots i{width:7px;height:7px;border-radius:50%;background:#5F6F68;animation:dot 1.1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}
+.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,60%,100%{transform:none;opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+.boss-timer{display:flex;align-items:center;gap:10px;margin-top:14px}
+.ring{width:46px;height:46px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:5}
+.ring .bg{stroke:rgba(237,243,234,.13)}
+.ring .fg{stroke:var(--gold);stroke-linecap:round;transition:stroke-dashoffset .2s linear,stroke .3s}
+.boss-timer.low .fg{stroke:var(--red)}
+.t-v{font:600 24px/1 var(--f-mono);color:var(--gold);font-variant-numeric:tabular-nums;min-width:2ch}
+.boss-timer.low .t-v{color:var(--red-soft)}
+.t-l{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--silk-3)}
+
+/* Final */
+.end-hero{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.end-hero .turi{width:118px;height:118px}
+.end-hero > div{flex:1 1 300px}
+.end-title{margin:8px 0 10px;font:700 clamp(30px,6vw,50px)/1.05 var(--f-display);text-wrap:balance}
+.cert{position:relative;margin-top:26px;padding:26px 22px 22px;border-radius:14px;background:linear-gradient(160deg,#12291F,#0A1511 70%);border:1px solid rgba(244,193,82,.55);box-shadow:0 0 0 6px rgba(244,193,82,.07),0 20px 50px rgba(0,0,0,.4)}
+.cert-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font:600 11px/1.3 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.cert-name{margin:16px 0 4px;font:700 clamp(30px,6vw,46px)/1.1 var(--f-display);color:var(--silk);overflow-wrap:anywhere}
+.cert-desc{margin:0;max-width:62ch;color:var(--silk-2)}
+.cert-rank{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:16px 0 4px;padding:8px 14px;border-radius:8px;background:rgba(244,193,82,.12);border:1px solid rgba(244,193,82,.45);font:700 20px/1.2 var(--f-display);color:var(--gold-2)}
+.cert-rank span{font:600 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:18px 0 0;padding:0}
+.cert-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;margin-top:18px;padding-top:14px;border-top:1px dashed rgba(237,243,234,.2);font:500 12px/1.4 var(--f-mono);color:var(--silk-3)}
+.end-block{margin-top:28px}
+.end-block h2{margin:0 0 12px;font:700 22px/1.2 var(--f-display)}
+.star-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.sr-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid rgba(237,243,234,.1)}
+.sr-ref{font:600 13px/1 var(--f-mono);color:var(--silk-2)}
+.ach-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.ach{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:rgba(0,0,0,.2);border:1px solid rgba(237,243,234,.1);opacity:.5}
+.ach svg{width:22px;height:22px;color:var(--silk-3)}
+.ach strong{display:block;font:600 15px/1.25 var(--f-display)}
+.ach span{font-size:14px;color:var(--silk-2)}
+.ach.on{opacity:1;border-color:rgba(244,193,82,.5);background:rgba(244,193,82,.08)}
+.ach.on svg{color:var(--gold)}
+.review ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.review li{padding:14px;border-radius:10px;background:var(--panel);border:1px solid rgba(237,243,234,.12)}
+.rv-q{margin:8px 0 6px;font-weight:700}
+.rv-a{margin:0 0 6px;color:var(--mint)}
+.rv-e{margin:0;color:var(--silk-2);font-size:15.5px}
+.end-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.end-actions .btn{flex:1 1 220px}
+
+/* Efectos */
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:58}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0}
+#flash.bad{background:radial-gradient(ellipse at center,rgba(255,90,79,0) 35%,rgba(255,90,79,.5));animation:flash .55s ease-out}
+#flash.ok{background:radial-gradient(ellipse at center,rgba(116,242,168,0) 45%,rgba(116,242,168,.28));animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+.float{position:fixed;z-index:59;pointer-events:none;transform:translate(-50%,-50%);font:700 24px/1 var(--f-mono);color:var(--gold);text-shadow:0 0 12px rgba(244,193,82,.65);animation:floatUp 1.1s ease-out forwards}
+@keyframes floatUp{from{opacity:1;transform:translate(-50%,-50%)}to{opacity:0;transform:translate(-50%,-170%)}}
+#toasts{position:fixed;top:calc(72px + env(safe-area-inset-top,0px));left:50%;z-index:60;display:grid;gap:8px;width:min(92vw,380px);transform:translateX(-50%);pointer-events:none}
+.toast{display:grid;gap:2px;padding:10px 14px;border-radius:10px;background:var(--paper);color:var(--paper-ink);box-shadow:0 12px 30px rgba(0,0,0,.45);animation:toastIn .3s ease-out;transition:opacity .4s,transform .4s}
+.toast strong{font:700 16px/1.2 var(--f-display)}
+.toast span{font-size:14px}
+.toast .k{font:600 10px/1 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:#8A6310}
+.toast--info .k{color:#0E6B80}
+.toast.out{opacity:0;transform:translateY(-10px)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="sheet" class="sheet" hidden></div>
+<div id="layer"></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="flash" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<noscript><p style="padding:24px;color:#EDF3EA">Este juego necesita JavaScript activado.</p></noscript>
+<script>
+(function () {
+'use strict';
+
+/* ============ Utilidades ============ */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+const strip = s => String(s).replace(/\*\*/g, '');
+const range = n => Array.from({length: n}, (_, i) => i);
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = b[i]; b[i] = b[j]; b[j] = t; } return b; };
+const pick1 = a => a[Math.floor(Math.random() * a.length)];
+const fmt = n => Number(n || 0).toLocaleString('es-ES');
+const RM = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const mult = s => s >= 6 ? 3 : s >= 3 ? 2 : 1;
+
+/* ============ Contenido: los apuntes de la UT4 convertidos en módulos ============ */
+const MODS = [
+{
+  id: 'u1', ref: 'U1', title: '¿Qué es la IA?', slides: 'Diapositivas 2 y 3',
+  intro: 'Arrancando sistemas… ¿Qué soy yo exactamente? Enséñame qué es la inteligencia artificial.',
+  notes: [
+    {t: 'Definición', src: 'Diapo 2', pts: [
+      'La inteligencia artificial (IA) es la **ciencia que intenta crear un sistema complejo capaz de pensar y actuar por sí mismo**.',
+      'Una de sus finalidades es comprobar si puede **imitar el comportamiento humano** en **razonamiento, planificación y percepción**.'
+    ], key: 'La gran pregunta de fondo: ¿qué hace humanos a los humanos?'},
+    {t: 'La pregunta de Descartes', src: 'Diapo 2', pts: [
+      'René Descartes enunció la famosa frase **«Pienso, luego existo»** en su libro **Discurso del método (1637)**.',
+      'Descartes ya se planteaba si **un complejo sistema mecánico podría imitar el proceso de pensamiento**.',
+      'Casi cuatro siglos después, la IA sigue intentando responder a esa pregunta, ahora con ordenadores.'
+    ]},
+    {t: 'IA débil (o estrecha)', src: 'Diapo 3', pts: [
+      'Se emplea para **formular y realizar hipótesis sobre cómo funciona la mente humana**.',
+      'Sirve para **desarrollar programas que realizan una tarea particular** o trabajan en un **ámbito específico**.',
+      'Está **creada para aplicaciones específicas**. Ejemplo: Deep Blue solo sabía jugar al ajedrez.'
+    ]},
+    {t: 'IA fuerte (o general)', src: 'Diapo 3', pts: [
+      '**No simula** el comportamiento de una mente: **es una mente en sí**.',
+      'Podría **pensar, razonar, emitir juicios, planificar, aprender nuevas habilidades y comunicarse por sí sola**.',
+      '¿Cómo saber si una máquina «piensa»? Con el **Test de Turing** (1950): un juez conversa por escrito con una máquina y con una persona sin verlas. Si no sabe cuál es la máquina, esta supera la prueba.'
+    ], key: 'En un estado avanzado, ¿sería la IA fuerte más humana que los humanos?'}
+  ],
+  qs: [
+    {type: 'mc', q: '¿Qué es la inteligencia artificial según los apuntes?',
+      opts: ['La ciencia que intenta crear un sistema complejo capaz de pensar y actuar por sí mismo', 'Un programa que solo sirve para jugar al ajedrez', 'Cualquier ordenador conectado a internet', 'Un robot con forma humana que obedece órdenes'], a: 0,
+      exp: 'La IA es la **ciencia que intenta crear un sistema complejo capaz de pensar y actuar por sí mismo**.'},
+    {type: 'pick', q: 'Una finalidad de la IA es imitar el comportamiento humano en…',
+      opts: ['Razonamiento', 'Planificación', 'Percepción', 'Respiración', 'Sentir hambre', 'Soñar'], a: [0, 1, 2],
+      exp: 'La IA intenta imitar el comportamiento humano en **razonamiento, planificación y percepción**.'},
+    {type: 'tf', q: '«Pienso, luego existo» es una frase de Alan Turing.', a: false,
+      hint: 'Piensa en el filósofo que escribió «Discurso del método».',
+      exp: 'Es de **René Descartes**, en **Discurso del método (1637)**. Turing llegó casi tres siglos después.'},
+    {type: 'sort', q: '¿Este rasgo es de IA débil o de IA fuerte?', bins: ['IA débil', 'IA fuerte'],
+      items: [['Creada para aplicaciones específicas', 0], ['Es una mente en sí misma', 1], ['Realiza una tarea particular', 0], ['Aprende nuevas habilidades por sí sola', 1], ['Formula hipótesis sobre cómo funciona la mente', 0], ['Piensa, razona y emite juicios', 1]],
+      exp: 'La **IA débil** trabaja en tareas y ámbitos específicos. La **IA fuerte** sería una mente en sí, capaz de pensar, razonar, planificar y aprender sola.'},
+    {type: 'fill', q: 'Completa la pregunta que se hacía Descartes.', text: 'Descartes se preguntaba si un complejo sistema {mecánico} podría imitar el proceso de {pensamiento}.', extra: ['solar', 'digestión'],
+      exp: 'Descartes planteó si **un complejo sistema mecánico podría imitar el proceso de pensamiento**.'},
+    {type: 'mc', q: 'Deep Blue solo sabía jugar al ajedrez. ¿Qué tipo de IA era?',
+      opts: ['IA débil (o estrecha)', 'IA fuerte (o general)', 'Un prompt multimodal', 'Un robot sociable'], a: 0,
+      exp: 'Deep Blue hacía **una tarea particular en un ámbito específico**: eso es **IA débil o estrecha**.'}
+  ]
+},
+{
+  id: 'u2', ref: 'U2', title: 'La IA en acción', slides: 'Diapositivas 4 y 9',
+  intro: '¿Para qué sirvo yo en el mundo real? Muéstrame dónde se usa ya la IA.',
+  notes: [
+    {t: 'Ejemplos de aplicación', src: 'Diapo 4', pts: [
+      '**Reconocimiento de voz y rostro** avanzado.',
+      '**Software de análisis de imágenes**: analiza imágenes complejas y conjuntos de datos para **compararlos e identificar patrones**. Por ejemplo, en el **ámbito médico**.',
+      '**Motores de búsqueda**: ayudan a encontrar información en internet con **respuestas más precisas y complejas**.',
+      '**Chatbots**: pueden ser **asistentes virtuales inteligentes** en smartphones y altavoces inteligentes.',
+      '**Motores de creación de contenido**: crean **imagen y vídeo a partir de un prompt** o de una referencia.'
+    ]},
+    {t: 'Variedad en el uso de la IA', src: 'Diapo 9', pts: [
+      '**Juegos**: Deep Blue se enfrentó al campeón mundial de ajedrez **Garry Kasparov**.',
+      '**Medicina**: un equipo de la **Universidad de Málaga** creó un software que compara la **expresión genética** de enfermos de **cáncer** para ver mejor cómo responden a los tratamientos. Fue la primera vez que una herramienta así estaba al alcance de especialistas clínicos.',
+      '**Ocio y divulgación**: vídeos históricos creados con IA, como «entrevistar» a los obreros del **Acueducto de Segovia**.'
+    ], key: 'La misma tecnología sirve para jugar, curar, informar o crear.'}
+  ],
+  qs: [
+    {type: 'match', q: 'Conecta cada aplicación con lo que hace.',
+      pairs: [['Análisis de imágenes', 'Compara imágenes y detecta patrones'], ['Motor de búsqueda', 'Encuentra información en internet'], ['Chatbot', 'Asistente virtual en el móvil'], ['Creación de contenido', 'Genera imagen y vídeo desde un prompt']],
+      exp: 'Análisis de imágenes → **patrones**; motor de búsqueda → **información en internet**; chatbot → **asistente virtual**; creación de contenido → **imagen y vídeo a partir de un prompt**.'},
+    {type: 'mc', q: 'Un hospital usa IA para revisar radiografías y detectar anomalías. ¿Qué tipo de aplicación es?',
+      opts: ['Software de análisis de imágenes', 'Motor de búsqueda', 'Chatbot', 'Reconocimiento de voz'], a: 0,
+      exp: 'El **software de análisis de imágenes** compara imágenes y datos para **identificar patrones**. El ámbito médico es justo el ejemplo de los apuntes.'},
+    {type: 'tf', q: 'Los chatbots pueden funcionar como asistentes virtuales en smartphones y altavoces inteligentes.', a: true,
+      hint: 'Piensa en el asistente que te responde cuando le hablas al móvil o al altavoz de casa.',
+      exp: 'Correcto: los chatbots pueden tomar la forma de **asistentes virtuales inteligentes** en smartphones y altavoces inteligentes.'},
+    {type: 'mc', q: '¿Qué desarrolló un equipo de la Universidad de Málaga?',
+      opts: ['Un software que compara la expresión genética de enfermos de cáncer', 'Un robot que juega al Go', 'El primer chatbot psicoterapeuta', 'Un coche autónomo'], a: 0,
+      exp: 'Su software compara la **expresión genética** de enfermos de **cáncer** para observar mejor la **respuesta a los tratamientos**.'},
+    {type: 'pick', q: '¿Cuáles aparecen en los apuntes como aplicaciones de la IA?',
+      opts: ['Reconocimiento de voz y rostro', 'Motores de creación de contenido', 'Motores de búsqueda', 'Imprimir documentos en papel', 'Encender la luz con un interruptor'], a: [0, 1, 2],
+      exp: 'Las aplicaciones de los apuntes son **reconocimiento de voz y rostro, análisis de imágenes, motores de búsqueda, chatbots y creación de contenido**. Imprimir o pulsar un interruptor no necesita IA.'}
+  ]
+},
+{
+  id: 'u3', ref: 'U3', title: 'IA en emergencias', slides: 'Diapositiva 5',
+  intro: '¡Alerta! Me llaman de Protección Civil. ¿Cómo puedo ayudar en una emergencia?',
+  notes: [
+    {t: 'Antes y durante la emergencia', src: 'Diapo 5', pts: [
+      '**Predicción y prevención de riesgos**: analiza datos para **anticipar incendios, inundaciones o fenómenos extremos** y activar **alertas tempranas**.',
+      '**Gestión de emergencias**: **clasificación de llamadas, priorización de incidentes** y **optimización del envío de recursos**.',
+      '**Apoyo a decisiones**: análisis **en tiempo real** para coordinar las actuaciones de **Protección Civil**.'
+    ]},
+    {t: 'Rescate y después', src: 'Diapo 5', pts: [
+      '**Búsqueda y rescate**: uso de **drones y visión artificial** para localizar personas con rapidez.',
+      '**Evaluación posterior**: se analiza cada emergencia para **mejorar protocolos y formación**.'
+    ], key: 'La IA ayuda antes, durante y después de una emergencia.'}
+  ],
+  qs: [
+    {type: 'sort', q: '¿Pasa antes, durante o después de la emergencia?', bins: ['Antes', 'Durante', 'Después'],
+      items: [['Anticipar un incendio forestal', 0], ['Activar una alerta temprana por inundación', 0], ['Clasificar y priorizar las llamadas', 1], ['Localizar personas con drones', 1], ['Coordinar a Protección Civil en tiempo real', 1], ['Mejorar protocolos y formación', 2]],
+      exp: '**Antes**: predicción y alertas tempranas. **Durante**: gestión de llamadas, apoyo a decisiones y rescate. **Después**: evaluación para mejorar protocolos y formación.'},
+    {type: 'match', q: 'Conecta cada situación con la función de la IA.',
+      pairs: [['Un dron localiza a un montañero perdido', 'Búsqueda y rescate'], ['El 112 ordena las llamadas por gravedad', 'Gestión de emergencias'], ['Aviso antes de que llegue una riada', 'Predicción y prevención'], ['Informe tras un incendio para mejorar', 'Evaluación posterior']],
+      exp: 'Drones → **búsqueda y rescate**; ordenar llamadas → **gestión de emergencias**; avisar antes → **predicción y prevención**; informe final → **evaluación posterior**.'},
+    {type: 'tf', q: 'En una emergencia, la IA solo sirve cuando la catástrofe ya ha terminado.', a: false,
+      hint: 'Recuerda las alertas tempranas: ¿en qué momento se activan?',
+      exp: 'Ayuda **antes** (predicción y alertas), **durante** (gestión, decisiones y rescate) y **después** (evaluación).'},
+    {type: 'mc', q: '¿Qué tecnologías usa la IA en búsqueda y rescate para localizar personas con rapidez?',
+      opts: ['Drones y visión artificial', 'Altavoces inteligentes', 'Motores de búsqueda', 'Impresoras 3D'], a: 0,
+      exp: 'En búsqueda y rescate se usan **drones y visión artificial**.'},
+    {type: 'fill', q: 'Completa en qué consiste la gestión de emergencias.', text: 'La gestión de emergencias incluye la {clasificación} de llamadas, la {priorización} de incidentes y la optimización del envío de {recursos}.', extra: ['publicidad', 'eliminación'],
+      exp: 'Gestión de emergencias = **clasificación de llamadas, priorización de incidentes y optimización del envío de recursos**.'}
+  ]
+},
+{
+  id: 'u4', ref: 'U4', title: 'Prompts y datos', slides: 'Diapositivas 6, 7 y 8',
+  intro: 'Para responder necesito entradas. ¿Qué es un prompt y qué datos me alimentan?',
+  notes: [
+    {t: '¿Qué es un prompt?', src: 'Diapo 6', pts: [
+      'Es **una instrucción o entrada** que se le proporciona a un **modelo de IA** para **obtener una respuesta**.',
+      'Lo más común es el **prompt escrito**, pero hay muchos más inputs: **imágenes, audio y voz, vídeo en tiempo real, sensores de presión, temperatura o aceleración, datos biométricos, geolocalización, datos de red, sensores ambientales**…',
+      'Ejemplo: el **Autopilot de Tesla** analiza con redes neuronales las imágenes de sus cámaras para «ver» la carretera.'
+    ]},
+    {t: 'La IA es gestionar datos no estructurados', src: 'Diapo 7', pts: [
+      'Fotos, audios, vídeos o textos libres son **datos no estructurados**: no vienen ordenados en filas y columnas. Gestionarlos es la especialidad de la IA.',
+      'La IA funciona como una **refinería**: toma la **materia prima bruta** (los datos), **encuentra la aguja en el pajar** y la convierte en **valor económico**.',
+      '**Sin datos, la IA no aprende. Sin IA, los datos son inmanejables.** La rentabilidad no nace de tener los datos, sino de cómo la IA los refina.'
+    ]},
+    {t: 'Inputs humanos y prompt multimodal', src: 'Diapos 7 y 8', pts: [
+      'Las personas recibimos datos del exterior a través de los **sentidos**, y nuestro propio cuerpo también nos da inputs: **«tengo hambre», «tengo frío», «tengo sueño»**.',
+      '**Prompt multimodal**: cuando la IA recibe datos de **varias fuentes a la vez**: vídeo con sonido, sensores, imagen… todo simultáneamente.'
+    ]}
+  ],
+  qs: [
+    {type: 'mc', q: '¿Qué es un prompt en el entorno de la IA?',
+      opts: ['Una instrucción o entrada que se da a un modelo de IA para obtener una respuesta', 'La respuesta final que genera la IA', 'El chip donde se guarda la IA', 'Un tipo de robot humanoide'], a: 0,
+      exp: 'Un prompt es **una instrucción o entrada** que se proporciona a un modelo de IA **para obtener una respuesta**.'},
+    {type: 'sort', q: '¿Una sola fuente de datos o prompt multimodal?', bins: ['Una fuente', 'Multimodal'],
+      items: [['Escribir una pregunta en un chat', 0], ['Un coche que combina cámaras, radar y GPS a la vez', 1], ['Dictar un mensaje por voz', 0], ['Analizar un vídeo con su sonido en tiempo real', 1], ['Un termómetro que solo mide la temperatura', 0], ['Un reloj que cruza pulso, temperatura y ubicación', 1]],
+      exp: '**Multimodal** = varias fuentes **simultáneas** (vídeo con sonido, sensores, imagen… todo a la vez).'},
+    {type: 'mc', q: 'Según la metáfora de la refinería, ¿de dónde nace la rentabilidad?',
+      opts: ['De cómo la IA refina los datos', 'De acumular muchos datos sin usarlos', 'De comprar ordenadores más caros', 'De borrar los datos antiguos'], a: 0,
+      exp: '«La rentabilidad **no nace de tener los datos, sino de cómo la IA los refina**».'},
+    {type: 'tf', q: 'Cuando sentimos «tengo hambre» o «tengo sueño», nuestro propio cuerpo nos está dando inputs.', a: true,
+      hint: 'Los humanos recibimos datos del exterior… y también del interior.',
+      exp: 'Igual que una IA, las personas recibimos inputs del exterior (por los **sentidos**) y también de **nuestro propio cuerpo**.'},
+    {type: 'pick', q: '¿Cuáles son datos no estructurados?',
+      opts: ['Una foto', 'Un audio de voz', 'Un vídeo', 'Una tabla de notas con filas y columnas', 'Una hoja de cálculo de gastos'], a: [0, 1, 2],
+      exp: 'Fotos, audios y vídeos son **datos no estructurados**. Las tablas y hojas de cálculo están ordenadas en filas y columnas: son datos estructurados.'}
+  ]
+},
+{
+  id: 'u5', ref: 'U5', title: 'Cómo aprende la IA', slides: 'Diapositivas 10, 11 y 12',
+  intro: 'Ahora viene lo importante: cómo aprendo, en qué destaco… y cuáles son mis defectos.',
+  notes: [
+    {t: '¿Cómo aprende la IA?', src: 'Diapo 10', pts: [
+      'Ingiere **grandes cantidades de datos de entrenamiento etiquetados**.',
+      'Analiza esos datos en busca de **correlaciones y patrones**.',
+      'Usa esos patrones para **hacer predicciones sobre estados futuros**.',
+      'Con ejemplos de texto aprende a **conversar de forma realista**; revisando **millones de imágenes** aprende a **identificar y describir objetos**.'
+    ]},
+    {t: 'Machine learning y deep learning', src: 'Diapo 10', pts: [
+      '**Machine learning**: por ejemplo, un **árbol de decisión**, una serie de preguntas encadenadas (¿qué tiempo hace?, ¿tengo prisa?) que llevan a una respuesta.',
+      '**Deep learning**: una **red neuronal** de muchas capas que hace a la vez la **extracción de características y la clasificación** (por ejemplo, «coche» o «no coche»).'
+    ]},
+    {t: 'Dónde brilla y dónde no', src: 'Diapo 11', pts: [
+      'Es buena cuando **hay muchos datos** (cuanto más se alimenta, mejor aprende), se necesita **rapidez**, se busca **precisión** (cálculos, diagnósticos, predicciones) o hay **tareas repetitivas o pesadas** (clasificar documentos, revisar imágenes, contestar preguntas frecuentes). Ejemplo: una **máquina que selecciona tomates**.',
+      'No es tan buena con la **creatividad pura o la intuición** (le falta un modelo del mundo), la **empatía real y las emociones**, o los **contextos con poca información o datos muy confusos** (improvisar).'
+    ]},
+    {t: 'Desventajas', src: 'Diapo 12', pts: [
+      '**Es cara.**',
+      'Requiere **conocimientos técnicos avanzados** y **trabajadores cualificados**.',
+      '**Refleja los sesgos** de sus datos de entrenamiento.',
+      '¿**Elimina puestos de trabajo** humanos? Podría aumentar el desempleo.',
+      '**Consume mucha energía.**'
+    ]}
+  ],
+  qs: [
+    {type: 'fill', q: 'Completa cómo aprende la IA.', text: 'La IA ingiere grandes cantidades de datos de entrenamiento {etiquetados}, busca correlaciones y {patrones}, y los usa para hacer {predicciones} sobre estados futuros.', extra: ['borrados', 'canciones'],
+      exp: 'Así aprende la IA: **datos etiquetados → correlaciones y patrones → predicciones sobre estados futuros**.'},
+    {type: 'sort', label: 'Seleccionadora de tomates', q: '¿En esto la IA es buena o no tan buena?', bins: ['Buena', 'No tan buena'],
+      items: [['Clasificar miles de documentos', 0], ['Consolar a alguien con empatía real', 1], ['Hacer cálculos con gran precisión', 0], ['Improvisar con datos muy confusos', 1], ['Contestar preguntas frecuentes', 0], ['Tener una idea creativa pura por intuición', 1]],
+      exp: 'Brilla con **muchos datos, rapidez, precisión y tareas repetitivas**. Flojea en **creatividad pura, empatía real y contextos confusos**.'},
+    {type: 'pick', q: '¿Cuáles son desventajas de la IA según los apuntes?',
+      opts: ['Es cara', 'Consume mucha energía', 'Refleja los sesgos de sus datos', 'Requiere trabajadores cualificados', 'Es más lenta que una persona', 'Funciona sin necesidad de datos'], a: [0, 1, 2, 3],
+      exp: 'Desventajas: **es cara, requiere conocimientos técnicos y trabajadores cualificados, refleja sesgos, puede eliminar empleos y consume mucha energía**.'},
+    {type: 'mc', q: 'Una IA de selección de personal aprendió con datos antiguos y ahora descarta a ciertos candidatos de forma injusta. ¿Qué desventaja muestra?',
+      opts: ['Refleja los sesgos de sus datos de entrenamiento', 'Consume mucha energía', 'Es demasiado rápida', 'Es cara'], a: 0,
+      exp: 'La IA **refleja los sesgos de sus datos de entrenamiento**: si los datos eran injustos, sus decisiones también lo serán.'},
+    {type: 'mc', q: 'En el esquema de deep learning, ¿qué hace la red neuronal?',
+      opts: ['Extracción de características y clasificación a la vez', 'Solo guarda las fotos', 'Borra los datos etiquetados', 'Hace una única pregunta de sí o no'], a: 0,
+      exp: 'La red neuronal de **deep learning** hace a la vez la **extracción de características y la clasificación**. El machine learning clásico puede usar, por ejemplo, un **árbol de decisión**.'},
+    {type: 'tf', q: 'Cuantos más datos recibe una IA, peor aprende.', a: false,
+      hint: 'Recuerda la frase: «cuanto más se alimenta…».',
+      exp: 'Al revés: **cuanto más se alimenta, mejor aprende** (y mejor aún si los datos son de calidad).'}
+  ]
+},
+{
+  id: 'u6', ref: 'U6', title: 'Modelos del mundo', slides: 'Diapositivas 13 y 14',
+  intro: 'Si suelto un vaso… ¿qué pasa? Para entender la realidad necesito un modelo del mundo.',
+  notes: [
+    {t: '¿Qué es un modelo del mundo?', src: 'Diapo 13', pts: [
+      'Es **cómo comprende una IA el mundo real**. Tiene cuatro características:',
+      '**Representación del entorno**: objetos, estados, reglas y relaciones («si suelto un vaso, cae»).',
+      '**Predicción**: simular **«qué pasaría si…»** antes de actuar.',
+      '**Aprendizaje**: se actualiza con la **experiencia y los datos**.',
+      '**Planificación**: elegir las acciones con **mayor probabilidad de éxito**.',
+      'Ejemplo: **Google Veo 2** genera vídeos con una física sorprendentemente realista.'
+    ]},
+    {t: 'Usos de los modelos del mundo', src: 'Diapo 13', pts: [
+      '**Conducción autónoma**: el coche crea un modelo dinámico del **tráfico, los semáforos y los peatones**.',
+      '**Videojuegos**: los **NPC** anticipan lo que hará el jugador.',
+      '**Procesamiento del lenguaje**: un chatbot da respuestas **coherentes con el contexto**.',
+      '**Robótica**: un robot recorre una habitación **sin chocar**.'
+    ]},
+    {t: 'Robots sociables', src: 'Diapo 14', pts: [
+      'Gracias a los modelos del mundo, ayudan a **capacitar a los empleados para ser más amables y empáticos** y **se adaptan a tareas complejas**.',
+      'Buscan **comunicarse mejor analizando señales vocales**: **tono de voz, silencios prolongados** u otros indicadores de **falta de empatía o frustración**.',
+      'También quieren **aumentar la interacción física con seguridad**. Ejemplos: **Tesla Optimus Gen 2** y **Atlas** de Boston Dynamics.'
+    ]}
+  ],
+  qs: [
+    {type: 'match', q: 'Conecta cada característica del modelo del mundo con su ejemplo.',
+      pairs: [['Representación', '«Si suelto un vaso, cae»'], ['Predicción', '«¿Qué pasaría si…?»'], ['Aprendizaje', 'Se actualiza con la experiencia'], ['Planificación', 'Elige la acción con más éxito']],
+      exp: '**Representación** = reglas del entorno; **predicción** = «qué pasaría si…»; **aprendizaje** = se actualiza con experiencia y datos; **planificación** = elegir la acción con más probabilidad de éxito.'},
+    {type: 'sort', q: '¿Dónde se usa este modelo del mundo?', bins: ['Conducción', 'Videojuegos', 'Lenguaje', 'Robótica'],
+      items: [['Anticipa semáforos y peatones', 0], ['Un NPC adivina tu próximo movimiento', 1], ['Un chatbot responde coherente con la conversación', 2], ['Recorre una habitación sin chocar', 3]],
+      exp: 'Conducción autónoma → **tráfico, semáforos y peatones**; videojuegos → **NPC**; lenguaje → **respuestas coherentes con el contexto**; robótica → **navegar sin chocar**.'},
+    {type: 'mc', q: 'Para detectar frustración, un robot sociable analiza señales vocales como…',
+      opts: ['El tono de voz y los silencios prolongados', 'El color de la ropa', 'La temperatura de la sala', 'El número de pasos'], a: 0,
+      exp: 'Analizan **patrones de tono de voz, silencios prolongados** u otros indicadores de falta de empatía o frustración.'},
+    {type: 'tf', q: 'Los NPC de un videojuego pueden usar un modelo del mundo para anticipar lo que hará el jugador.', a: true,
+      hint: 'Repasa los cuatro usos de los modelos del mundo: uno de ellos son los videojuegos.',
+      exp: 'Correcto: en los videojuegos, **los NPC tienen modelos del mundo para anticipar lo que hará el jugador**.'},
+    {type: 'mc', q: '¿Cuál es uno de los objetivos de los robots sociables?',
+      opts: ['Ayudar a capacitar a los empleados para ser más amables y empáticos', 'Sustituir a todos los empleados de una empresa', 'Ganar campeonatos de ajedrez', 'Componer música'], a: 0,
+      exp: 'Los robots sociables **capacitan a los empleados para ser más amables y empáticos**, se adaptan a tareas complejas y buscan una interacción física segura.'}
+  ]
+},
+{
+  id: 'u7', ref: 'U7', title: 'Historia de la IA', slides: 'Diapositivas 15 y 16',
+  intro: '¿De dónde vengo? Viajemos en el tiempo por la historia de la IA.',
+  notes: [
+    {t: 'Los pioneros', src: 'Diapo 15', pts: [
+      '**Alan Turing (1912-1954)**, **el padre de la inteligencia artificial**, estudió la capacidad de las máquinas para **simular la conducta humana**. Hoy aparece en el **billete de 50 libras** del Banco de Inglaterra.',
+      '**1956 · Nacimiento oficial de la IA**: se acuña por primera vez el término **«Inteligencia Artificial»**.',
+      '**1956 · Logic Theorist**: el **primer programa funcional de IA**, capaz de **demostrar teoremas matemáticos**.',
+      '**1966 · ELIZA**: el **primer chatbot**. Simulaba ser un **psicoterapeuta** mediante **procesamiento del lenguaje natural**.'
+    ]},
+    {t: 'Máquinas contra campeones', src: 'Diapos 15 y 16', pts: [
+      '**1997 · Deep Blue**: la supercomputadora de **IBM** gana al campeón mundial de ajedrez **Garry Kasparov**.',
+      '**2016 · AlphaGo** (Google) vence a **Lee Sedol**, campeón mundial de **Go**, un juego **mucho más complejo que el ajedrez**.',
+      'AlphaGo marca el inicio del **boom moderno de la IA con deep learning**.'
+    ], key: 'Turing → 1956 → 1966 → 1997 → 2016.'}
+  ],
+  qs: [
+    {type: 'order', q: 'Línea temporal: ordena del más antiguo al más reciente.',
+      items: ['Alan Turing estudia si las máquinas pueden simular la conducta humana', 'Se acuña el término «Inteligencia Artificial»', 'ELIZA, el primer chatbot', 'Deep Blue vence a Kasparov', 'AlphaGo vence a Lee Sedol'],
+      exp: '**Turing (1912-1954)** → **1956** término IA → **1966** ELIZA → **1997** Deep Blue → **2016** AlphaGo.'},
+    {type: 'match', q: 'Conecta cada año con su hito.',
+      pairs: [['1956', 'Logic Theorist'], ['1966', 'ELIZA'], ['1997', 'Deep Blue'], ['2016', 'AlphaGo']],
+      exp: '**1956** Logic Theorist · **1966** ELIZA · **1997** Deep Blue · **2016** AlphaGo.'},
+    {type: 'mc', q: '¿Quién es considerado el padre de la inteligencia artificial?',
+      opts: ['Alan Turing', 'René Descartes', 'Garry Kasparov', 'Lee Sedol'], a: 0,
+      exp: '**Alan Turing (1912-1954)** es el padre de la IA: estudió la capacidad de las máquinas para simular la conducta humana.'},
+    {type: 'tf', q: 'ELIZA fue el primer chatbot y simulaba ser un psicoterapeuta.', a: true,
+      hint: 'Viaja a 1966 y busca el primer programa que conversaba.',
+      exp: 'Correcto: **ELIZA (1966)** fue el primer chatbot y simulaba ser un **psicoterapeuta** mediante procesamiento del lenguaje natural.'},
+    {type: 'mc', q: '¿Por qué fue tan importante la victoria de AlphaGo en 2016?',
+      opts: ['Ganó al Go, mucho más complejo que el ajedrez, y abrió el boom del deep learning', 'Fue la primera vez que una máquina jugó al ajedrez', 'Fue el primer chatbot de la historia', 'Demostró teoremas matemáticos por primera vez'], a: 0,
+      exp: 'AlphaGo derrotó al campeón mundial de **Go**, un juego **mucho más complejo que el ajedrez**, y marcó el inicio del **boom moderno de la IA con deep learning**.'}
+  ]
+},
+{
+  id: 'u8', ref: 'U8', title: 'Protección de datos', slides: 'Diapositiva 17',
+  intro: 'Me alimento de datos… pero no de cualquier manera. Hay leyes que protegen a las personas.',
+  notes: [
+    {t: 'Sin datos no hay IA', src: 'Diapo 17', pts: [
+      'La IA **aprende de los datos**: cuantos más y **de mejor calidad**, mejor funcionan sus modelos.',
+      'Los datos pueden ser **imágenes, texto, voz, localización, historial de navegación**…',
+      '**Sin datos, no hay inteligencia artificial funcional.**'
+    ]},
+    {t: 'Lo que dice la ley', src: 'Diapo 17', pts: [
+      'Toda empresa que realice una **actividad económica** y maneje **datos personales** debe cumplir:',
+      'El **RGPD**: Reglamento General de Protección de Datos (de la Unión Europea).',
+      'La **LOPDGDD 3/2018**: Ley Orgánica de Protección de Datos Personales y Garantía de los Derechos Digitales.',
+      'Aviso de **Sam Altman** (CEO de OpenAI): las conversaciones con ChatGPT **carecen de protección legal**. Piensa bien qué compartes.'
+    ]},
+    {t: 'Cinco principios para respetar la normativa', src: 'Diapo 17', pts: [
+      '**Consentimiento informado**: la persona debe saber en qué se usarán sus datos.',
+      '**Minimización**: usar solo los datos necesarios.',
+      '**Anonimización**: quitar los datos personales identificables.',
+      '**Derecho al olvido**: una persona puede pedir que se borren sus datos.',
+      '**Transparencia**: las empresas deben explicar cómo usan los datos.'
+    ]}
+  ],
+  qs: [
+    {type: 'match', q: 'Conecta cada principio con su significado.',
+      pairs: [['Consentimiento informado', 'Saber para qué se usarán tus datos'], ['Minimización', 'Usar solo los datos necesarios'], ['Anonimización', 'Quitar los datos que te identifican'], ['Derecho al olvido', 'Pedir que borren tus datos'], ['Transparencia', 'Explicar cómo se usan los datos']],
+      exp: 'Los cinco principios: **consentimiento informado, minimización, anonimización, derecho al olvido y transparencia**.'},
+    {type: 'fill', q: 'Completa las normas que protegen tus datos.', text: 'Las empresas que manejan datos personales deben cumplir el {RGPD} y la Ley Orgánica {3}/2018, conocida como LOPDGDD.', extra: ['15', 'IBM'],
+      exp: 'Las normas son el **RGPD** y la **LOPDGDD 3/2018** (Ley Orgánica de Protección de Datos Personales y Garantía de los Derechos Digitales).'},
+    {type: 'mc', q: 'Una app para contar pasos te pide el DNI, tu dirección y todos tus contactos. ¿Qué principio incumple?',
+      opts: ['Minimización', 'Derecho al olvido', 'Anonimización', 'Transparencia'], a: 0,
+      exp: '**Minimización**: usar solo los datos **necesarios**. Para contar pasos no hace falta tu DNI.'},
+    {type: 'tf', q: 'Una IA puede funcionar perfectamente sin ningún dato.', a: false,
+      hint: 'Recuerda la frase de los apuntes: «Sin datos, no hay…».',
+      exp: '**Sin datos, no hay inteligencia artificial funcional.**'},
+    {type: 'mc', q: 'Laura pide a una red social que borre todas sus fotos y datos personales. ¿Qué derecho ejerce?',
+      opts: ['Derecho al olvido', 'Minimización', 'Transparencia', 'Consentimiento informado'], a: 0,
+      exp: 'El **derecho al olvido** permite a una persona **pedir que se borren sus datos**.'}
+  ]
+},
+{
+  id: 'u9', ref: 'U9', title: 'Impacto de la IA', slides: 'Diapositivas 18 y 19',
+  intro: '¿Vengo a quitar trabajos o a crear otros nuevos? Analicemos mi impacto en la sociedad.',
+  notes: [
+    {t: 'Sectores más impactados', src: 'Diapo 18', pts: [
+      '**Atención al cliente** → chatbots, asistentes virtuales y sistemas automáticos.',
+      '**Medios y comunicación** → generación automática de noticias, imágenes y vídeos.',
+      '**Transporte y logística** → vehículos autónomos (como los robotaxis de San Francisco), optimización de rutas y almacenes robotizados.',
+      '**Finanzas y seguros** → algoritmos de inversión, detección de fraude y análisis de riesgos.',
+      '**Industria y manufactura** → robots en fábricas y mantenimiento predictivo.',
+      '**Sanidad** → diagnósticos automáticos, análisis de imágenes médicas y telemedicina con IA.'
+    ]},
+    {t: 'Nuevos empleos', src: 'Diapo 18', pts: [
+      '**Entrenadores de modelos de IA** (curan y etiquetan datos).',
+      '**Auditores de sesgos y ética** en IA.',
+      '**Ingenieros de prompt** (especialistas en dar instrucciones a las IA).',
+      '**Especialistas en ciberseguridad de IA.**',
+      '**Diseñadores de experiencias humano-IA.**',
+      '**Especialistas en IA en cada sector** de la sociedad.'
+    ]},
+    {t: 'Efectos en la sociedad', src: 'Diapo 19', pts: [
+      '**Creatividad e innovación**: al liberarnos de tareas repetitivas, podemos aportar de forma más creativa e innovadora.',
+      '**Ética**: preocupan la **pérdida de empleos**, la **privacidad** y la **concentración de poder** en quienes controlan estas tecnologías.',
+      '**Economía**: la IA puede impulsar la **productividad y el crecimiento**, pero también **agravar la desigualdad laboral**. Hacen falta políticas para una **transición gradual**.'
+    ]}
+  ],
+  qs: [
+    {type: 'sort', q: '¿A qué sector pertenece cada uso?', bins: ['Finanzas y seguros', 'Transporte y logística', 'Sanidad'],
+      items: [['Detección de fraude', 0], ['Optimización de rutas', 1], ['Telemedicina con IA', 2], ['Análisis de riesgos', 0], ['Almacenes robotizados', 1], ['Análisis de imágenes médicas', 2]],
+      exp: 'Finanzas → **fraude y riesgos**; transporte → **rutas y almacenes robotizados**; sanidad → **telemedicina e imágenes médicas**.'},
+    {type: 'mc', q: '¿A qué se dedica un ingeniero o ingeniera de prompt?',
+      opts: ['A dar instrucciones eficaces a las IA', 'A reparar robots en las fábricas', 'A fabricar chips', 'A conducir vehículos autónomos'], a: 0,
+      exp: 'Los **ingenieros de prompt** son especialistas en **dar instrucciones a las IA**.'},
+    {type: 'pick', q: '¿Cuáles son nuevos empleos que genera la IA según los apuntes?',
+      opts: ['Entrenador/a de modelos de IA', 'Auditor/a de sesgos y ética', 'Especialista en ciberseguridad de IA', 'Diseñador/a de experiencias humano-IA', 'Operador/a de telégrafo', 'Ascensorista'], a: [0, 1, 2, 3],
+      exp: 'Nuevos empleos: **entrenadores de modelos, auditores de sesgos y ética, ingenieros de prompt, ciberseguridad de IA, diseño de experiencias humano-IA** y especialistas en cada sector.'},
+    {type: 'tf', q: 'Según los apuntes, la IA puede impulsar la productividad pero también agravar la desigualdad laboral.', a: true,
+      hint: 'Impacto económico: más productividad y crecimiento, pero…',
+      exp: 'Correcto: puede **impulsar la productividad y el crecimiento**, pero también **agravar la desigualdad laboral**. Por eso hacen falta políticas de transición gradual.'},
+    {type: 'mc', q: '¿Qué preocupación ética aparece en los apuntes?',
+      opts: ['La concentración de poder en quienes controlan la tecnología', 'Que la IA no consume energía', 'Que la IA siempre es neutral', 'Que la IA elimina todos los sesgos'], a: 0,
+      exp: 'Las cuestiones éticas giran en torno a la **pérdida de empleos**, la **privacidad** y la **concentración de poder** en quienes controlan estas tecnologías.'}
+  ]
+},
+{
+  id: 'u10', ref: 'U10', title: 'El zoo de las IAs', slides: 'Diapositivas 20 y 21',
+  intro: '¡No soy la única IA del mundo! Te presento a las más relevantes.',
+  notes: [
+    {t: 'Sanidad y asistentes', src: 'Diapo 20', pts: [
+      '**Sanidad y biomedicina**: **IBM Watson Health** (diagnóstico asistido, oncología), **PathAI** (análisis de imágenes médicas) y **BioGPT** de Microsoft Research (textos biomédicos).',
+      '**Asistentes conversacionales y productividad**: **ChatGPT** (OpenAI), **Gemini** (Google DeepMind), **Claude** (Anthropic) y **Copilot** (Microsoft).'
+    ]},
+    {t: 'Robots y negocios', src: 'Diapo 20', pts: [
+      '**Robótica y automatización**: **Tesla Optimus** (humanoide en desarrollo), **Boston Dynamics** (Spot y Atlas) y **Figure AI** (robots para trabajo industrial).',
+      '**Negocios y datos**: **Mistral AI** (modelos ligeros y eficientes para empresas), **Palantir AI** (análisis masivo de datos estratégicos) y **DataRobot** (AutoML para predicciones empresariales).'
+    ]},
+    {t: 'Creatividad e IAs curiosas', src: 'Diapos 20 y 21', pts: [
+      '**Creatividad y multimedia**: **MidJourney** (imágenes artísticas), **Stable Diffusion** (imágenes, libre y open source), **Runway Gen-2** (vídeo) y **Suno AI** (música).',
+      '**IAs curiosas**: **Gemini Storybook** (cuentos ilustrados a tu medida), **NotebookLM** de Google (investigación, un «compañero de pensamiento»), **Ideogram** (imágenes), **Sora** de OpenAI (vídeo) y **Suno** (música).'
+    ]}
+  ],
+  qs: [
+    {type: 'match', q: 'Conecta cada IA con lo que crea o hace.',
+      pairs: [['Suno', 'Música'], ['Runway Gen-2', 'Vídeo'], ['MidJourney', 'Imágenes artísticas'], ['PathAI', 'Imágenes médicas'], ['Tesla Optimus', 'Robot humanoide']],
+      exp: 'Suno → **música**; Runway Gen-2 → **vídeo**; MidJourney → **imágenes artísticas**; PathAI → **imágenes médicas**; Tesla Optimus → **robot humanoide**.'},
+    {type: 'sort', q: 'Clasifica cada IA en su categoría.', bins: ['Asistente', 'Robótica', 'Sanidad'],
+      items: [['ChatGPT', 0], ['Copilot', 0], ['Atlas (Boston Dynamics)', 1], ['Figure AI', 1], ['IBM Watson Health', 2], ['BioGPT', 2]],
+      exp: 'Asistentes: **ChatGPT y Copilot**. Robótica: **Atlas y Figure AI**. Sanidad: **IBM Watson Health y BioGPT**.'},
+    {type: 'mc', q: '¿Qué tiene de especial Stable Diffusion?',
+      opts: ['Genera imágenes y es libre (open source)', 'Es un robot humanoide', 'Solo compone música', 'Detecta fraudes bancarios'], a: 0,
+      exp: '**Stable Diffusion** genera **imágenes** y es **libre y open source**.'},
+    {type: 'tf', q: 'Sora, de OpenAI, es una IA especializada en componer música.', a: false,
+      hint: 'Sora aparece en los apuntes junto a Runway como herramienta de…',
+      exp: '**Sora** genera **vídeo**. La música es cosa de **Suno**.'},
+    {type: 'mc', q: 'Gemini es el asistente conversacional de…',
+      opts: ['Google DeepMind', 'OpenAI', 'Anthropic', 'Tesla'], a: 0,
+      exp: '**Gemini** es de **Google DeepMind**. ChatGPT es de OpenAI, Claude de Anthropic y Copilot de Microsoft.'}
+  ]
+}
+];
+
+/* Preguntas del examen final (Test de Turing) */
+const BOSS = [
+  {type: 'mc', q: '¿Qué hacía el Logic Theorist (1956)?', opts: ['Demostrar teoremas matemáticos', 'Conversar como un psicoterapeuta', 'Jugar al Go', 'Conducir coches'], a: 0,
+    exp: 'El **Logic Theorist** fue el primer programa funcional de IA y **demostraba teoremas matemáticos**.'},
+  {type: 'mc', q: '¿En qué consiste el Test de Turing?', opts: ['Un juez conversa sin ver con quién habla y debe distinguir a la máquina de la persona', 'Una carrera de velocidad entre robots', 'Un examen de matemáticas para ordenadores', 'Una prueba que mide cuánta energía consume una IA'], a: 0,
+    exp: 'Si el juez **no distingue a la máquina de la persona**, la máquina supera el **Test de Turing**.'},
+  {type: 'tf', q: 'La IA fuerte está creada para aplicaciones específicas.', a: false, hint: '¿Qué tipo de IA era la «estrecha»?',
+    exp: 'Eso describe a la **IA débil**. La IA fuerte sería **una mente en sí misma**.'},
+  {type: 'mc', q: '¿Qué sector usa la IA para el mantenimiento predictivo?', opts: ['Industria y manufactura', 'Medios y comunicación', 'Atención al cliente', 'Finanzas y seguros'], a: 0,
+    exp: '**Industria y manufactura**: robots en fábricas y **mantenimiento predictivo**.'},
+  {type: 'mc', q: '¿Qué es un prompt multimodal?', opts: ['El que recibe datos de varias fuentes a la vez', 'Un prompt escrito muy largo', 'Un prompt en varios idiomas', 'Una respuesta de la IA con emojis'], a: 0,
+    exp: 'Un prompt es **multimodal** cuando recibe datos de **varias fuentes simultáneas**: vídeo con sonido, sensores, imagen…'},
+  {type: 'mc', q: '¿Qué IA de negocios ofrece AutoML para predicciones empresariales?', opts: ['DataRobot', 'Suno AI', 'PathAI', 'ELIZA'], a: 0,
+    exp: '**DataRobot** ofrece **AutoML para predicciones empresariales**.'},
+  {type: 'tf', q: 'La LOPDGDD es la Ley Orgánica 3/2018.', a: true, hint: 'Es la ley española que acompaña al RGPD. Mira su número en los apuntes.',
+    exp: 'Correcto: **LOPDGDD 3/2018**, Ley Orgánica de Protección de Datos Personales y Garantía de los Derechos Digitales.'},
+  {type: 'mc', q: '¿En qué juego, mucho más complejo que el ajedrez, ganó AlphaGo?', opts: ['El Go', 'Las damas', 'El parchís', 'El póker'], a: 0,
+    exp: '**AlphaGo** venció a Lee Sedol al **Go** en 2016.'},
+  {type: 'mc', q: '¿Qué nuevo empleo consiste en curar y etiquetar datos?', opts: ['Entrenador/a de modelos de IA', 'Auditor/a de sesgos', 'Ingeniero/a de prompt', 'Diseñador/a humano-IA'], a: 0,
+    exp: 'Los **entrenadores de modelos de IA** se encargan de **curar y etiquetar datos**.'},
+  {type: 'mc', q: 'En emergencias, ¿para qué sirve la evaluación posterior?', opts: ['Para mejorar protocolos y formación', 'Para activar alertas tempranas', 'Para localizar personas con drones', 'Para clasificar llamadas'], a: 0,
+    exp: 'La **evaluación posterior** analiza cada emergencia para **mejorar protocolos y formación**.'},
+  {type: 'mc', q: '«Anonimizar» datos significa…', opts: ['Quitar los datos personales identificables', 'Borrar todos los datos', 'Usar solo los datos necesarios', 'Pedir permiso antes de usarlos'], a: 0,
+    exp: '**Anonimización** = quitar los datos personales identificables.'},
+  {type: 'tf', q: 'La IA es especialmente buena mostrando empatía real y emociones.', a: false, hint: 'Repasa la lista de «dónde no es tan buena».',
+    exp: 'La **empatía real y las emociones** están en la lista de cosas en las que la IA **no es tan buena**.'},
+  {type: 'mc', q: '¿Quién venció a Garry Kasparov en 1997?', opts: ['Deep Blue, de IBM', 'AlphaGo, de Google', 'ELIZA', 'Logic Theorist'], a: 0,
+    exp: 'La supercomputadora **Deep Blue de IBM** ganó a Kasparov en **1997**.'},
+  {type: 'mc', q: '¿Qué empresa desarrolla el robot humanoide Optimus?', opts: ['Tesla', 'IBM', 'Anthropic', 'Palantir'], a: 0,
+    exp: '**Tesla Optimus** es un robot humanoide en desarrollo.'},
+  {type: 'tf', q: 'Un modelo del mundo permite a una IA simular «qué pasaría si…» antes de actuar.', a: true, hint: 'Piensa en la característica llamada «predicción».',
+    exp: 'Correcto: esa es la característica de **predicción** de los modelos del mundo.'},
+  {type: 'mc', q: 'Mistral AI es conocida por…', opts: ['Sus modelos ligeros y eficientes para empresas', 'Sus robots para fábricas', 'Generar música', 'Analizar imágenes médicas'], a: 0,
+    exp: '**Mistral AI** ofrece **modelos ligeros y eficientes para empresas**.'},
+  {type: 'mc', q: '¿Qué usa el Autopilot de Tesla para «ver» la carretera?', opts: ['Redes neuronales que analizan las imágenes de sus cámaras', 'Un árbol de decisión con tres preguntas', 'Solo el GPS', 'Un chatbot'], a: 0,
+    exp: 'El Autopilot analiza con **redes neuronales las imágenes de sus cámaras**: son sus inputs.'},
+  {type: 'tf', q: 'El término «Inteligencia Artificial» se acuñó en 1956.', a: true, hint: 'Es el mismo año del Logic Theorist.',
+    exp: 'Correcto: **1956** es el año del **nacimiento oficial de la IA**.'}
+];
+const BOSS_NEED = 6;
+const BOSS_TIME = 25;
+
+const TYPES = {
+  mc: {label: 'Elige la respuesta', icon: 'list'},
+  tf: {label: '¿Dato real o alucinación?', icon: 'toggle'},
+  pick: {label: 'Selección múltiple', icon: 'checks'},
+  sort: {label: 'Seleccionadora', icon: 'sort'},
+  order: {label: 'Línea temporal', icon: 'timeline'},
+  match: {label: 'Conecta parejas', icon: 'link'},
+  fill: {label: 'Completa el dato', icon: 'cursor'}
+};
+const LINES = {
+  ok: ['¡Dato validado! Mis neuronas brillan.', '¡Patrón detectado! Sigue así.', 'Precisión máxima. ¡Guardado en memoria!', '¡Entrenamiento correcto!', 'Esto ya no se me olvida.'],
+  bad: ['¡Bzzzt! Cortocircuito.', 'Error de entrenamiento… lo anoto.', 'Sesgo detectado. Revisemos el dato.', 'Auch, eso ha dolido en mis circuitos.', 'Dato corrupto. Aprendamos de él.'],
+  low: '¡Batería crítica! Una vida más y me apago…'
+};
+const ACH = {
+  first: {t: 'Primer arranque', d: 'Completa tu primer módulo'},
+  perfect: {t: 'Circuito limpio', d: 'Termina un módulo sin fallos'},
+  streak6: {t: 'Sobrecarga', d: 'Consigue 6 aciertos seguidos'},
+  history: {t: 'Máquina del tiempo', d: 'Completa Historia de la IA sin fallos'},
+  nohint: {t: 'Sin chuleta', d: 'Gana la misión sin usar pistas'},
+  turing: {t: 'Test superado', d: 'Supera el Test de Turing'},
+  edge: {t: 'Al límite', d: 'Gana con una sola vida'}
+};
+const PAIRC = ['#F4C152', '#62D8F0', '#C3A6FF', '#FF9F5A', '#F7A8D8'];
+
+/* ============ Iconos ============ */
+const I = p => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICON = {
+  heart: '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 21.2l-1.4-1.3C5.4 15.2 2 12.1 2 8.3 2 5.2 4.4 2.8 7.5 2.8c1.7 0 3.4.8 4.5 2.1 1.1-1.3 2.8-2.1 4.5-2.1 3.1 0 5.5 2.4 5.5 5.5 0 3.8-3.4 6.9-8.6 11.6L12 21.2z"/></svg>',
+  star: '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 17.3l6.2 3.7-1.6-7 5.4-4.7-7.2-.6L12 2 9.2 8.7 2 9.3l5.4 4.7-1.6 7z"/></svg>',
+  menu: I('<path d="M4 6h16M4 12h16M4 18h16"/>'),
+  arrow: I('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  back: I('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
+  check: I('<path d="M4.5 12.5l5 5L19.5 7"/>'),
+  x: I('<path d="M6 6l12 12M18 6L6 18"/>'),
+  warn: I('<path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5v.01"/>'),
+  lock: I('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
+  book: I('<path d="M3 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/>'),
+  bulb: I('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.1V16h5v-.1c0-.8.4-1.6 1.1-2.1A6 6 0 0 0 12 3z"/>'),
+  soundOn: I('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>'),
+  soundOff: I('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>'),
+  bolt: I('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
+  list: I('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/>'),
+  toggle: I('<rect x="2.5" y="7" width="19" height="10" rx="5"/><circle cx="16.5" cy="12" r="3"/>'),
+  checks: I('<rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="13" width="7" height="7" rx="1.5"/><path d="M14 7.5h7M14 16.5h7"/><path d="M4.8 7.6l1.4 1.4 2.4-2.6"/>'),
+  sort: I('<path d="M3 17h18"/><circle cx="7" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><rect x="8" y="8" width="8" height="6" rx="1"/><path d="M12 2v3M10 4l2 2 2-2"/>'),
+  timeline: I('<path d="M3 12h18"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/><path d="M6 6v2M12 16v2M18 6v2"/>'),
+  link: I('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
+  cursor: I('<path d="M3 8h13M3 16h7"/><path d="M18 12v9M16 12h4M16 21h4"/>'),
+  terminal: I('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/>'),
+  trophy: I('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>')
+};
+
+/* ============ TURI, el robot ============ */
+function turi(mood, size) {
+  const eyes = {
+    idle: '<rect class="eye" x="37" y="50" width="14" height="18" rx="4"/><rect class="eye" x="69" y="50" width="14" height="18" rx="4"/>',
+    think: '<rect class="eye" x="42" y="46" width="12" height="15" rx="4"/><rect class="eye" x="74" y="46" width="12" height="15" rx="4"/>',
+    happy: '<path class="eye-l" d="M36 62q8-12 16 0"/><path class="eye-l" d="M68 62q8-12 16 0"/>',
+    sad: '<path class="eye-l" d="M38 52l12 12M50 52L38 64"/><path class="eye-l" d="M70 52l12 12M82 52L70 64"/>',
+    off: '<path class="eye-l" d="M38 60h12"/><path class="eye-l" d="M70 60h12"/>'
+  };
+  const mouths = {idle: 'M52 80h16', think: 'M55 80h10', happy: 'M47 77q13 11 26 0', sad: 'M48 84q12-9 24 0', off: 'M52 81h16'};
+  const m = eyes[mood] ? mood : 'idle';
+  return `<svg class="turi turi--${m}" viewBox="0 0 120 120" width="${size}" height="${size}" aria-hidden="true">` +
+    '<path d="M60 12v14" stroke="#8F9C96" stroke-width="4" stroke-linecap="round"/>' +
+    '<circle class="turi-led" cx="60" cy="9" r="6"/>' +
+    '<rect x="9" y="46" width="10" height="26" rx="4" fill="#98A49F"/><rect x="101" y="46" width="10" height="26" rx="4" fill="#98A49F"/>' +
+    '<rect x="16" y="24" width="88" height="80" rx="16" fill="#D7DED9" stroke="#66736D" stroke-width="3"/>' +
+    '<rect x="25" y="36" width="70" height="58" rx="11" fill="#0B1411"/>' +
+    `<g>${eyes[m]}<path class="mouth" d="${mouths[m]}"/></g>` +
+    '<circle cx="24" cy="99" r="2" fill="#98A49F"/><circle cx="96" cy="99" r="2" fill="#98A49F"/>' +
+    '</svg>';
+}
+
+/* ============ Estado y guardado ============ */
+const KEY = 'mision-turing-ut4';
+const store = {
+  get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento: el juego sigue */ } }
+};
+let P = Object.assign({name: '', sound: true, notes: []}, store.get(KEY + ':prefs') || {});
+if (!Array.isArray(P.notes)) P.notes = [];
+let S = null;
+let view = 'start';
+let U = {};
+let confirmFn = null;
+let lastFocus = null;
+
+function newRun() {
+  return {v: 1, phase: 'play', mod: 0, ch: 0, lives: 5, score: 0, streak: 0, best: 0, hints: 3, usedHint: false,
+    stars: [], modErr: 0, modOk: 0, modPts: 0, log: [], ok: 0, total: 0, failedCh: null,
+    boss: {meter: 0, used: []}, t0: Date.now(), t1: null, ach: [], lifeBonus: 0};
+}
+const save = () => { if (S) store.set(KEY + ':run', S); };
+const savePrefs = () => store.set(KEY + ':prefs', P);
+const running = () => !!(S && S.phase === 'play');
+const hasSaved = () => running() && (S.mod > 0 || S.ch > 0 || S.lives < 5);
+const totalStars = () => (S ? S.stars.reduce((a, b) => a + (b || 0), 0) : 0);
+
+/* ============ Sonido (sintetizado, sin archivos) ============ */
+const SND = {
+  ctx: null,
+  ensure() {
+    if (!P.sound) return null;
+    try {
+      if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; this.ctx = new AC(); }
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) { return null; }
+    return this.ctx;
+  },
+  tone(f, d, o) {
+    o = o || {}; const c = this.ensure(); if (!c) return;
+    try {
+      const t = c.currentTime + (o.at || 0); const osc = c.createOscillator(); const g = c.createGain();
+      osc.type = o.type || 'square'; osc.frequency.setValueAtTime(f, t);
+      if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + d);
+      const v = o.vol || 0.05;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      osc.connect(g); g.connect(c.destination); osc.start(t); osc.stop(t + d + 0.03);
+    } catch (e) { /* audio no disponible */ }
+  },
+  noise(d, vol) {
+    const c = this.ensure(); if (!c) return;
+    try {
+      const len = Math.floor(c.sampleRate * d); const buf = c.createBuffer(1, len, c.sampleRate); const ch = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      const src = c.createBufferSource(); src.buffer = buf; const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1400;
+      const g = c.createGain(); g.gain.value = vol || 0.05; src.connect(f); f.connect(g); g.connect(c.destination); src.start();
+    } catch (e) { /* audio no disponible */ }
+  },
+  play(n) {
+    if (!P.sound) return;
+    switch (n) {
+      case 'click': this.tone(880, 0.05, {type: 'triangle', vol: 0.03}); break;
+      case 'select': this.tone(660, 0.06, {type: 'triangle', vol: 0.045}); break;
+      case 'ok': this.tone(660, 0.1, {vol: 0.045}); this.tone(990, 0.18, {vol: 0.045, at: 0.09}); break;
+      case 'bad': this.tone(230, 0.36, {type: 'sawtooth', vol: 0.06, to: 70}); this.noise(0.26, 0.06); break;
+      case 'buzz': this.tone(180, 0.18, {type: 'sawtooth', vol: 0.035, to: 120}); break;
+      case 'item': this.tone(1040, 0.07, {type: 'triangle', vol: 0.045}); break;
+      case 'heart': this.tone(1200, 0.08, {type: 'triangle', vol: 0.05}); this.tone(1600, 0.14, {type: 'triangle', vol: 0.05, at: 0.08}); break;
+      case 'level': [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.18, {vol: 0.045, at: i * 0.11})); break;
+      case 'star': this.tone(1320, 0.12, {type: 'triangle', vol: 0.05}); this.tone(1760, 0.12, {type: 'triangle', vol: 0.04, at: 0.07}); break;
+      case 'tick': this.tone(1500, 0.03, {vol: 0.025}); break;
+      case 'over': [392, 330, 262, 196].forEach((f, i) => this.tone(f, 0.32, {type: 'sawtooth', vol: 0.05, at: i * 0.22})); break;
+      case 'win': [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => this.tone(f, 0.2, {vol: 0.045, at: i * 0.12})); break;
+      case 'power': this.tone(110, 0.55, {type: 'sawtooth', vol: 0.035, to: 880}); break;
+      case 'hint': this.tone(740, 0.08, {type: 'sine', vol: 0.07}); this.tone(1110, 0.16, {type: 'sine', vol: 0.07, at: 0.07}); break;
+    }
+  }
+};
+function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* sin vibración */ } }
+
+/* ============ Efectos (chispas y confeti de componentes SMD) ============ */
+const FX = {
+  cv: null, cx: null, parts: [], raf: 0, dpr: 1,
+  init() { this.cv = $('#fx'); if (!this.cv || !this.cv.getContext) return; this.cx = this.cv.getContext('2d'); this.resize(); },
+  resize() { if (!this.cv) return; this.dpr = Math.min(2, window.devicePixelRatio || 1); this.cv.width = Math.round(innerWidth * this.dpr); this.cv.height = Math.round(innerHeight * this.dpr); },
+  add(p) { this.parts.push(p); if (!this.raf && this.cx) this.raf = requestAnimationFrame(() => this.tick()); },
+  burst(x, y, kind) {
+    const n = RM ? 6 : (kind === 'spark' ? 24 : 16);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, s = 2 + Math.random() * 4.5;
+      this.add({x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1.5, life: 1, decay: 0.025 + Math.random() * 0.03, kind: kind,
+        color: kind === 'spark' ? pick1(['#FFD97A', '#FF9F5A', '#FF5A4F', '#FFFFFF']) : pick1(['#F4C152', '#74F2A8', '#EDF3EA']),
+        size: 2 + Math.random() * 2, g: 0.12});
+    }
+  },
+  confetti(n) {
+    const count = RM ? Math.min(n, 16) : n;
+    for (let i = 0; i < count; i++) {
+      this.add({x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * 0.4, vx: (Math.random() - 0.5) * 2.2, vy: 2 + Math.random() * 3,
+        life: 1, decay: 0.003 + Math.random() * 0.004, kind: 'conf', color: pick1(['#F4C152', '#EDF3EA', '#FF5A4F', '#62D8F0', '#74F2A8', '#1B2220']),
+        w: 7 + Math.random() * 6, h: 3.5 + Math.random() * 2.5, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, g: 0.035});
+    }
+  },
+  tick() {
+    const c = this.cx, d = this.dpr;
+    c.setTransform(d, 0, 0, d, 0, 0); c.clearRect(0, 0, innerWidth, innerHeight);
+    this.parts = this.parts.filter(p => p.life > 0 && p.y < innerHeight + 40);
+    for (const p of this.parts) {
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+      c.globalAlpha = Math.max(0, Math.min(1, p.life));
+      if (p.kind === 'conf') {
+        p.rot += p.vr; c.save(); c.translate(p.x, p.y); c.rotate(p.rot);
+        c.fillStyle = p.color; c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        c.fillStyle = 'rgba(205,210,212,.95)'; c.fillRect(-p.w / 2, -p.h / 2, 1.8, p.h); c.fillRect(p.w / 2 - 1.8, -p.h / 2, 1.8, p.h);
+        c.restore();
+      } else if (p.kind === 'spark') {
+        c.strokeStyle = p.color; c.lineWidth = 2; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x - p.vx * 2.4, p.y - p.vy * 2.4); c.stroke();
+      } else {
+        c.fillStyle = p.color; c.beginPath(); c.arc(p.x, p.y, p.size, 0, Math.PI * 2); c.fill();
+      }
+    }
+    c.globalAlpha = 1;
+    if (this.parts.length) this.raf = requestAnimationFrame(() => this.tick());
+    else { this.raf = 0; c.clearRect(0, 0, innerWidth, innerHeight); }
+  }
+};
+function flash(kind) { const f = $('#flash'); if (!f) return; f.className = ''; void f.offsetWidth; f.className = kind; }
+function shake() { if (RM) return; const m = $('#app'); m.classList.remove('shake'); void m.offsetWidth; m.classList.add('shake'); setTimeout(() => m.classList.remove('shake'), 450); }
+function floatText(txt, x, y) { const el = document.createElement('div'); el.className = 'float'; el.textContent = txt; el.style.left = x + 'px'; el.style.top = y + 'px'; document.body.appendChild(el); setTimeout(() => el.remove(), 1150); }
+function toast(title, sub, info) {
+  const box = $('#toasts'); const el = document.createElement('div');
+  el.className = 'toast' + (info ? ' toast--info' : '');
+  el.innerHTML = `<span class="k">${info ? 'Aviso' : 'Logro desbloqueado'}</span><strong>${esc(title)}</strong>${sub ? `<span>${esc(sub)}</span>` : ''}`;
+  box.appendChild(el);
+  setTimeout(() => el.classList.add('out'), info ? 2200 : 3400);
+  setTimeout(() => el.remove(), info ? 2700 : 3900);
+}
+function unlock(id) { if (!S || S.ach.indexOf(id) >= 0) return; S.ach.push(id); toast(ACH[id].t, ACH[id].d); SND.play('star'); }
+
+/* ============ Piezas de interfaz ============ */
+const starRow = n => `<span class="stars">${[0, 1, 2].map(k => `<span class="st ${k < n ? 'on' : ''}">${ICON.star}</span>`).join('')}</span>`;
+function heartsHTML() { return range(5).map(i => `<span class="heart ${i < S.lives ? 'on' : 'off'}">${ICON.heart}</span>`).join(''); }
+function hudHTML(mode) {
+  let mid;
+  if (mode === 'play') {
+    const m = MODS[S.mod]; const n = m.qs.length;
+    mid = `<div class="hud-mod"><span class="ref">${m.ref}</span><span class="hud-t">${esc(m.title)}</span></div>
+      <div class="segs" role="img" aria-label="Reto ${Math.min(S.ch + 1, n)} de ${n}">${range(n).map(i => `<i class="${i < S.ch ? 'done' : i === S.ch ? 'cur' : ''}"></i>`).join('')}</div>`;
+  } else if (mode === 'boss') {
+    mid = `<div class="hud-mod"><span class="ref">CPU</span><span class="hud-t">Test de Turing</span></div><div class="hud-stars">${ICON.star}<span>${totalStars()}/30</span></div>`;
+  } else {
+    mid = `<div class="hud-mod"><span class="ref">OP</span><span class="hud-t">${esc(P.name || 'Operador/a')}</span></div><div class="hud-stars">${ICON.star}<span>${totalStars()}/30</span></div>`;
+  }
+  return `<header class="hud"><div class="wrap hud-in">
+    <button class="icon-btn" data-act="menu" aria-label="Abrir menú de pausa">${ICON.menu}</button>
+    <div class="hud-mid">${mid}</div>
+    <div class="hud-right">
+      <div class="lives" role="img" aria-label="Vidas: ${S.lives} de 5">${heartsHTML()}</div>
+      <div class="score"><span class="lbl">Puntos</span><span class="val" id="scoreVal" data-v="${S.score}">${fmt(S.score)}</span></div>
+    </div></div></header>`;
+}
+function updateScore() {
+  const el = $('#scoreVal'); if (!el) return;
+  const from = +(el.dataset.v || 0), to = S.score; el.dataset.v = to;
+  if (RM || from === to) { el.textContent = fmt(to); return; }
+  const t0 = performance.now();
+  const step = t => { const k = Math.min(1, (t - t0) / 500); el.textContent = fmt(Math.round(from + (to - from) * k)); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function datasheetHTML() {
+  return `<section class="datasheet" aria-labelledby="dsT">
+    <div class="ds-head"><h2 id="dsT">Hoja de datos de la misión</h2><span>TURI-UT4 · REV 1.0</span></div>
+    <div class="ds-scroll"><table><tbody>
+      <tr><th scope="row">Vidas</th><td>5 para toda la misión</td></tr>
+      <tr><th scope="row">Reto fallado</th><td><span class="neg">−1 vida</span>, y TURI te explica la respuesta</td></tr>
+      <tr><th scope="row">Módulo perfecto</th><td><span class="pos">+1 vida</span> (nunca más de 5)</td></tr>
+      <tr><th scope="row">Racha</th><td>3 aciertos seguidos: puntos x2 · 6 seguidos: x3</td></tr>
+      <tr><th scope="row">Pistas</th><td>3 comodines para toda la partida</td></tr>
+      <tr><th scope="row">Recorrido</th><td>10 módulos con los apuntes + el Test de Turing final</td></tr>
+      <tr><th scope="row">0 vidas</th><td>TURI se apaga y la misión vuelve a empezar</td></tr>
+    </tbody></table></div>
+  </section>`;
+}
+function noteHTML(c, h) {
+  return `<article class="note"><header class="note-head"><${h}>${esc(c.t)}</${h}><span class="note-src">${esc(c.src)}</span></header>
+    <ul class="note-list">${c.pts.map(p => `<li>${md(p)}</li>`).join('')}</ul>
+    ${c.key ? `<p class="note-key"><span>Idea clave</span>${md(c.key)}</p>` : ''}</article>`;
+}
+const hintBox = t => `<div class="hintbox">${ICON.bulb}<p>${md(t)}</p></div>`;
+
+/* ============ Pantallas ============ */
+function startHTML() {
+  const saved = hasSaved() ? S : null;
+  const finished = S && (S.phase === 'over' || S.phase === 'win');
+  const where = saved ? (saved.mod < MODS.length ? MODS[saved.mod].ref : 'Test final') : '';
+  return `<div class="wrap wrap--wide start-bar"><button class="icon-btn" data-act="sound" aria-label="${P.sound ? 'Silenciar el sonido' : 'Activar el sonido'}">${P.sound ? ICON.soundOn : ICON.soundOff}</button></div>
+  <main class="wrap wrap--wide screen screen--start">
+    <div class="start-grid">
+      <div>
+        <p class="eyebrow">UT4 · Aplicación de la inteligencia artificial</p>
+        <h1 class="title"><span class="title-sm">Misión</span><span class="title-lg">Turing</span></h1>
+        <p class="lead">TURI es un prototipo de IA recién encendido y su red neuronal está vacía. Entrena a TURI con los apuntes de la unidad, módulo a módulo, hasta que supere el <strong>Test de Turing</strong>. Tienes <strong>5 vidas</strong> para conseguirlo.</p>
+        <form class="start-form" id="startForm" autocomplete="off" novalidate>
+          <label for="opName">Tu nombre de operador/a</label>
+          <div class="start-row">
+            <input id="opName" name="opName" type="text" maxlength="24" placeholder="Escribe tu nombre" value="${esc(P.name)}">
+            ${saved
+              ? `<button class="btn btn-primary" type="button" data-act="continue">Continuar · ${where} · ${saved.lives} ${saved.lives === 1 ? 'vida' : 'vidas'} ${ICON.arrow}</button>`
+              : `<button class="btn btn-primary" type="submit">Encender a TURI ${ICON.arrow}</button>`}
+          </div>
+          <div class="start-alt">
+            ${saved ? '<button class="link" type="button" data-act="ask-new">Empezar una misión nueva</button>' : ''}
+            ${finished ? `<button class="link" type="button" data-act="last">Ver el resultado de tu última misión</button>` : ''}
+            ${P.notes.length ? '<button class="link" type="button" data-act="notes">Repasar los apuntes desbloqueados</button>' : ''}
+          </div>
+        </form>
+      </div>
+      <div class="start-visual">
+        <p class="bubble bubble--down">¡Hola! Soy <strong>TURI</strong>. ¿Me ayudas a aprender cómo funciona la IA?</p>
+        ${turi('idle', 200)}
+      </div>
+    </div>
+    ${datasheetHTML()}
+    <p class="foot">Basado en las 21 diapositivas de la UT4 · 10 módulos · 52 retos · 1 examen final</p>
+  </main>`;
+}
+
+function mapLine() {
+  const nm = esc(P.name || 'operador/a');
+  if (S.mod >= MODS.length) return `¡Todos mis módulos están cargados, ${nm}! Toca la <strong>CPU</strong> para hacer el Test de Turing.`;
+  const m = MODS[S.mod];
+  if (S.lives <= 1) return `Batería crítica… Con mucho cuidado en <strong>${m.ref} · ${esc(m.title)}</strong>.`;
+  if (S.mod === 0 && S.ch === 0) return `¡Hola, ${nm}! Toca el chip <strong>U1</strong> para cargar mis primeros datos.`;
+  if (S.ch > 0) return `Nos quedamos a mitad de <strong>${m.ref} · ${esc(m.title)}</strong>. ¡Seguimos!`;
+  return `Siguiente parada: <strong>${m.ref} · ${esc(m.title)}</strong>. ¡Vamos!`;
+}
+function mapHTML() {
+  const pct = Math.round(S.mod / (MODS.length + 1) * 100);
+  const on = Math.round(pct / 10);
+  return hudHTML('map') + `<main class="wrap screen screen--map">
+    <h1 class="sr-only" tabindex="-1">Mapa de la misión</h1>
+    <div class="map-top">
+      ${turi(S.lives <= 1 ? 'think' : 'idle', 84)}
+      <div class="map-talk">
+        <p class="bubble">${mapLine()}</p>
+        <div class="meter-line" role="img" aria-label="Entrenamiento de TURI: ${pct} por ciento"><span>Entrenamiento</span><span class="bar">${range(10).map(i => `<i class="${i < on ? 'on' : ''}"></i>`).join('')}</span><span class="v">${pct} %</span></div>
+      </div>
+    </div>
+    <div class="map-tools">
+      <button class="btn btn-ghost btn-sm" data-act="notes">${ICON.book} Apuntes</button>
+      <span class="hint-count">${ICON.bulb} ${S.hints} ${S.hints === 1 ? 'pista' : 'pistas'}</span>
+    </div>
+    <div class="board" id="board" role="group" aria-label="Mapa de módulos"></div>
+  </main>`;
+}
+function route(x1, y1, x2, y2) {
+  const ym = Math.round((y1 + y2) / 2), c = 12;
+  if (Math.abs(x2 - x1) < 2 * c) return `M${x1} ${y1} V${y2}`;
+  const s = x2 > x1 ? 1 : -1;
+  return `M${x1} ${y1} V${ym - c} L${x1 + s * c} ${ym} H${x2 - s * c} L${x2} ${ym + c} V${y2}`;
+}
+function drawBoard() {
+  const el = $('#board'); if (!el) return;
+  const W = Math.max(280, el.clientWidth); const n = MODS.length;
+  const chipW = Math.min(250, Math.round(W * 0.62)); const chipH = 80; const pitch = chipH + 58; const top0 = 64;
+  const leftX = Math.max(18, Math.round(W / 2 - chipW - 30));
+  const rightX = Math.min(W - chipW - 18, Math.round(W / 2 + 30));
+  const boxes = range(n).map(i => ({x: i % 2 === 0 ? leftX : rightX, y: top0 + i * pitch, w: chipW, h: chipH}));
+  const cpuW = Math.min(320, W - 60), cpuH = 118;
+  boxes.push({x: Math.round((W - cpuW) / 2), y: top0 + n * pitch + 12, w: cpuW, h: cpuH});
+  const H = boxes[n].y + cpuH + 34;
+  el.style.height = H + 'px';
+  const cx = b => Math.round(b.x + b.w / 2);
+  let svg = `<svg class="board-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <defs><filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+  const jx = Math.round(W / 2);
+  const paths = [{d: route(jx, 30, cx(boxes[0]), boxes[0].y), lit: true, i: -1}];
+  for (let i = 0; i < n; i++) paths.push({d: route(cx(boxes[i]), boxes[i].y + boxes[i].h, cx(boxes[i + 1]), boxes[i + 1].y), lit: S.mod >= i + 1 && U.hideTrace !== i, i: i});
+  paths.forEach(p => {
+    svg += `<path class="trace" d="${p.d}"/>`;
+    if (p.lit) {
+      const anim = U.animTrace === p.i;
+      svg += `<path class="trace-lit${anim ? ' trace-anim' : ''}" d="${p.d}" filter="url(#glow)"/>`;
+      if (!RM && !anim) svg += `<path class="trace-flow" d="${p.d}"/>`;
+    }
+  });
+  boxes.forEach(b => { svg += `<rect class="pad-end" x="${cx(b) - 6}" y="${b.y - 5}" width="12" height="6" rx="1"/>`; if (b !== boxes[n]) svg += `<rect class="pad-end" x="${cx(b) - 6}" y="${b.y + b.h - 1}" width="12" height="6" rx="1"/>`; });
+  svg += `<g class="j1"><rect x="${jx - 44}" y="6" width="88" height="24" rx="3"/>${range(5).map(k => `<rect class="pin" x="${jx - 35 + k * 15}" y="12" width="8" height="12" rx="1"/>`).join('')}<text x="${jx + 52}" y="23">J1 · INICIO</text></g>`;
+  for (let i = 0; i < n; i++) {
+    const b = boxes[i]; const left = i % 2 === 0;
+    const fx0 = left ? b.x + b.w + 14 : 12, fx1 = left ? W - 12 : b.x - 14;
+    if (fx1 - fx0 < 86) continue;
+    const dx = Math.round((fx0 + fx1) / 2 - 41), dy = b.y + 22;
+    svg += `<g class="decor${i < S.mod ? ' lit' : ''}" transform="translate(${dx} ${dy})">
+      <rect class="pad" x="0" y="4" width="8" height="10" rx="1.5"/><rect class="silk-o" x="10" y="2" width="26" height="14" rx="3"/><rect class="pad" x="38" y="4" width="8" height="10" rx="1.5"/>
+      <text class="silk-t" x="23" y="31" text-anchor="middle">R${i + 1}</text>
+      <circle class="led-ring" cx="72" cy="9" r="9"/><circle class="led" cx="72" cy="9" r="5"${i < S.mod ? ' filter="url(#glow)"' : ''}/>
+      <text class="silk-t" x="72" y="31" text-anchor="middle">D${i + 1}</text></g>`;
+  }
+  svg += '</svg>';
+  let chips = MODS.map((m, i) => {
+    const b = boxes[i]; const st = i < S.mod ? 'done' : i === S.mod ? 'current' : 'locked';
+    const meta = st === 'done' ? `<span class="chip-meta" aria-label="${S.stars[i] || 0} de 3 estrellas">${starRow(S.stars[i] || 0)}</span>`
+      : st === 'current' ? `<span class="chip-meta">${S.ch > 0 ? 'Continuar' : 'Empezar'} ${ICON.arrow}</span>`
+      : `<span class="chip-meta">${ICON.lock} Bloqueado</span>`;
+    return `<button class="chip chip--${st}" data-act="chip" data-i="${i}" style="left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px"${st === 'locked' ? ' aria-disabled="true"' : ''}>
+      <span class="chip-ref">${m.ref}<em>${m.qs.length} retos</em></span><span class="chip-name">${esc(m.title)}</span>${meta}</button>`;
+  }).join('');
+  const cb = boxes[n]; const cst = S.mod >= n ? 'current' : 'locked';
+  chips += `<button class="chip chip--cpu chip--${cst}" data-act="chip" data-i="${n}" style="left:${cb.x}px;top:${cb.y}px;width:${cb.w}px;height:${cb.h}px"${cst === 'locked' ? ' aria-disabled="true"' : ''}>
+    <span class="cpu-pins cpu-pins--t" aria-hidden="true"></span><span class="cpu-pins cpu-pins--b" aria-hidden="true"></span>
+    <span class="chip-ref">CPU · Examen final</span><span class="chip-name">Test de Turing</span>
+    <span class="chip-meta">${cst === 'current' ? `¡Al examen! ${ICON.arrow}` : `${ICON.lock} Completa los 10 módulos`}</span></button>`;
+  el.innerHTML = svg + chips;
+  if (U.animTrace != null) {
+    const p = el.querySelector('.trace-anim');
+    if (p && p.getTotalLength && !RM) {
+      const L = Math.ceil(p.getTotalLength());
+      p.style.strokeDasharray = L; p.style.strokeDashoffset = L;
+      p.getBoundingClientRect();
+      p.style.transition = 'stroke-dashoffset 1.1s ease-in-out'; p.style.strokeDashoffset = 0;
+      setTimeout(() => SND.play('power'), 60);
+    }
+    U.animTrace = null;
+  }
+}
+function scrollToCurrent() {
+  const c = $('.chip--current'); if (!c) return;
+  const r = c.getBoundingClientRect();
+  if (r.top < 90 || r.bottom > innerHeight - 20) c.scrollIntoView({block: 'center', behavior: RM ? 'auto' : 'smooth'});
+}
+
+function introHTML() {
+  const m = MODS[S.mod]; const k = U.card || 0; const n = m.notes.length; const last = k === n - 1;
+  return hudHTML('map') + `<main class="wrap screen screen--intro">
+    <div class="intro-head"><span class="ref-badge">${m.ref}</span><div><h1 class="intro-title" tabindex="-1">${esc(m.title)}</h1><p class="intro-src">Apuntes · ${m.slides}</p></div></div>
+    <div class="talk">${turi('think', 64)}<p class="bubble">${esc(m.intro)}</p></div>
+    <div class="load"><span>Cargando datos</span><span class="bar">${range(n).map(i => `<i class="${i <= k ? 'on' : ''}"></i>`).join('')}</span><span>${k + 1}/${n}</span></div>
+    ${noteHTML(m.notes[k], 'h2')}
+    <div class="intro-nav">
+      <button class="btn btn-ghost" data-act="card-prev"${k === 0 ? ' disabled' : ''}>${ICON.back} Anterior</button>
+      ${last ? `<button class="btn btn-primary" data-act="begin">Empezar los retos ${ICON.arrow}</button>` : `<button class="btn btn-primary" data-act="card-next">Siguiente ${ICON.arrow}</button>`}
+    </div>
+    <p class="intro-skip"><button class="link" data-act="to-map">Volver al mapa</button></p>
+  </main>`;
+}
+
+function tagsHTML(q) {
+  const t = TYPES[q.type]; const nx = mult(S.streak + 1);
+  return `<span class="q-type">${ICON[t.icon]}${esc(q.label || t.label)}</span>${S.streak >= 2 ? `<span class="q-streak">Racha ${S.streak}${nx > 1 ? ' · siguiente x' + nx : ''}</span>` : ''}`;
+}
+function playHTML() {
+  const q = U.cq;
+  const title = q.type === 'tf' ? 'Analiza esta afirmación de TURI' : md(q.q);
+  return hudHTML('play') + `<main class="wrap screen screen--play">
+    <div class="q-head">
+      <div class="q-turi" id="qTuri" data-size="64">${turi('idle', 64)}</div>
+      <div class="q-meta"><div class="q-tags" id="qTags">${tagsHTML(q)}</div><h1 class="q-text" tabindex="-1">${title}</h1></div>
+    </div>
+    <div class="q-body" id="qbody">${qBodyHTML(q)}</div>
+    <div class="q-hint" id="qhint"${U.hintText ? '' : ' hidden'}>${U.hintText ? hintBox(U.hintText) : ''}</div>
+    <div class="q-actions">
+      <button class="btn btn-hint" data-act="hint"${hintDisabled(q) ? ' disabled' : ''}>${ICON.bulb} Pista <span class="n">${S.hints}</span></button>
+      ${q.type === 'sort' ? '<span class="q-note">Toca el contenedor correcto</span>' : `<button class="btn btn-primary" id="checkBtn" data-act="check"${canCheck(q) ? '' : ' disabled'}>Comprobar</button>`}
+    </div>
+  </main>`;
+}
+
+/* Cuerpo de cada tipo de reto */
+function qBodyHTML(q) {
+  const u = U.q; const dis = U.done || (view === 'boss' && U.typing);
+  const D = dis ? ' disabled' : '';
+  switch (q.type) {
+    case 'mc':
+      return `<div class="opts">${u.order.map((oi, k) => {
+        const removed = u.removed.indexOf(oi) >= 0; let c = '';
+        if (U.done) c = oi === q.a ? 'is-right' : (oi === u.sel ? 'is-wrong' : 'is-dim');
+        else if (removed) c = 'is-removed'; else if (u.sel === oi) c = 'is-sel';
+        return `<button class="opt ${c}" data-act="opt" data-i="${oi}"${dis || removed ? ' disabled' : ''} aria-pressed="${u.sel === oi}"><span class="opt-k">${'ABCDEF'[k]}</span><span class="opt-t">${md(q.opts[oi])}</span>${U.done && oi === q.a ? `<span class="opt-mark">${ICON.check}</span>` : ''}</button>`;
+      }).join('')}</div>`;
+    case 'tf': {
+      const b = (v, label, icon) => {
+        let c = '';
+        if (U.done) c = v === q.a ? 'is-right' : (u.sel === v ? 'is-wrong' : 'is-dim');
+        else if (u.sel === v) c = 'is-sel';
+        return `<button class="opt opt--tf ${c}" data-act="tf" data-v="${v ? 1 : 0}"${D} aria-pressed="${u.sel === v}">${icon}<span>${label}</span></button>`;
+      };
+      const stmt = view === 'boss' ? '' : `<div class="tf-term"><span class="tf-pr" aria-hidden="true">&gt;_</span><p>${md(q.q)}</p></div>`;
+      return `${stmt}<div class="tf-opts">${b(true, 'Dato real', ICON.check)}${b(false, 'Alucinación', ICON.warn)}</div>
+        <p class="help">Una <strong>alucinación</strong> es una respuesta falsa de una IA que suena convincente.</p>`;
+    }
+    case 'pick':
+      return `<p class="count-line">Marca <strong>${q.a.length}</strong> · llevas <strong>${u.sel.size}</strong></p><div class="picks">${u.order.map(oi => {
+        const on = u.sel.has(oi); let c = on ? 'is-sel' : '';
+        if (U.done) { const good = q.a.indexOf(oi) >= 0; c = good ? (on ? 'is-right' : 'is-missed') : (on ? 'is-wrong' : 'is-dim'); }
+        else if (u.locked === oi) c += ' is-locked';
+        return `<button class="pick ${c}" data-act="pick" data-i="${oi}"${D} aria-pressed="${on}"><span class="box">${ICON.check}</span><span>${md(q.opts[oi])}</span></button>`;
+      }).join('')}</div>`;
+    case 'sort': {
+      const n = q.items.length; const fin = u.pos >= n; const idx = fin ? null : u.queue[u.pos];
+      const rev = !fin && u.reveal > 0 ? q.items[idx][1] : -1;
+      return `<div class="belt"><div class="belt-track" aria-hidden="true"></div>
+          <div class="belt-item" id="beltItem" aria-live="polite">${fin ? '¡Todo clasificado!' : esc(q.items[idx][0])}</div>
+          <span class="belt-count">${Math.min(u.pos + 1, n)}/${n}</span>${u.errors ? `<span class="belt-err">${u.errors} ${u.errors === 1 ? 'error' : 'errores'}</span>` : ''}</div>
+        <div class="bins bins--${q.bins.length}">${q.bins.map((b, bi) => `<button class="bin${bi === rev ? ' bin--reveal' : ''}" data-act="bin" data-b="${bi}"${fin || dis || u.busy ? ' disabled' : ''}><span class="bin-k">${bi + 1}</span><span class="bin-name">${esc(b)}</span><span class="bin-n">${u.count[bi]}</span></button>`).join('')}</div>
+        <p class="sort-msg" id="sortMsg" aria-live="polite">${esc(u.msg || '')}</p>`;
+    }
+    case 'order': {
+      const n = q.items.length; const pool = u.pool.filter(i => u.placed.indexOf(i) < 0); let helped = false;
+      const slots = range(n).map(k => {
+        const it = u.placed[k]; const has = it != null; let c = has ? 'filled' : '';
+        if (U.done && has) c += it === k ? ' is-right' : ' is-wrong';
+        else if (k < u.lock) c += ' is-locked';
+        let txt = '—'; if (has) txt = esc(q.items[it]); else if (!helped) { txt = 'Toca un evento para colocarlo aquí'; helped = true; }
+        return `<li><button class="slot ${c}" data-act="ord-rm" data-k="${k}"${!has || dis || k < u.lock ? ' disabled' : ''}><span class="slot-n">${k + 1}</span><span>${txt}</span></button></li>`;
+      }).join('');
+      return `<ol class="slots">${slots}</ol>${pool.length ? `<p class="count-line">Eventos por colocar</p><div class="pool">${pool.map(i => `<button class="tok" data-act="ord-add" data-i="${i}"${D}>${esc(q.items[i])}</button>`).join('')}</div>` : ''}`;
+    }
+    case 'match': {
+      const leftOf = j => { let r = -1; Object.keys(u.pairs).forEach(l => { if (u.pairs[l] === j) r = +l; }); return r; };
+      const L = q.pairs.map((p, i) => {
+        const has = u.pairs[i] != null; let c = has ? ' is-paired' : '';
+        if (U.done) c += u.pairs[i] === i ? ' is-right' : ' is-wrong';
+        else { if (u.selL === i) c += ' is-sel'; if (u.lockL === i) c += ' is-locked'; }
+        return `<button class="m-item${c}" data-act="m-left" data-i="${i}"${has ? ` style="--pc:${PAIRC[i]}"` : ''}${D} aria-pressed="${u.selL === i}"><span class="m-badge">${has ? i + 1 : ''}</span><span>${esc(p[0])}</span></button>`;
+      }).join('');
+      const R = u.right.map(j => {
+        const l = leftOf(j); const has = l >= 0; let c = has ? ' is-paired' : '';
+        if (U.done && has) c += l === j ? ' is-right' : ' is-wrong';
+        return `<button class="m-item${c}" data-act="m-right" data-i="${j}"${has ? ` style="--pc:${PAIRC[l]}"` : ''}${D}><span class="m-badge">${has ? l + 1 : ''}</span><span>${esc(q.pairs[j][1])}</span></button>`;
+      }).join('');
+      const tip = U.done ? 'Resultado de tus parejas' : (u.selL != null ? 'Ahora toca su pareja en la columna derecha' : 'Toca un elemento de la izquierda y luego su pareja');
+      return `<p class="count-line">${tip}</p><div class="match"><div class="m-col">${L}</div><div class="m-col">${R}</div></div>`;
+    }
+    case 'fill': {
+      let html = '';
+      u.segs.forEach((s, k) => {
+        html += md(s);
+        if (k < u.answers.length) {
+          const id = u.slots[k]; const has = id != null; let c = has ? 'filled' : '';
+          if (U.done) c += has && u.bank[id].w === u.answers[k] ? ' is-right' : ' is-wrong';
+          else { if (!has && u.active === k) c += ' active'; if (u.lockGap === k) c += ' is-locked'; }
+          html += `<button class="gap ${c}" data-act="fill-gap" data-k="${k}"${dis || u.lockGap === k ? ' disabled' : ''} aria-label="Hueco ${k + 1}${has ? ': ' + esc(u.bank[id].w) : ', vacío'}">${has ? esc(u.bank[id].w) : '?'}</button>`;
+        }
+      });
+      const bank = u.bank.filter(b => u.slots.indexOf(b.id) < 0);
+      return `<p class="fill-text">${html}</p>${bank.length ? `<p class="count-line">Palabras disponibles</p><div class="bank">${bank.map(b => `<button class="tok" data-act="fill-tok" data-i="${b.id}"${D}>${esc(b.w)}</button>`).join('')}</div>` : ''}`;
+    }
+  }
+  return '';
+}
+
+function prepare(q) {
+  switch (q.type) {
+    case 'mc': return {order: shuffle(range(q.opts.length)), sel: null, removed: []};
+    case 'tf': return {sel: null};
+    case 'pick': return {order: shuffle(range(q.opts.length)), sel: new Set(), locked: null};
+    case 'sort': return {queue: shuffle(range(q.items.length)), pos: 0, errors: 0, count: q.bins.map(() => 0), msg: '', busy: false, reveal: 0, lifeTaken: false};
+    case 'order': { let pool = shuffle(range(q.items.length)); if (pool.every((v, i) => v === i)) pool = pool.reverse(); return {pool, placed: [], lock: 0}; }
+    case 'match': { let right = shuffle(range(q.pairs.length)); if (right.every((v, i) => v === i)) right = right.reverse(); return {right, pairs: {}, selL: 0, lockL: null}; }
+    case 'fill': {
+      const parts = q.text.split(/\{([^}]+)\}/); const segs = [], answers = [];
+      parts.forEach((p, k) => { if (k % 2) answers.push(p); else segs.push(p); });
+      const bank = shuffle(answers.concat(q.extra || [])).map((w, id) => ({w, id}));
+      return {segs, answers, bank, slots: answers.map(() => null), active: 0, lockGap: null};
+    }
+  }
+  return {};
+}
+const activeQ = () => (view === 'boss' ? BOSS[U.bi] : U.cq);
+function canCheck(q) {
+  const u = U.q; if (!u) return false;
+  switch (q.type) {
+    case 'mc': case 'tf': return u.sel !== null && u.sel !== undefined;
+    case 'pick': return u.sel.size === q.a.length;
+    case 'order': return u.placed.length === q.items.length;
+    case 'match': return q.pairs.every((_, i) => u.pairs[i] != null);
+    case 'fill': return u.slots.every(s => s != null);
+  }
+  return false;
+}
+function isCorrect(q, u) {
+  switch (q.type) {
+    case 'mc': case 'tf': return u.sel === q.a;
+    case 'pick': return u.sel.size === q.a.length && q.a.every(i => u.sel.has(i));
+    case 'order': return u.placed.length === q.items.length && u.placed.every((v, k) => v === k);
+    case 'match': return q.pairs.every((_, i) => u.pairs[i] === i);
+    case 'fill': return u.slots.every((id, k) => id != null && u.bank[id].w === u.answers[k]);
+  }
+  return false;
+}
+function hintDisabled(q) {
+  if (!S || S.hints <= 0 || U.hintUsed || U.done) return true;
+  if (view === 'boss' && U.typing) return true;
+  if (q.type === 'tf' && !q.hint) return true;
+  if (q.type === 'sort' && U.q && U.q.pos >= q.items.length) return true;
+  return false;
+}
+function plainQ(q) { return q.type === 'fill' ? strip(q.text.replace(/\{[^}]+\}/g, '___')) : strip(q.q); }
+function plainSol(q) {
+  switch (q.type) {
+    case 'mc': return strip(q.opts[q.a]);
+    case 'tf': return q.a ? 'Dato real' : 'Alucinación (es falso)';
+    case 'pick': return q.a.map(i => strip(q.opts[i])).join(' · ');
+    case 'sort': return q.bins.map((b, bi) => b + ': ' + q.items.filter(it => it[1] === bi).map(it => it[0]).join(', ')).join(' | ');
+    case 'order': return q.items.join(' → ');
+    case 'match': return q.pairs.map(p => p[0] + ' → ' + p[1]).join(' · ');
+    case 'fill': return q.text.replace(/\{([^}]+)\}/g, '$1');
+  }
+  return '';
+}
+function solutionHTML(q) {
+  switch (q.type) {
+    case 'mc': return `<p>${md(q.opts[q.a])}</p>`;
+    case 'tf': return `<p>${q.a ? '<strong>Dato real</strong>: la afirmación es verdadera.' : '<strong>Alucinación</strong>: la afirmación es falsa.'}</p>`;
+    case 'pick': return `<ul>${q.a.map(i => `<li>${md(q.opts[i])}</li>`).join('')}</ul>`;
+    case 'sort': return `<ul>${q.bins.map((b, bi) => `<li><strong>${esc(b)}:</strong> ${q.items.filter(it => it[1] === bi).map(it => esc(it[0])).join(' · ')}</li>`).join('')}</ul>`;
+    case 'order': return `<ol>${q.items.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`;
+    case 'match': return `<ul>${q.pairs.map(p => `<li>${esc(p[0])} → <strong>${esc(p[1])}</strong></li>`).join('')}</ul>`;
+    case 'fill': return `<p>${esc(q.text).replace(/\{([^}]+)\}/g, '<strong>$1</strong>')}</p>`;
+  }
+  return '';
+}
+function renderQ() {
+  const q = activeQ(); const body = $('#qbody'); if (!q || !body) return;
+  const a = document.activeElement; let sel = null;
+  if (a && a.dataset && a.dataset.act && body.contains(a)) {
+    const d = a.dataset; const attr = d.i != null ? 'i' : d.k != null ? 'k' : d.b != null ? 'b' : d.v != null ? 'v' : null;
+    if (attr) sel = `[data-act="${d.act}"][data-${attr}="${d[attr]}"]`;
+  }
+  body.innerHTML = qBodyHTML(q);
+  const cb = $('#checkBtn'); if (cb) cb.disabled = U.done || !canCheck(q) || (view === 'boss' && U.typing);
+  const hb = $('[data-act="hint"]'); if (hb) { hb.disabled = hintDisabled(q); const n = hb.querySelector('.n'); if (n) n.textContent = S.hints; }
+  const hint = $('#qhint'); if (hint) { hint.hidden = !U.hintText; hint.innerHTML = U.hintText ? hintBox(U.hintText) : ''; }
+  if (sel) { const el = body.querySelector(sel); if (el && !el.disabled) el.focus({preventScroll: true}); else if (cb && !cb.disabled) cb.focus({preventScroll: true}); }
+}
+function setMood(m) {
+  const el = $('#qTuri') || $('#bossTuri'); if (!el) return;
+  el.innerHTML = turi(m, +(el.dataset.size || 64));
+  if (RM) return;
+  el.classList.remove('bounce', 'hurt'); void el.offsetWidth;
+  if (m === 'happy') el.classList.add('bounce');
+  if (m === 'sad') el.classList.add('hurt');
+}
+
+/* ============ Lógica de juego ============ */
+function loseLife() {
+  S.lives = Math.max(0, S.lives - 1);
+  SND.play('bad'); buzz(140);
+  const h = $$('.hud .heart')[S.lives];
+  if (h) {
+    h.classList.remove('on'); h.classList.add('off');
+    if (!RM) { h.classList.add('breaking'); setTimeout(() => h.classList.remove('breaking'), 700); }
+    const r = h.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, 'spark');
+  }
+  const lv = $('.hud .lives'); if (lv) lv.setAttribute('aria-label', 'Vidas: ' + S.lives + ' de 5');
+  flash('bad'); shake();
+}
+function celebrate(pts, mu) {
+  SND.play('ok'); flash('ok'); setMood('happy');
+  const anchor = $('#checkBtn') || $('#qbody');
+  if (anchor) { const r = anchor.getBoundingClientRect(); const x = r.left + r.width / 2, y = Math.max(80, r.top); FX.burst(x, y, 'dot'); floatText('+' + fmt(pts) + (mu > 1 ? ' x' + mu : ''), x, y - 14); }
+}
+function setupQ() {
+  U.cq = MODS[S.mod].qs[S.ch]; U.q = prepare(U.cq); U.done = false; U.hintUsed = false; U.hintText = '';
+}
+function startChallenges() {
+  view = 'play'; U = {}; setupQ(); render(); window.scrollTo(0, 0);
+}
+function check() {
+  const q = activeQ(); if (!q || U.done || !canCheck(q)) return;
+  if (view === 'boss' && U.typing) return;
+  const ok = isCorrect(q, U.q);
+  U.done = true; renderQ();
+  if (view === 'boss') bossResolve(ok, false); else resolve(ok);
+}
+function resolve(ok) {
+  const q = U.cq;
+  const already = !!(S.failedCh && S.failedCh.mod === S.mod && S.failedCh.ch === S.ch);
+  const good = ok && !already;
+  S.total++;
+  let pts = 0, mu = 1;
+  if (good) {
+    S.ok++; S.modOk++; S.streak++; S.best = Math.max(S.best, S.streak);
+    mu = mult(S.streak); pts = 100 * mu; S.score += pts; S.modPts += pts;
+    celebrate(pts, mu);
+    if (S.streak >= 6) unlock('streak6');
+  } else {
+    if (!already) loseLife(); else SND.play('buzz');
+    S.modErr++; S.streak = 0; setMood('sad');
+    S.log.push({ref: MODS[S.mod].ref, q: plainQ(q), a: plainSol(q), exp: q.exp});
+  }
+  S.failedCh = null; S.ch++;
+  save(); updateScore();
+  const tg = $('#qTags'); if (tg) tg.innerHTML = tagsHTML(q);
+  showSheet(good, q, pts, mu, {});
+}
+function useHint() {
+  const q = activeQ(); if (!q || hintDisabled(q)) return;
+  const u = U.q; let text = '';
+  switch (q.type) {
+    case 'mc': { const wrong = shuffle(range(q.opts.length).filter(i => i !== q.a)).slice(0, 2); u.removed = wrong; if (wrong.indexOf(u.sel) >= 0) u.sel = null; text = 'He descartado dos opciones incorrectas.'; break; }
+    case 'tf': text = q.hint; break;
+    case 'pick': {
+      const miss = q.a.filter(i => !u.sel.has(i));
+      if (!miss.length) { text = 'Todo lo que has marcado es correcto. ¡Comprueba!'; break; }
+      const i = miss[0];
+      if (u.sel.size >= q.a.length) { const bad = Array.from(u.sel).find(x => q.a.indexOf(x) < 0); if (bad != null) u.sel.delete(bad); }
+      u.sel.add(i); u.locked = i; text = `«${strip(q.opts[i])}» es correcta. Te la dejo marcada.`; break;
+    }
+    case 'sort': u.reveal = 2; text = 'Resalto en azul el contenedor correcto para los 2 siguientes elementos.'; break;
+    case 'order': u.placed = [0].concat(u.placed.filter(i => i !== 0)); u.lock = 1; text = 'He colocado el primer elemento en su sitio.'; break;
+    case 'match': {
+      const i = range(q.pairs.length).find(k => u.pairs[k] !== k);
+      if (i == null) { text = 'Tus parejas ya están bien. ¡Comprueba!'; break; }
+      Object.keys(u.pairs).forEach(l => { if (u.pairs[l] === i) delete u.pairs[l]; });
+      u.pairs[i] = i; u.lockL = i; if (u.selL === i) u.selL = range(q.pairs.length).find(k => u.pairs[k] == null); if (u.selL === undefined) u.selL = null;
+      text = `Pareja fijada: «${q.pairs[i][0]}» con «${q.pairs[i][1]}».`; break;
+    }
+    case 'fill': {
+      const k = range(u.answers.length).find(g => u.slots[g] == null || u.bank[u.slots[g]].w !== u.answers[g]);
+      if (k == null) { text = 'Todos los huecos están bien. ¡Comprueba!'; break; }
+      const b = u.bank.find(x => x.w === u.answers[k]); const where = u.slots.indexOf(b.id);
+      if (where >= 0) u.slots[where] = null;
+      u.slots[k] = b.id; u.lockGap = k; u.active = u.slots.findIndex(s => s == null);
+      text = 'He rellenado un hueco por ti.'; break;
+    }
+  }
+  S.hints--; S.usedHint = true; U.hintUsed = true; U.hintText = text;
+  SND.play('hint'); save(); renderQ();
+}
+function sortPick(bi) {
+  const q = activeQ(), u = U.q;
+  if (!q || q.type !== 'sort' || U.done || u.busy || u.pos >= q.items.length) return;
+  const right = q.items[u.queue[u.pos]][1];
+  u.busy = true; $$('.bin').forEach(b => { b.disabled = true; });
+  if (u.reveal > 0) u.reveal--;
+  const item = $('#beltItem'), bin = $(`.bin[data-b="${bi}"]`);
+  if (bi === right) {
+    u.count[bi]++; u.msg = ''; SND.play('item');
+    if (bin) { bin.classList.add('bin--ok'); const nEl = bin.querySelector('.bin-n'); if (nEl) nEl.textContent = u.count[bi]; }
+    if (item) item.classList.add('fly');
+    setTimeout(sortNext, RM ? 120 : 380);
+  } else {
+    u.errors++; u.count[right]++; u.msg = `Ese iba en «${q.bins[right]}».`;
+    const m = $('#sortMsg'); if (m) m.textContent = u.msg;
+    if (item) item.classList.add('wrong');
+    if (bin) bin.classList.add('bin--bad');
+    const rb = $(`.bin[data-b="${right}"]`); if (rb) rb.classList.add('bin--reveal');
+    if (!u.lifeTaken) { u.lifeTaken = true; S.failedCh = {mod: S.mod, ch: S.ch}; loseLife(); setMood('sad'); save(); }
+    else SND.play('buzz');
+    if (S.lives <= 0) { setTimeout(() => { if (U.q !== u) return; U.done = true; renderQ(); resolve(false); }, 800); return; }
+    setTimeout(sortNext, RM ? 400 : 1300);
+  }
+}
+function sortNext() {
+  const q = activeQ(), u = U.q; if (!q || q.type !== 'sort') return;
+  u.pos++; u.busy = false;
+  if (u.pos >= q.items.length) { U.done = true; renderQ(); resolve(u.errors === 0); }
+  else { renderQ(); setMood('idle'); }
+}
+function showSheet(ok, q, pts, mu, opt) {
+  const sh = $('#sheet'); const last = S.lives <= 0;
+  const title = ok ? '¡Correcto!' : (opt.timeout ? '¡Tiempo agotado!' : '¡Cortocircuito!');
+  const tag = ok ? `+${fmt(pts)}${mu > 1 ? ' · x' + mu : ''}` : '−1 vida';
+  const line = ok ? pick1(LINES.ok) : (S.lives === 1 ? LINES.low : pick1(LINES.bad));
+  sh.innerHTML = `<div class="wrap sheet-in" role="status">
+    <div class="sheet-head">${ok ? ICON.check : ICON.bolt}<strong>${title}</strong><span class="sheet-pts">${tag}</span></div>
+    <p class="sheet-turi">TURI: «${esc(line)}»</p>
+    ${ok ? '' : `<div class="sheet-box"><p class="lbl">${ICON.check} Solución</p>${solutionHTML(q)}</div>`}
+    <div class="sheet-box"><p class="lbl">${ICON.book} Apuntes</p><p>${md(q.exp)}</p></div>
+    <button class="btn btn-primary btn-block" data-act="next" id="nextBtn">${last ? 'Ver resultado' : 'Continuar'} ${ICON.arrow}</button>
+  </div>`;
+  sh.className = 'sheet ' + (ok ? 'sheet--ok' : 'sheet--bad');
+  sh.hidden = false; document.body.classList.add('sheet-open');
+  requestAnimationFrame(() => requestAnimationFrame(() => sh.classList.add('open')));
+  setTimeout(() => { const b = $('#nextBtn'); if (b) b.focus({preventScroll: true}); }, 90);
+}
+function closeSheet() { const sh = $('#sheet'); sh.classList.remove('open'); sh.hidden = true; sh.innerHTML = ''; document.body.classList.remove('sheet-open'); }
+function next() {
+  closeSheet();
+  if (S.lives <= 0) { gameOver(); return; }
+  if (view === 'boss') { bossNext(); return; }
+  if (S.ch >= MODS[S.mod].qs.length) { completeModule(); return; }
+  setupQ(); render(); window.scrollTo(0, 0);
+}
+function completeModule() {
+  const i = S.mod, m = MODS[i], errs = S.modErr;
+  const stars = errs === 0 ? 3 : errs === 1 ? 2 : 1;
+  S.stars[i] = stars;
+  const sum = {i, stars, ok: S.modOk, n: m.qs.length, pts: S.modPts, life: false, bonus: 0};
+  if (errs === 0) { if (S.lives < 5) { S.lives++; sum.life = true; } else { S.score += 300; sum.bonus = 300; } }
+  S.mod++; S.ch = 0; S.modErr = 0; S.modOk = 0; S.modPts = 0; S.failedCh = null;
+  if (i === 0) unlock('first');
+  if (errs === 0) unlock('perfect');
+  if (m.id === 'u7' && errs === 0) unlock('history');
+  save();
+  view = 'map'; U = {hideTrace: i}; render(); window.scrollTo(0, 0);
+  if (sum.life) { const h = $$('.hud .heart')[S.lives - 1]; if (h && !RM) h.classList.add('gain'); }
+  openModal(doneHTML(sum), 'close-done');
+  SND.play('level'); if (sum.life) setTimeout(() => SND.play('heart'), 650);
+  FX.confetti(70);
+}
+function doneHTML(s) {
+  const m = MODS[s.i];
+  const bonus = s.life ? `<p class="bonus">${ICON.heart}<span>Módulo perfecto: <strong>+1 vida</strong></span></p>`
+    : s.bonus ? `<p class="bonus">${ICON.heart}<span>Módulo perfecto con las vidas al máximo: <strong>+${s.bonus} puntos</strong></span></p>`
+    : '<p class="bonus bonus--muted">Completa un módulo sin fallos para recuperar una vida.</p>';
+  return `<div class="panel" role="dialog" aria-modal="true" aria-labelledby="doneT">
+    <p class="eyebrow">${m.ref} · Módulo completado</p><h2 id="doneT">${esc(m.title)}</h2>
+    <div class="big-stars" role="img" aria-label="${s.stars} de 3 estrellas">${[0, 1, 2].map(k => `<span class="bs ${k < s.stars ? 'on' : ''}" style="--d:${(k * 0.22).toFixed(2)}s">${ICON.star}</span>`).join('')}</div>
+    <dl class="stat-row"><div class="stat"><dt>Aciertos</dt><dd>${s.ok}/${s.n}</dd></div><div class="stat"><dt>Puntos</dt><dd>+${fmt(s.pts)}</dd></div></dl>
+    ${bonus}
+    <button class="btn btn-primary btn-block" data-act="close-done" style="margin-top:14px">Volver al mapa ${ICON.arrow}</button>
+  </div>`;
+}
+
+/* ----- Test de Turing ----- */
+function startBoss() {
+  view = 'boss'; U = {}; bossSetup(); render(); window.scrollTo(0, 0);
+  openModal(`<div class="panel" role="dialog" aria-modal="true" aria-labelledby="biT">
+    <p class="eyebrow">CPU · Examen final</p><h2 id="biT">El Test de Turing</h2>
+    <p>Un juez humano va a chatear con TURI sin saber si habla con una persona o con una máquina. Si TURI responde bien, el juez no podrá distinguir a TURI de un ser humano.</p>
+    <ul class="plain"><li>Necesitas <strong>${BOSS_NEED} respuestas correctas</strong> para convencer al juez.</li><li>Tienes <strong>${BOSS_TIME} segundos</strong> por pregunta.</li><li>Cada fallo o tiempo agotado cuesta <strong>1 vida</strong>.</li></ul>
+    <button class="btn btn-primary btn-block" data-act="boss-go">¡Que empiece el test! ${ICON.arrow}</button></div>`, 'boss-go');
+}
+function bossSetup() {
+  const avail = range(BOSS.length).filter(i => S.boss.used.indexOf(i) < 0);
+  U.bi = avail.length ? pick1(avail) : pick1(range(BOSS.length));
+  U.q = prepare(BOSS[U.bi]); U.done = false; U.resolved = false; U.hintUsed = false; U.hintText = ''; U.typing = true; U.paused = false; U.tid = 0;
+}
+function bossPrompt(q) { return q.type === 'tf' ? '¿Dato real o alucinación? ' + q.q : q.q; }
+function bossHTML() {
+  const q = BOSS[U.bi];
+  return hudHTML('boss') + `<main class="wrap screen screen--boss">
+    <div class="boss-top">
+      <div><p class="eyebrow">Examen final · CPU</p><h1 class="boss-h" tabindex="-1">Test de Turing</h1></div>
+      <div class="meter" role="img" aria-label="Convencimiento del juez: ${S.boss.meter} de ${BOSS_NEED}">
+        <span class="meter-l"><span>Convencimiento del juez</span><b id="meterV">${S.boss.meter}/${BOSS_NEED}</b></span>
+        <span class="meter-bar" id="meterBar">${range(BOSS_NEED).map(i => `<i class="${i < S.boss.meter ? 'on' : ''}"></i>`).join('')}</span>
+      </div>
+    </div>
+    <div class="chat">
+      <div class="chat-row"><div class="judge-av" aria-hidden="true">${ICON.terminal}<span>JUEZ</span></div>
+        <div class="msg"><span class="msg-k">Juez · pregunta ${S.boss.used.length + 1}</span><p id="bossQ" aria-live="polite">${U.typing ? '' : md(bossPrompt(q))}</p></div></div>
+      <div class="chat-row chat-row--turi"><div class="msg msg--turi" id="bossA"><span class="dots" role="img" aria-label="TURI está pensando"><i></i><i></i><i></i></span></div>
+        <div class="turi-av" id="bossTuri" data-size="56">${turi('think', 56)}</div></div>
+    </div>
+    <div class="boss-timer" id="bossTimer"><svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="bg" cx="22" cy="22" r="18"/><circle class="fg" id="ringFg" cx="22" cy="22" r="18" stroke-dasharray="113.1" stroke-dashoffset="0"/></svg><span class="t-v" id="tval">${BOSS_TIME}</span><span class="t-l">segundos para responder</span></div>
+    <div class="q-body" id="qbody">${qBodyHTML(q)}</div>
+    <div class="q-hint" id="qhint" hidden></div>
+    <div class="q-actions">
+      <button class="btn btn-hint" data-act="hint"${hintDisabled(q) ? ' disabled' : ''}>${ICON.bulb} Pista <span class="n">${S.hints}</span></button>
+      <button class="btn btn-primary" id="checkBtn" data-act="check" disabled>Responder</button>
+    </div>
+  </main>`;
+}
+function bossStartTyping() {
+  const q = BOSS[U.bi]; const el = $('#bossQ'); const full = bossPrompt(q);
+  clearInterval(U.typeId);
+  if (RM || !el) { if (el) el.innerHTML = md(full); U.typing = false; onTyped(); return; }
+  const plain = strip(full); let k = 0; U.typing = true;
+  U.typeId = setInterval(() => {
+    k += 2; el.textContent = plain.slice(0, k);
+    if (k >= plain.length) { clearInterval(U.typeId); el.innerHTML = md(full); U.typing = false; onTyped(); }
+  }, 22);
+}
+function onTyped() {
+  renderQ();
+  if ($('#layer').firstChild) { U.paused = true; U.remain = BOSS_TIME * 1000; return; }
+  bossTimerStart(BOSS_TIME * 1000);
+}
+function bossTimerStart(ms) { clearInterval(U.tid); U.tEnd = Date.now() + ms; U.lastTick = null; bossTick(); U.tid = setInterval(bossTick, 200); }
+function bossTick() {
+  if (view !== 'boss' || U.done) { clearInterval(U.tid); return; }
+  const left = Math.max(0, (U.tEnd - Date.now()) / 1000);
+  const fg = $('#ringFg'), tv = $('#tval'), box = $('#bossTimer');
+  if (fg) fg.style.strokeDashoffset = (113.1 * (1 - left / BOSS_TIME)).toFixed(1);
+  if (tv) tv.textContent = Math.ceil(left);
+  if (box) box.classList.toggle('low', left <= 8);
+  const s = Math.ceil(left);
+  if (left <= 5 && left > 0 && s !== U.lastTick) { U.lastTick = s; SND.play('tick'); }
+  if (left <= 0) { clearInterval(U.tid); U.done = true; renderQ(); bossResolve(false, true); }
+}
+function pauseBoss() { if (view === 'boss' && U.tid && !U.done && !U.paused) { U.remain = U.tEnd - Date.now(); clearInterval(U.tid); U.tid = 0; U.paused = true; } }
+function resumeBoss() { if (view === 'boss' && U.paused && !U.done && !U.typing) { U.paused = false; bossTimerStart(Math.max(1000, U.remain)); } }
+function bossResolve(ok, timeout) {
+  if (U.resolved) return; U.resolved = true; U.done = true; clearInterval(U.tid);
+  const q = BOSS[U.bi]; const u = U.q;
+  const ans = $('#bossA');
+  if (ans) ans.textContent = timeout ? '(TURI se ha quedado en blanco)' : (q.type === 'tf' ? (u.sel ? 'Es un dato real.' : 'Eso es una alucinación.') : strip(q.opts[u.sel]));
+  if (S.boss.used.indexOf(U.bi) < 0) S.boss.used.push(U.bi);
+  S.total++;
+  let pts = 0, mu = 1;
+  if (ok) {
+    S.ok++; S.streak++; S.best = Math.max(S.best, S.streak); mu = mult(S.streak);
+    const left = Math.max(0, Math.ceil((U.tEnd - Date.now()) / 1000));
+    pts = 150 * mu + left * 5; S.score += pts; S.boss.meter++;
+    celebrate(pts, mu);
+    if (S.streak >= 6) unlock('streak6');
+  } else {
+    S.streak = 0; loseLife(); setMood('sad');
+    S.log.push({ref: 'CPU', q: plainQ(q), a: plainSol(q), exp: q.exp});
+  }
+  save(); updateScore();
+  const mb = $('#meterBar'); if (mb) mb.innerHTML = range(BOSS_NEED).map(i => `<i class="${i < S.boss.meter ? 'on' : ''}"></i>`).join('');
+  const mv = $('#meterV'); if (mv) mv.textContent = S.boss.meter + '/' + BOSS_NEED;
+  showSheet(ok, q, pts, mu, {timeout: timeout});
+}
+function bossNext() {
+  if (S.boss.meter >= BOSS_NEED) { win(); return; }
+  bossSetup(); render(); window.scrollTo(0, 0); bossStartTyping();
+}
+function win() {
+  S.phase = 'win'; S.t1 = Date.now(); S.lifeBonus = S.lives * 300; S.score += S.lifeBonus;
+  unlock('turing'); if (S.lives === 1) unlock('edge'); if (!S.usedHint) unlock('nohint');
+  save(); view = 'win'; U = {}; render(); window.scrollTo(0, 0);
+  SND.play('win'); FX.confetti(160); if (!RM) setTimeout(() => FX.confetti(110), 1100);
+}
+function gameOver() {
+  S.phase = 'over'; S.t1 = Date.now(); save();
+  closeOverlay(true); view = 'over'; U = {}; render(); window.scrollTo(0, 0); SND.play('over');
+}
+
+/* ----- Pantallas finales ----- */
+function rankFor(st) { return st >= 27 ? 'Leyenda de Turing' : st >= 22 ? 'Mente maestra de la IA' : st >= 16 ? 'Promesa del deep learning' : 'Aprendiz de datos'; }
+function endHTML(won) {
+  const st = totalStars(); const acc = S.total ? Math.round(S.ok / S.total * 100) : 0;
+  const mins = Math.max(1, Math.round(((S.t1 || Date.now()) - S.t0) / 60000));
+  const done = Math.min(S.mod, MODS.length);
+  const serial = 'TUR-' + (S.t0 % 2176782336).toString(36).toUpperCase().padStart(6, '0');
+  const date = new Date(S.t1 || Date.now()).toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'});
+  const starsGrid = MODS.map((m, i) => `<div class="sr-item"><span class="sr-ref">${m.ref}</span>${starRow(S.stars[i] || 0)}</div>`).join('');
+  const ach = Object.keys(ACH).map(k => `<li class="ach${S.ach.indexOf(k) >= 0 ? ' on' : ''}">${ICON.trophy}<div><strong>${ACH[k].t}</strong><span>${ACH[k].d}</span></div></li>`).join('');
+  const review = S.log.length
+    ? `<section class="end-block review"><h2>Para repasar (${S.log.length})</h2><ol>${S.log.map(e => `<li><span class="ref-badge sm">${esc(e.ref)}</span><p class="rv-q">${esc(e.q)}</p><p class="rv-a">Solución: ${esc(e.a)}</p><p class="rv-e">${md(e.exp)}</p></li>`).join('')}</ol></section>`
+    : '<section class="end-block"><h2>Para repasar</h2><p class="empty">No has fallado ningún reto. Impecable.</p></section>';
+  const stats = `<dl class="stat-grid">
+      <div class="stat"><dt>Puntuación</dt><dd>${fmt(S.score)}</dd></div>
+      <div class="stat"><dt>Estrellas</dt><dd>${st}/30</dd></div>
+      <div class="stat"><dt>Vidas</dt><dd>${S.lives}/5</dd></div>
+      <div class="stat"><dt>Precisión</dt><dd>${acc} %</dd></div>
+      <div class="stat"><dt>Mejor racha</dt><dd>${S.best}</dd></div>
+      <div class="stat"><dt>Tiempo</dt><dd>${mins} min</dd></div>
+    </dl>`;
+  const actions = `<div class="end-actions"><button class="btn btn-primary" data-act="again">${won ? 'Jugar otra vez' : 'Reintentar la misión'} ${ICON.arrow}</button><button class="btn btn-ghost" data-act="notes">${ICON.book} Repasar apuntes</button></div>`;
+  if (won) {
+    return `<main class="wrap wrap--wide screen screen--end">
+      <div class="end-hero">${turi('happy', 118)}<div><p class="eyebrow">Misión cumplida</p><h1 class="end-title" tabindex="-1">¡TURI ha superado el Test de Turing!</h1>
+        <p class="lead">El juez no ha sabido distinguir a TURI de un ser humano. Todo gracias a tu entrenamiento${S.lifeBonus ? ` (+${fmt(S.lifeBonus)} puntos por las vidas que te quedaban)` : ''}.</p></div></div>
+      <section class="cert" aria-label="Certificado de entrenamiento">
+        <div class="cert-top"><span>Certificado de entrenamiento</span><span>Nº ${serial}</span></div>
+        <p class="cert-name">${esc(P.name || 'Operador/a')}</p>
+        <p class="cert-desc">ha entrenado a TURI con los apuntes de la <strong>UT4 · Aplicación de la inteligencia artificial</strong> y ha superado el Test de Turing.</p>
+        <p class="cert-rank"><span>Rango</span>${rankFor(st)}</p>
+        ${stats}
+        <div class="cert-foot"><span>${date}</span><span>Haz una captura para enseñársela a tu profe</span></div>
+      </section>
+      <section class="end-block"><h2>Estrellas por módulo</h2><div class="star-grid">${starsGrid}</div></section>
+      <section class="end-block"><h2>Logros</h2><ul class="ach-list">${ach}</ul></section>
+      ${review}${actions}
+    </main>`;
+  }
+  const where = S.mod < MODS.length ? `${MODS[S.mod].ref} · ${esc(MODS[S.mod].title)}` : 'el Test de Turing';
+  return `<main class="wrap wrap--wide screen screen--end">
+    <div class="end-hero">${turi('off', 118)}<div><p class="eyebrow">Sin energía</p><h1 class="end-title" tabindex="-1">TURI se ha apagado</h1>
+      <p class="lead">Te has quedado sin vidas en <strong>${where}</strong>. Has completado <strong>${done} de 10 módulos</strong>. Repasa los fallos de abajo y vuelve a intentarlo: esta vez lo sabes mejor.</p></div></div>
+    <section class="end-block">${stats}</section>
+    <section class="end-block"><h2>Estrellas por módulo</h2><div class="star-grid">${starsGrid}</div></section>
+    ${review}${actions}
+  </main>`;
+}
+
+/* ============ Capas: menú, apuntes, confirmaciones ============ */
+function openModal(html, closeAct) {
+  pauseBoss();
+  if (!$('#layer').firstChild) lastFocus = document.activeElement;
+  $('#layer').innerHTML = `<div class="overlay" data-close="${closeAct || 'close-ov'}">${html}</div>`;
+  const f = $('#layer .panel [data-act]:not(:disabled), #layer .panel button:not(:disabled)');
+  if (f) f.focus({preventScroll: true});
+}
+function closeOverlay(silent) {
+  const had = !!$('#layer').firstChild;
+  $('#layer').innerHTML = '';
+  if (!silent) resumeBoss();
+  if (had && lastFocus && document.body.contains(lastFocus)) { try { lastFocus.focus({preventScroll: true}); } catch (e) { /* nada */ } }
+  lastFocus = null;
+}
+function openMenu() {
+  const inQ = view === 'play' || view === 'boss';
+  openModal(`<div class="panel" role="dialog" aria-modal="true" aria-labelledby="menuT">
+    <p class="eyebrow">Menú</p><h2 id="menuT">Pausa</h2>
+    <div class="menu-list">
+      <button class="btn btn-primary" data-act="close-ov">Seguir jugando</button>
+      ${view === 'intro' ? '<button class="btn btn-ghost" data-act="to-map">Volver al mapa</button>' : ''}
+      ${inQ ? '' : `<button class="btn btn-ghost" data-act="notes">${ICON.book} Apuntes</button>`}
+      <button class="btn btn-ghost" data-act="sound">${P.sound ? ICON.soundOn : ICON.soundOff} Sonido: ${P.sound ? 'activado' : 'desactivado'}</button>
+      <button class="btn btn-ghost" data-act="howto">Cómo se juega</button>
+      <button class="btn btn-danger" data-act="ask-restart">Reiniciar la misión</button>
+      <button class="link" data-act="home">Ir a la portada</button>
+    </div>
+    ${inQ ? '<p class="help">Durante un reto, los apuntes se quedan cerrados. Usa las pistas si te atascas.</p>' : ''}
+  </div>`);
+}
+function notesAvail(i) { return P.notes.indexOf(i) >= 0 && !(running() && i === S.mod && S.ch > 0); }
+function openNotes(sel) {
+  let cur = sel;
+  if (cur == null || P.notes.indexOf(cur) < 0) { const list = P.notes.filter(notesAvail); cur = list.length ? Math.max.apply(null, list) : null; }
+  const tabs = MODS.map((m, i) => `<button class="ntab${i === cur ? ' on' : ''}" data-act="ntab" data-i="${i}"${P.notes.indexOf(i) >= 0 ? '' : ' disabled'} aria-pressed="${i === cur}">${m.ref}</button>`).join('');
+  let body;
+  if (cur == null) body = '<p class="empty">Todavía no has cargado ningún módulo. Empieza la misión y los apuntes irán apareciendo aquí.</p>';
+  else if (!notesAvail(cur)) body = '<p class="empty">Estás en mitad de este módulo. Termina sus retos para volver a consultar estos apuntes.</p>';
+  else { const m = MODS[cur]; body = `<div class="n-head"><span class="ref-badge sm">${m.ref}</span><div><h3>${esc(m.title)}</h3><p>${m.slides}</p></div></div>` + m.notes.map(c => noteHTML(c, 'h4')).join(''); }
+  openModal(`<div class="panel panel--notes" role="dialog" aria-modal="true" aria-labelledby="nT">
+    <div class="n-top"><h2 id="nT">${ICON.book} Apuntes de TURI</h2><button class="icon-btn" data-act="close-ov" aria-label="Cerrar apuntes">${ICON.x}</button></div>
+    <nav class="ntabs" aria-label="Módulos">${tabs}</nav>
+    <div class="n-body">${body}</div></div>`);
+  const t = $(`#layer .ntab[data-i="${cur}"]`); if (t && sel != null) t.focus({preventScroll: true});
+}
+function askConfirm(title, text, yes, fn) {
+  confirmFn = fn;
+  openModal(`<div class="panel" role="alertdialog" aria-modal="true" aria-labelledby="cT"><h2 id="cT">${esc(title)}</h2><p>${esc(text)}</p>
+    <div class="row"><button class="btn btn-ghost" data-act="close-ov">Cancelar</button><button class="btn btn-danger" data-act="confirm-yes">${esc(yes)}</button></div></div>`);
+}
+
+/* ============ Render y acciones ============ */
+const app = $('#app');
+function render() {
+  if (U && U.tid) { clearInterval(U.tid); U.tid = 0; }
+  let html = '';
+  switch (view) {
+    case 'map': html = mapHTML(); break;
+    case 'intro': html = introHTML(); break;
+    case 'play': html = playHTML(); break;
+    case 'boss': html = bossHTML(); break;
+    case 'win': html = endHTML(true); break;
+    case 'over': html = endHTML(false); break;
+    default: html = startHTML();
+  }
+  app.innerHTML = html;
+  if (view === 'map') { drawBoard(); requestAnimationFrame(scrollToCurrent); }
+  const h = app.querySelector('h1[tabindex="-1"]'); if (h && view !== 'start') h.focus({preventScroll: true});
+}
+function goMap() { view = 'map'; U = {}; closeSheet(); render(); }
+function newGame() {
+  S = newRun(); save(); closeOverlay(true); SND.play('power'); goMap(); window.scrollTo(0, 0);
+}
+function readName() { const inp = $('#opName'); const v = inp ? inp.value.trim().slice(0, 24) : ''; if (v) { P.name = v; savePrefs(); } return v; }
+
+const ACT = {
+  start() {
+    const v = readName();
+    if (!v) { const inp = $('#opName'); if (inp) { inp.focus(); inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake'); } toast('Escribe tu nombre', 'Así aparecerá en tu certificado.', true); return; }
+    newGame();
+  },
+  continue() { readName(); SND.play('power'); goMap(); window.scrollTo(0, 0); },
+  'ask-new'() { askConfirm('¿Empezar una misión nueva?', 'Se perderá la partida guardada. Los apuntes que ya has desbloqueado se conservan.', 'Empezar de cero', () => { readName(); newGame(); }); },
+  last() { if (S && (S.phase === 'over' || S.phase === 'win')) { view = S.phase; render(); window.scrollTo(0, 0); } },
+  chip(b) {
+    const i = +b.dataset.i;
+    if (i < S.mod) { openNotes(i); return; }
+    if (i > S.mod) { SND.play('buzz'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); toast('Chip bloqueado', 'Completa antes ' + (S.mod < MODS.length ? MODS[S.mod].ref + ' · ' + MODS[S.mod].title : 'los módulos') + '.', true); return; }
+    if (i === MODS.length) { startBoss(); return; }
+    if (P.notes.indexOf(i) < 0) { P.notes.push(i); savePrefs(); }
+    SND.play('click');
+    if (S.ch > 0) { startChallenges(); return; }
+    view = 'intro'; U = {card: 0}; render(); window.scrollTo(0, 0);
+  },
+  'card-prev'() { U.card = Math.max(0, (U.card || 0) - 1); SND.play('click'); render(); },
+  'card-next'() { U.card = Math.min(MODS[S.mod].notes.length - 1, (U.card || 0) + 1); SND.play('click'); render(); },
+  begin() { SND.play('click'); startChallenges(); },
+  'to-map'() { closeOverlay(true); goMap(); window.scrollTo(0, 0); },
+  opt(b) { if (U.done) return; U.q.sel = +b.dataset.i; SND.play('select'); renderQ(); },
+  tf(b) { if (U.done) return; U.q.sel = b.dataset.v === '1'; SND.play('select'); renderQ(); },
+  pick(b) {
+    if (U.done) return; const u = U.q, q = activeQ(); const i = +b.dataset.i;
+    if (u.locked === i) return;
+    if (u.sel.has(i)) u.sel.delete(i);
+    else {
+      if (u.sel.size >= q.a.length) { const cl = $('#qbody .count-line'); if (cl) { cl.classList.remove('nudge'); void cl.offsetWidth; cl.classList.add('nudge'); } SND.play('buzz'); return; }
+      u.sel.add(i);
+    }
+    SND.play('select'); renderQ();
+  },
+  bin(b) { sortPick(+b.dataset.b); },
+  'ord-add'(b) { if (U.done) return; const u = U.q, q = activeQ(); const i = +b.dataset.i; if (u.placed.indexOf(i) >= 0 || u.placed.length >= q.items.length) return; u.placed.push(i); SND.play('select'); renderQ(); },
+  'ord-rm'(b) { if (U.done) return; const u = U.q; const k = +b.dataset.k; if (k < u.lock || u.placed[k] == null) return; u.placed.splice(k, 1); SND.play('click'); renderQ(); },
+  'm-left'(b) { if (U.done) return; const u = U.q; const i = +b.dataset.i; if (i === u.lockL) return; if (u.selL === i) { delete u.pairs[i]; u.selL = null; } else u.selL = i; SND.play('select'); renderQ(); },
+  'm-right'(b) {
+    if (U.done) return; const u = U.q, q = activeQ(); const j = +b.dataset.i;
+    let owner = -1; Object.keys(u.pairs).forEach(l => { if (u.pairs[l] === j) owner = +l; });
+    if (u.selL == null) { if (owner >= 0 && owner !== u.lockL) { delete u.pairs[owner]; u.selL = owner; SND.play('click'); renderQ(); } return; }
+    if (owner >= 0 && owner === u.lockL) return;
+    if (owner >= 0) delete u.pairs[owner];
+    u.pairs[u.selL] = j;
+    const nx = range(q.pairs.length).find(k => u.pairs[k] == null);
+    u.selL = nx == null ? null : nx;
+    SND.play('select'); renderQ();
+  },
+  'fill-tok'(b) {
+    if (U.done) return; const u = U.q; const id = +b.dataset.i;
+    const g = (u.active != null && u.active >= 0 && u.slots[u.active] == null) ? u.active : u.slots.findIndex(s => s == null);
+    if (g < 0) return;
+    u.slots[g] = id; u.active = u.slots.findIndex(s => s == null); SND.play('select'); renderQ();
+  },
+  'fill-gap'(b) { if (U.done) return; const u = U.q; const k = +b.dataset.k; if (k === u.lockGap) return; if (u.slots[k] != null) { u.slots[k] = null; SND.play('click'); } u.active = k; renderQ(); },
+  check() { check(); },
+  hint() { useHint(); },
+  next() { next(); },
+  menu() { SND.play('click'); openMenu(); },
+  'close-ov'() { closeOverlay(); },
+  notes() { openNotes(); },
+  ntab(b) { openNotes(+b.dataset.i); },
+  sound() {
+    P.sound = !P.sound; savePrefs(); if (P.sound) SND.play('click');
+    if ($('#layer').firstChild) openMenu(); else if (view === 'start') render();
+  },
+  howto() { openModal(`<div class="panel" role="dialog" aria-modal="true" aria-labelledby="hT"><p class="eyebrow">Instrucciones</p><h2 id="hT">Cómo se juega</h2>
+    <p>Cada módulo empieza cargando los apuntes: léelos con calma. Después llegan los retos: elegir respuesta, detectar alucinaciones, clasificar en la seleccionadora, ordenar la línea temporal, conectar parejas y completar frases.</p>
+    ${datasheetHTML()}<button class="btn btn-primary btn-block" data-act="close-ov" style="margin-top:16px">Entendido</button></div>`); },
+  'ask-restart'() { askConfirm('¿Reiniciar la misión?', 'Volverás al módulo U1 con 5 vidas y 0 puntos. Los apuntes desbloqueados se conservan.', 'Reiniciar', () => newGame()); },
+  'confirm-yes'() { const f = confirmFn; confirmFn = null; closeOverlay(true); if (f) f(); },
+  'close-done'() { closeOverlay(); U.hideTrace = null; U.animTrace = S.mod - 1; drawBoard(); setTimeout(scrollToCurrent, RM ? 0 : 700); },
+  'boss-go'() { closeOverlay(true); bossStartTyping(); },
+  again() { newGame(); },
+  home() { closeOverlay(true); closeSheet(); view = 'start'; U = {}; render(); window.scrollTo(0, 0); }
+};
+
+document.addEventListener('click', e => {
+  const ov = e.target.classList && e.target.classList.contains('overlay') ? e.target : null;
+  if (ov) { const a = ov.dataset.close; if (ACT[a]) ACT[a](); return; }
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  if (b.getAttribute('aria-disabled') === 'true' && b.dataset.act !== 'chip') return;
+  SND.ensure();
+  const fn = ACT[b.dataset.act]; if (fn) { e.preventDefault(); fn(b, e); }
+});
+document.addEventListener('submit', e => { if (e.target && e.target.id === 'startForm') { e.preventDefault(); SND.ensure(); if (hasSaved()) ACT.continue(); else ACT.start(); } });
+document.addEventListener('keydown', e => {
+  if (e.target && e.target.matches && e.target.matches('input, textarea')) return;
+  const layerOpen = !!$('#layer').firstChild; const sheetOpen = !$('#sheet').hidden;
+  if (e.key === 'Escape') {
+    if (layerOpen) { const ov = $('#layer .overlay'); const a = ov && ov.dataset.close; if (a && ACT[a]) ACT[a](); else closeOverlay(); }
+    else if (S && (view === 'map' || view === 'intro' || view === 'play' || view === 'boss')) openMenu();
+    return;
+  }
+  if (layerOpen || e.ctrlKey || e.metaKey || e.altKey) return;
+  const onBody = !document.activeElement || document.activeElement === document.body || (document.activeElement.tagName === 'H1');
+  if (e.key === 'Enter' && onBody) {
+    const nb = $('#nextBtn'); const cb = $('#checkBtn');
+    if (sheetOpen && nb) { e.preventDefault(); nb.click(); } else if (cb && !cb.disabled) { e.preventDefault(); cb.click(); }
+    return;
+  }
+  if (sheetOpen || !(view === 'play' || view === 'boss') || U.done || U.typing) return;
+  const n = parseInt(e.key, 10); if (isNaN(n) || n < 1) return;
+  const q = activeQ(); const u = U.q; const k = n - 1; if (!q || !u) return;
+  let target = null;
+  if (q.type === 'mc' && k < u.order.length) target = `[data-act="opt"][data-i="${u.order[k]}"]`;
+  else if (q.type === 'tf' && k < 2) target = `[data-act="tf"][data-v="${k === 0 ? 1 : 0}"]`;
+  else if (q.type === 'pick' && k < u.order.length) target = `[data-act="pick"][data-i="${u.order[k]}"]`;
+  else if (q.type === 'sort' && k < q.bins.length) target = `[data-act="bin"][data-b="${k}"]`;
+  else if (q.type === 'order') { const pool = u.pool.filter(i => u.placed.indexOf(i) < 0); if (k < pool.length) target = `[data-act="ord-add"][data-i="${pool[k]}"]`; }
+  else if (q.type === 'fill') { const bank = u.bank.filter(b => u.slots.indexOf(b.id) < 0); if (k < bank.length) target = `[data-act="fill-tok"][data-i="${bank[k].id}"]`; }
+  if (target) { const el = $('#qbody ' + target); if (el && !el.disabled) { e.preventDefault(); el.click(); } }
+});
+let rz = 0;
+window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { FX.resize(); if (view === 'map') drawBoard(); }, 150); });
+
+/* ============ Arranque ============ */
+function boot(data) {
+  FX.init();
+  const saved = (data && data.S) || store.get(KEY + ':run');
+  if (saved && saved.v === 1 && saved.boss && Array.isArray(saved.stars)) S = saved;
+  view = 'start';
+  if (data && data.view && S && running()) view = (data.view === 'intro' || data.view === 'play' || data.view === 'boss') ? 'map' : data.view;
+  render();
+}
+try { const hot = window.claude && window.claude.hot; if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({S: S, view: view})); } catch (e) { /* entorno sin recarga en caliente */ }
+const hot = window.claude && window.claude.hot;
+if (hot && typeof hot.ready === 'function') hot.ready(boot); else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>
