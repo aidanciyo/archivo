@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Misión 4.0</title>
+<meta name="description" content="Juego de repaso de la UT1 · Digitalización de los sectores productivos: 7 épocas, un jefe final y 5 vidas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* ============================================================
+   MISIÓN 4.0 · estilos
+   Cada época tiene su paleta (data-era). Todo usa tokens.
+   ============================================================ */
+:root{
+  color-scheme:dark;
+  --on:#120E0A; --ok:#4ADE80; --bad:#FF5D5D; --heart:#FF4D6D; --gold:#FFD447;
+  --f-display:"Big Shoulders Display","Arial Narrow","Roboto Condensed","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+/* Base: la máquina del tiempo */
+:root,[data-era="0"]{--bg:#12131B;--panel:#1B1D29;--panel2:#232636;--line:#343850;--ink:#EDEEF6;--muted:#A6AAC2;--a1:#FFB547;--a2:#6EE7F9;--a3:#C29BFF;--glow:rgba(255,181,71,.13)}
+/* 1 · Vapor: carbón y latón */
+[data-era="1"]{--bg:#19130E;--panel:#241B14;--panel2:#2E231A;--line:#48372A;--ink:#F6EADA;--muted:#C4AD93;--a1:#E7A93E;--a2:#DB6C44;--a3:#F2D8A7;--glow:rgba(231,169,62,.16)}
+/* 2 · Electricidad: noche y arco voltaico */
+[data-era="2"]{--bg:#0F1128;--panel:#191C3B;--panel2:#212549;--line:#353A6C;--ink:#EEF0FF;--muted:#AAAED8;--a1:#FFD447;--a2:#7FA6FF;--a3:#F5F1D6;--glow:rgba(255,212,71,.14)}
+/* 3 · Silicio: placa de circuito y pistas de oro */
+[data-era="3"]{--bg:#08201A;--panel:#0E2C24;--panel2:#13372D;--line:#23533F;--ink:#E9F8F0;--muted:#A0C9B6;--a1:#F0C35A;--a2:#48E5A4;--a3:#9FE7FF;--glow:rgba(72,229,164,.12)}
+/* 4 · Digitalización: del papel al píxel */
+[data-era="4"]{--bg:#0E1433;--panel:#161F4D;--panel2:#1D285C;--line:#303E80;--ink:#EFF3FF;--muted:#AEB9E3;--a1:#5AB0FF;--a2:#C29BFF;--a3:#FFB547;--glow:rgba(90,176,255,.15)}
+/* 5 · Ciberfísicos: gemelo digital cian, actuador naranja */
+[data-era="5"]{--bg:#061A22;--panel:#0B2631;--panel2:#10313F;--line:#1D4C60;--ink:#E6FAFF;--muted:#96C2CF;--a1:#2FD6F2;--a2:#FF9A3D;--a3:#B7F36B;--glow:rgba(47,214,242,.14)}
+/* 6 · IT (verde) y OT (naranja) convergen en azul */
+[data-era="6"]{--bg:#111519;--panel:#1A2026;--panel2:#222A31;--line:#36424D;--ink:#EEF3F6;--muted:#A5B4C0;--a1:#3FD08A;--a2:#FF7A3D;--a3:#4C8DFF;--glow:rgba(76,141,255,.13)}
+/* 7 · Balance: pros turquesa, contras coral */
+[data-era="7"]{--bg:#141221;--panel:#1E1B30;--panel2:#262239;--line:#3C3757;--ink:#F3F0FB;--muted:#B5ADCD;--a1:#4FE0C8;--a2:#FF6F6F;--a3:#FFD166;--glow:rgba(79,224,200,.12)}
+/* 8 · Jefe final: el Sobredigitalizador */
+[data-era="8"]{--bg:#17060F;--panel:#250A19;--panel2:#2F0E21;--line:#521A3A;--ink:#FFEAF3;--muted:#D8A0BC;--a1:#FF2E88;--a2:#FFD166;--a3:#7CE7FF;--glow:rgba(255,46,136,.16)}
+
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{
+  min-height:100%;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  background-color:var(--bg);color:var(--ink);
+  font:400 17px/1.55 var(--f-body);
+  background-image:
+    radial-gradient(1100px 460px at 50% -140px,var(--glow),transparent 72%),
+    linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px);
+  background-size:auto,28px 28px,28px 28px;
+  background-attachment:fixed,fixed,fixed;
+  transition:background-color .7s ease;
+  -webkit-font-smoothing:antialiased;
+}
+[hidden]{display:none!important}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--a2);outline-offset:3px}
+.wrap{max-width:780px;margin:0 auto;padding-block:18px 56px}
+.eyebrow{font:600 12px/1.3 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.eyebrow.block{display:block;margin:6px 0 -4px}
+.h-display{font:800 clamp(30px,6.6vw,46px)/.95 var(--f-display);text-transform:uppercase;letter-spacing:.01em}
+.muted{color:var(--muted)}
+.center{text-align:center}
+.small{font-size:14px}
+
+/* ---------- iconos ---------- */
+.ic{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.18em}
+.ic-heart,.ic-star,.ic-play{fill:currentColor;stroke:none}
+
+/* ---------- botones ---------- */
+.btn{appearance:none;-webkit-appearance:none;border:0;border-radius:12px;background:var(--a1);color:var(--on);font:700 17px/1.15 var(--f-body);padding:14px 20px;min-height:50px;display:inline-flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;text-align:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.22),0 8px 22px -12px var(--a1);transition:transform .08s ease,filter .15s ease,box-shadow .15s ease}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px);box-shadow:inset 0 -1px 0 rgba(0,0,0,.22)}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:none;transform:none;box-shadow:none}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--a1);filter:none}
+.btn.big{font-size:19px;min-height:58px;padding:16px 26px}
+.btn.danger{color:var(--bad)}
+.btn .ic{width:1.2em;height:1.2em}
+.btn-stack{display:inline-flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left}
+.btn-stack small{font:600 12px/1 var(--f-mono);letter-spacing:.06em;opacity:.8;text-transform:uppercase}
+.linkbtn{appearance:none;border:0;background:none;color:var(--a1);font:700 15px/1 var(--f-body);display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:8px 2px;text-decoration:underline;text-underline-offset:3px}
+.icon-btn{appearance:none;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);width:44px;height:44px;border-radius:12px;display:inline-grid;place-items:center;cursor:pointer;flex:none}
+.icon-btn .ic{width:22px;height:22px}
+.row-btns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row-btns.end{justify-content:flex-end}
+kbd{font:600 12px/1 var(--f-mono)}
+
+/* ---------- motivo: panel de control con piloto (LED) ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px}
+.panel-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.panel-head > .eyebrow{flex:1 1 0;min-width:0}
+.led{width:9px;height:9px;border-radius:50%;background:var(--a1);box-shadow:0 0 0 3px rgba(0,0,0,.28),0 0 12px var(--a1);flex:none}
+@media (max-width:520px){.panel{padding:18px 16px}}
+
+/* ---------- portada ---------- */
+.title-screen{display:grid;gap:24px;padding-block:20px 56px}
+.title-bar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.plates{display:flex;flex-wrap:wrap;gap:6px}
+.plate{font:600 11px/1.35 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.logo{font:900 clamp(78px,22vw,172px)/.8 var(--f-display);text-transform:uppercase;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .14em;margin-top:4px}
+.logo-a{color:var(--ink)}
+.logo-b{background:linear-gradient(90deg,#E7A93E,#FFD447 24%,#48E5A4 46%,#2FD6F2 66%,#5AB0FF 82%,#FF2E88);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{font-size:clamp(18px,4.4vw,22px);line-height:1.45;max-width:34em}
+.tagline b{color:#FF6FAE}
+.eras{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.eras li{border-top:5px solid var(--c);padding-top:8px;display:grid;gap:3px}
+.eras b{font:800 clamp(22px,4.6vw,30px)/1 var(--f-display);color:var(--c)}
+.eras span{font:600 11px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+@media (max-width:560px){.eras{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:14px}}
+.rules{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:14px 22px}
+.rules li{display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:1.45}
+.rules .ic{width:26px;height:26px;color:var(--a1);margin-top:1px}
+.rules .ic-heart{color:var(--heart)}
+@media (max-width:560px){.rules{grid-template-columns:1fr}}
+.start{display:grid;gap:12px}
+.start input{width:100%;min-height:52px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:12px 14px;font-size:18px}
+.start input:focus{outline:none;border-color:var(--a1);box-shadow:0 0 0 3px rgba(255,181,71,.25)}
+.best{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:15px}
+.best .ic{color:var(--gold)}
+
+/* ---------- HUD ---------- */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;max-width:780px;margin:10px auto 0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px;padding:10px 12px;border-radius:16px;border:1px solid var(--line);background:var(--panel);box-shadow:0 12px 30px -18px rgba(0,0,0,.9)}
+@supports (background:color-mix(in srgb,red 50%,transparent)){.hud{background:color-mix(in srgb,var(--panel) 86%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}}
+.hud-left{display:flex;align-items:center;gap:10px;min-width:0}
+.hud-ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--panel2);color:var(--a1);flex:none}
+.hud-ico .ic{width:22px;height:22px}
+.hud-title{display:grid;min-width:0}
+.hud-title strong{font:800 21px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-title .eyebrow{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-right{display:flex;align-items:center;gap:10px}
+.hearts{display:flex;gap:2px}
+.heart{width:22px;height:22px;color:var(--heart);display:grid;place-items:center}
+.heart .ic{width:22px;height:22px}
+.heart.off{color:var(--line)}
+.heart.breaking{animation:heartBreak .8s ease-out}
+.heart.gain{animation:heartGain .9s ease-out}
+.hud-score{display:grid;text-align:right;min-width:48px}
+.hud-score .eyebrow{font-size:10px}
+.hud-score b{font:800 22px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.hud-btn{appearance:none;border:1.5px solid var(--line);background:var(--panel2);color:var(--ink);height:40px;min-width:40px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 8px;cursor:pointer;font:600 14px/1 var(--f-mono)}
+.hud-btn .ic{width:20px;height:20px}
+.hint-btn .ic{color:var(--gold)}
+.hud-btn:disabled{opacity:.38;cursor:not-allowed}
+.segs{grid-column:1/-1;display:flex;gap:4px}
+.seg{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.seg.ok{background:var(--ok)}.seg.bad{background:var(--bad)}.seg.cur{background:var(--a1);box-shadow:0 0 8px var(--a1)}
+@media (max-width:460px){
+  .hud{padding:8px 10px;gap:8px}
+  .hud-title{display:none}
+  .hud-ico{width:34px;height:34px}
+  .hud-right{gap:7px}
+  .heart,.heart .ic{width:18px;height:18px}
+  .hud-btn{height:38px;min-width:38px;padding:0 6px}
+  .hud-score b{font-size:20px}
+}
+
+/* ---------- mapa del tiempo ---------- */
+.map-head{display:grid;gap:8px;margin:22px 0 20px}
+.rail{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.station{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:start}
+.station::after{content:"";position:absolute;left:27px;top:60px;bottom:-18px;width:3px;border-radius:2px;background:var(--line)}
+.station:last-child::after{display:none}
+.station.done::after{background:var(--st)}
+.st-node{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:2px solid var(--line);color:var(--muted);position:relative;z-index:1}
+.st-node .ic{width:26px;height:26px}
+.station.done .st-node{border-color:var(--st);color:var(--st)}
+.station.cur .st-node{background:var(--st);border-color:var(--st);color:var(--on);animation:nodePulse 2s ease-in-out infinite}
+.st-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:4px}
+.station.cur .st-card{border-color:var(--st);box-shadow:0 0 0 1px var(--st),0 14px 40px -24px var(--st)}
+.st-card h3{font:800 25px/1 var(--f-display);text-transform:uppercase;letter-spacing:.01em}
+.st-card p{color:var(--muted);font-size:15px}
+.station.locked .st-card{opacity:.55}
+.st-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px}
+.stars{display:inline-flex;gap:2px;color:var(--line)}
+.stars .on{color:var(--gold)}
+.stars .ic{width:20px;height:20px}
+.st-card .btn{margin-top:8px;justify-self:start}
+
+/* ---------- intro de época ---------- */
+.intro{display:grid;gap:14px;justify-items:start;padding-block:28px 56px}
+.intro-badge{width:84px;height:84px;border-radius:24px;display:grid;place-items:center;background:var(--a1);color:var(--on);box-shadow:0 0 0 6px rgba(0,0,0,.25),0 0 44px var(--glow)}
+.intro-badge .ic{width:46px;height:46px}
+.intro-title{font:900 clamp(44px,11vw,84px)/.88 var(--f-display);text-transform:uppercase}
+.intro-sub{font-size:19px;color:var(--muted)}
+.mission{width:100%}
+.intro-meta{font:600 13px/1.3 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+
+/* ---------- tarjetas de apuntes ---------- */
+.note{margin-top:16px}
+.note-title{font:800 clamp(30px,7vw,46px)/.95 var(--f-display);text-transform:uppercase;letter-spacing:.01em;margin-bottom:18px}
+.note-title:focus,.q:focus{outline:none}
+.note-body{display:grid;gap:16px}
+.note-body b{-webkit-box-decoration-break:clone;box-decoration-break:clone}
+@supports (background:color-mix(in srgb,red 50%,transparent)){
+  .note-body p b,.note-body li b,.note-body blockquote b{background:linear-gradient(transparent 58%,color-mix(in srgb,var(--a1) 34%,transparent) 0)}
+}
+.lead{font-size:18px;max-width:40em}
+.pts{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.pts li{position:relative;padding-left:24px;max-width:62ch}
+.pts li::before{content:"";position:absolute;left:3px;top:.52em;width:9px;height:9px;border-radius:2px;background:var(--a1);transform:rotate(45deg)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fact{background:var(--panel2);border-radius:12px;padding:12px 10px;display:grid;gap:5px;align-content:start}
+.fact b{font:800 clamp(22px,5.6vw,34px)/1 var(--f-display);color:var(--a1);overflow-wrap:anywhere;background:none!important}
+.fact span{font:600 11px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.flow span{background:var(--panel2);border:1.5px solid var(--a1);border-radius:999px;padding:8px 14px;font-weight:700}
+.flow i{font-style:normal;color:var(--a1);font-weight:700}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:600px){.duo{grid-template-columns:1fr}}
+.duo-col{background:var(--panel2);border-radius:14px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.duo-col ul{margin:0;padding-left:18px;display:grid;gap:8px}
+.duo-col.good{box-shadow:inset 0 0 0 1.5px rgba(74,222,128,.4)}
+.duo-col.bad{box-shadow:inset 0 0 0 1.5px rgba(255,93,93,.4)}
+.duo-col.good > .eyebrow{color:var(--ok)}
+.duo-col.bad > .eyebrow{color:var(--bad)}
+.tiles{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:600px){.tiles.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.tiles.c3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tile{background:var(--panel2);border-radius:14px;padding:14px;display:grid;gap:6px;align-content:start}
+.tile > b{font-size:17px;line-height:1.25}
+.tile p{font-size:15.5px;line-height:1.45}
+.tile-ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--bg);color:var(--a1)}
+.tile-ico .ic{width:20px;height:20px}
+.tile.wide{grid-column:1/-1}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.step{background:var(--panel2);border-radius:14px;padding:14px;display:grid;gap:6px;align-content:start;position:relative}
+.step > b{font:800 23px/1 var(--f-display);text-transform:uppercase;color:var(--a1);background:none!important}
+.step p{font-size:15.5px}
+.step em{font:600 12px/1.3 var(--f-mono);font-style:normal;text-transform:uppercase;letter-spacing:.06em;color:var(--a2)}
+.step:not(:last-child)::after{content:"→";position:absolute;right:-21px;top:50%;transform:translateY(-50%);color:var(--a1);font-weight:700;font-size:20px}
+@media (max-width:600px){.steps{grid-template-columns:1fr}.step:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-25px;transform:translateX(-50%)}}
+.callout{background:var(--panel2);border-radius:14px;padding:14px 16px;display:grid;gap:4px}
+.callout.rule{box-shadow:inset 0 0 0 1.5px var(--a1)}
+.callout.rule .eyebrow{color:var(--a1)}
+.hub{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.hub-core{background:var(--a1);color:var(--on);border-radius:14px;padding:14px;display:grid;align-content:center;gap:4px}
+.hub-core .eyebrow{color:var(--on);opacity:.75}
+.hub-core b{font:900 clamp(24px,4.4vw,30px)/1 var(--f-display);text-transform:uppercase;background:none!important;overflow-wrap:anywhere}
+.hub .tile p{font-size:15px}
+@media (max-width:600px){.hub{grid-template-columns:repeat(2,minmax(0,1fr))}.hub-core,.hub .tile:last-child{grid-column:1/-1}}
+.leaps{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.leaps li{display:grid;grid-template-columns:48px minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center;background:var(--panel2);border-radius:12px;padding:10px 12px}
+.leaps li.leaps-h{background:none;padding-block:0}
+.leap-n{font:900 30px/1 var(--f-display);color:var(--a1);background:none!important}
+.leap-m{font-weight:700}
+.leap-c::before{content:"→ ";color:var(--a1);font-weight:700}
+@media (max-width:520px){.leaps li{grid-template-columns:40px minmax(0,1fr)}.leap-c{grid-column:2}.leaps li.leaps-h{display:none}}
+.quote{margin:0;padding:18px 18px 16px;border-radius:14px;background:var(--panel2);font:700 clamp(18px,4vw,21px)/1.4 var(--f-body);position:relative}
+.quote::before{content:"“";position:absolute;top:-14px;left:12px;font:900 58px/1 var(--f-display);color:var(--a1)}
+.quote.big{font-size:clamp(20px,4.6vw,26px);padding-top:24px}
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.eq span{background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:700}
+.eq i{font:800 24px/1 var(--f-display);font-style:normal;color:var(--a1)}
+.eq span.eq-res{background:var(--a1);color:var(--on);border-color:var(--a1);font:900 22px/1 var(--f-display);padding:9px 14px}
+.loop{display:grid;grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);grid-template-rows:auto 36px auto}
+.loop-node{background:var(--panel2);border-radius:14px;padding:14px;display:grid;gap:5px;align-content:start;border:1.5px solid var(--line)}
+.loop-node b{font:800 23px/1 var(--f-display);text-transform:uppercase;color:var(--a1);background:none!important}
+.loop-node p{font-size:15px}
+.loop-k{font:600 12px/1 var(--f-mono);color:var(--muted)}
+.loop-node.n1{border-color:var(--a1)}
+.loop-node.n4{border-color:var(--a2)}
+.loop-node.n4 b{color:var(--a2)}
+.loop-arrow{display:grid;place-items:center;color:var(--a1);font:700 22px/1 var(--f-body)}
+.loop-center{display:grid;place-items:center;color:var(--muted)}
+.loop-center .ic{width:22px;height:22px;animation:spin 6s linear infinite}
+.chipset{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.chipset li{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:15px;font-weight:700}
+.chipset.warn li{border:1.5px solid var(--a2);color:var(--a2);font:800 22px/1 var(--f-display);text-transform:uppercase;padding:10px 16px;background:transparent}
+.twin{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.twin-box{border:2px solid var(--a1);border-radius:12px;padding:14px 18px;font:800 22px/1 var(--f-display);text-transform:uppercase}
+.twin-box.ghost{border-style:dashed;color:var(--a1);background:repeating-linear-gradient(45deg,transparent 0 7px,rgba(47,214,242,.12) 7px 9px)}
+.twin-sync{font:600 12px/1.3 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:center}
+.itot{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.itot-col{border-radius:14px;padding:14px 16px;display:grid;gap:6px;align-content:start;background:var(--panel2)}
+.itot-col.it{box-shadow:inset 0 0 0 2px var(--a1)}
+.itot-col.ot{box-shadow:inset 0 0 0 2px var(--a2)}
+.itot-tag{font:900 34px/1 var(--f-display)}
+.itot-col.it .itot-tag{color:var(--a1)}
+.itot-col.ot .itot-tag{color:var(--a2)}
+.itot-col ul{margin:4px 0 0;padding-left:18px;display:grid;gap:4px;font-size:15px}
+.itot-merge{grid-column:1/-1;border-radius:14px;padding:14px 16px;background:var(--a3);color:var(--on);display:grid;gap:2px;text-align:center}
+.itot-merge b{font:900 26px/1 var(--f-display);text-transform:uppercase;background:none!important}
+@media (max-width:520px){.itot{grid-template-columns:1fr}}
+.chain{list-style:none;margin:0 auto;padding:0;display:grid;gap:26px;max-width:420px;width:100%}
+.chain li{position:relative;text-align:center;background:var(--panel2);border:1.5px solid var(--a1);border-radius:12px;padding:12px 14px;font-weight:700}
+.chain li:not(:last-child)::after{content:"↓";position:absolute;left:50%;bottom:-25px;transform:translateX(-50%);color:var(--a1);font-weight:700}
+.chain li:last-child{background:var(--a1);color:var(--on)}
+.iceberg{width:100%;max-width:470px;height:auto;display:block;margin:0 auto;color:var(--ink)}
+.note-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.dots{display:flex;gap:6px}
+.dots i{width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .2s}
+.dots i.on{background:var(--a1);width:22px}
+
+/* ---------- retos ---------- */
+.ch{margin-top:16px}
+.ch.shake{animation:shake .45s ease-in-out}
+.streak-chip{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font:600 12px/1 var(--f-mono);color:var(--a1);text-transform:uppercase;letter-spacing:.08em}
+.streak-chip .ic{color:#FF8A3D}
+.q{font:700 clamp(21px,4.8vw,27px)/1.3 var(--f-body)}
+.help{color:var(--muted);font-size:15px;margin-top:6px}
+.case{background:var(--panel2);border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:grid;gap:4px}
+.case .eyebrow{color:var(--a1)}
+.opts{display:grid;gap:10px;margin-top:18px}
+.opt{appearance:none;display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--panel2);color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:13px 16px;font:600 17px/1.35 var(--f-body);cursor:pointer;min-height:58px;transition:border-color .15s,background-color .15s,transform .08s}
+.opt:hover:not(:disabled){border-color:var(--a1)}
+.opt:active:not(:disabled){transform:translateY(1px)}
+.opt kbd{min-width:30px;height:30px;border-radius:8px;display:inline-grid;place-items:center;background:var(--bg);color:var(--a1);border:1px solid var(--line);flex:none}
+.opt:disabled{cursor:default}
+.opt:disabled:not(.is-ok):not(.is-bad){opacity:.5}
+.opt.is-ok{border-color:var(--ok);background:rgba(74,222,128,.14)}
+.opt.is-ok kbd{background:var(--ok);color:#06210F;border-color:var(--ok)}
+.opt.is-bad{border-color:var(--bad);background:rgba(255,93,93,.14)}
+.opt.is-bad kbd{background:var(--bad);color:#2A0606;border-color:var(--bad)}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.tf .opt{justify-content:center;font-size:19px;min-height:74px;flex-direction:column;gap:8px}
+.hint{display:flex;gap:12px;align-items:flex-start;margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--panel2);border:1.5px solid var(--gold);animation:fbIn .25s ease-out}
+.hint .ic{width:26px;height:26px;color:var(--gold)}
+.hint .eyebrow{display:block;color:var(--gold)}
+.fb{margin-top:18px;border-radius:14px;padding:16px 18px;border:1.5px solid;display:grid;gap:10px;justify-items:start;animation:fbIn .25s ease-out}
+.fb.ok{border-color:var(--ok);background:rgba(74,222,128,.09)}
+.fb.bad{border-color:var(--bad);background:rgba(255,93,93,.09)}
+.fb-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 12px;width:100%}
+.fb-title{font:900 28px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em}
+.fb.ok .fb-title{color:var(--ok)}
+.fb.bad .fb-title{color:var(--bad)}
+.fb-pts{font:600 13px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.06em}
+.fb-right{display:flex;gap:8px;align-items:flex-start}
+.fb-right .ic{color:var(--ok);margin-top:3px}
+.fb-ex .eyebrow{display:block;margin-bottom:2px}
+/* ordenar */
+.slots{display:grid;gap:8px;margin-top:16px}
+.slot{appearance:none;display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:8px 12px;border-radius:12px;border:1.5px dashed var(--line);background:transparent;color:var(--muted);text-align:left;font:600 16px/1.3 var(--f-body)}
+.slot.filled{border-style:solid;border-color:var(--a1);background:var(--panel2);color:var(--ink);cursor:pointer}
+.slot-n{font:800 22px/1 var(--f-display);width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--bg);color:var(--a1);flex:none}
+.slot.ok{border-color:var(--ok)}
+.slot.ok .slot-n{background:var(--ok);color:#06210F}
+.slot.bad{border-color:var(--bad)}
+.slot.bad .slot-n{background:var(--bad);color:#2A0606}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{appearance:none;border:1.5px solid var(--a1);background:var(--panel2);color:var(--ink);border-radius:999px;padding:10px 16px;min-height:46px;font:600 16px/1.25 var(--f-body);cursor:pointer;text-align:left}
+.chip:hover:not(:disabled){background:var(--bg)}
+.chip:disabled{opacity:.25;cursor:default;border-color:var(--line)}
+.order-btns{margin-top:14px}
+/* clasificar: cinta transportadora */
+.belt{position:relative;margin-top:16px;border-radius:16px;background:var(--panel2);border:1px solid var(--line);min-height:176px;padding:38px 16px 36px;display:grid;place-items:center;overflow:hidden}
+.belt-count{position:absolute;top:12px;left:14px}
+.belt-item{position:relative;z-index:1;max-width:30em;background:var(--bg);border:2px solid var(--a1);border-radius:14px;padding:14px 18px;font:700 clamp(17px,4.2vw,20px)/1.35 var(--f-body);text-align:center;box-shadow:0 10px 0 -2px rgba(0,0,0,.35)}
+.belt-item.in{animation:beltIn .38s cubic-bezier(.2,.8,.2,1)}
+.belt-track{position:absolute;left:0;right:0;bottom:0;height:16px;border-top:2px solid var(--line);background:repeating-linear-gradient(90deg,var(--line) 0 12px,transparent 12px 24px);animation:belt .9s linear infinite}
+.bins{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:10px;margin-top:12px}
+.bin{appearance:none;border:2px solid var(--bin);background:transparent;color:var(--ink);border-radius:14px;min-height:80px;padding:12px 8px;display:grid;place-items:center;align-content:center;gap:5px;cursor:pointer;transition:background-color .15s,transform .08s}
+.bin strong{font:800 clamp(20px,5vw,27px)/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em;color:var(--bin)}
+.bin small{font:600 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.bin:hover:not(:disabled){background:rgba(255,255,255,.05)}
+.bin:active:not(:disabled){transform:translateY(1px)}
+.bin:disabled{opacity:.5;cursor:default}
+.bin.flash-ok{background:rgba(74,222,128,.2);border-color:var(--ok)}
+.bin.flash-bad{background:rgba(255,93,93,.2);border-color:var(--bad)}
+@media (max-width:480px){.bins.n3{grid-template-columns:1fr}.bins.n3 .bin{min-height:56px;grid-auto-flow:column;justify-content:space-between;padding:10px 16px}}
+.belt-log{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.log{display:flex;gap:8px;align-items:flex-start;font-size:15px;line-height:1.4;padding:8px 10px;border-radius:10px;background:var(--panel2);animation:fbIn .25s ease-out}
+.log .ic{margin-top:2px}
+.log.ok .ic{color:var(--ok)}
+.log.bad{box-shadow:inset 0 0 0 1.5px var(--bad)}
+.log.bad .ic{color:var(--bad)}
+/* relacionar */
+.match{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:10px;margin-top:16px;align-items:start}
+.mcol{display:grid;gap:8px}
+.mitem{appearance:none;display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel2);color:var(--ink);font:600 15px/1.3 var(--f-body);text-align:left;cursor:pointer;transition:border-color .15s,background-color .15s}
+.ml{font-weight:700}
+.mitem:hover:not(:disabled){border-color:var(--a1)}
+.mitem.sel{border-color:var(--a1);background:var(--bg);box-shadow:0 0 0 3px rgba(255,255,255,.08)}
+.mitem.done{border-color:var(--ok);background:rgba(74,222,128,.08);cursor:default}
+.mitem.wrong{border-color:var(--bad);animation:shake .45s}
+.mnum{display:none;flex:none;width:24px;height:24px;border-radius:7px;background:var(--ok);color:#06210F;font:700 13px/24px var(--f-mono);text-align:center}
+.mitem.done .mnum{display:inline-block}
+
+/* ---------- fin de época ---------- */
+.done-card{display:grid;gap:16px;justify-items:center;text-align:center;margin-top:16px;padding-block:30px}
+.big-stars{display:flex;gap:10px}
+.bstar{color:var(--line)}
+.bstar .ic{width:56px;height:56px}
+.bstar.on{color:var(--gold);animation:starPop .5s cubic-bezier(.2,1.6,.4,1) both;animation-delay:var(--d)}
+.bonus{display:flex;gap:8px;align-items:center;justify-content:center;color:var(--ok);font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;width:100%}
+.stats div{background:var(--panel2);border-radius:12px;padding:12px 10px;text-align:center}
+.stats dt{font:600 11px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.stats dd{margin:6px 0 0;font:800 clamp(24px,6vw,32px)/1 var(--f-display);font-variant-numeric:tabular-nums}
+@media (max-width:520px){.stats.six{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------- jefe final ---------- */
+.boss-wrap{display:grid;gap:12px;padding-block:14px 56px}
+.boss-stage{display:grid;place-items:center;padding-top:14px}
+.boss-svg{width:118px;height:auto;flex:none;overflow:visible}
+.boss-svg.big{width:min(260px,64vw)}
+.boss-svg .boss-body{transform-box:fill-box;transform-origin:center;animation:bossBob 3s ease-in-out infinite,glitch 5s steps(1) infinite}
+.boss-svg .boss-orbit rect{transform-box:fill-box;transform-origin:center;animation:orbit 3.4s ease-in-out infinite alternate}
+.boss-svg .boss-orbit rect:nth-child(2){animation-delay:-1.2s}
+.boss-svg .boss-orbit rect:nth-child(3){animation-delay:-2.1s}
+.boss-svg .boss-orbit rect:nth-child(4){animation-delay:-.6s}
+.boss-svg .boss-badge{transform-box:fill-box;transform-origin:center;animation:badge 1.1s ease-in-out infinite}
+.boss-svg .boss-x{opacity:0}
+.boss-svg.hurt .boss-body{animation:hurt .55s ease-out}
+.boss-svg.hurt .boss-eyes,.boss-svg.dead .boss-eyes{opacity:0}
+.boss-svg.hurt .boss-x,.boss-svg.dead .boss-x{opacity:1}
+.boss-svg.laugh .boss-body{animation:laugh .45s ease-in-out 2}
+.boss-svg.dead{animation:die 1.8s ease-in .4s forwards}
+.boss-top{display:flex;align-items:center;gap:14px}
+.boss-hp{flex:1;display:grid;gap:6px;min-width:0}
+.hp-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.hp-num{font:800 24px/1 var(--f-display);color:var(--a1);font-variant-numeric:tabular-nums}
+.hpbar{height:16px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.hpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--a1),var(--a2));transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.speech{position:relative;background:var(--panel2);border:1.5px solid var(--a1);border-radius:14px;padding:12px 16px;font:700 16px/1.4 var(--f-body)}
+.speech::before{content:"";position:absolute;left:44px;top:-8px;width:14px;height:14px;background:var(--panel2);border-left:1.5px solid var(--a1);border-top:1.5px solid var(--a1);transform:rotate(45deg)}
+.boss-stage + .speech::before{left:calc(50% - 7px)}
+.speech.pop{animation:fbIn .3s ease-out}
+.boss-rules{margin:12px 0 18px;padding-left:20px;display:grid;gap:6px}
+.timer-row{display:flex;align-items:center;gap:10px;margin-top:18px}
+.timer{flex:1;height:10px;border-radius:5px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)}
+.timer i{display:block;height:100%;background:var(--a2);transform-origin:left center}
+.timer.low i{background:var(--bad)}
+.timer-num{font:800 22px/1 var(--f-display);min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ---------- final y diploma ---------- */
+.final{display:grid;gap:16px;padding-block:20px 56px}
+.diploma{text-align:center;display:grid;gap:14px;justify-items:center;padding:34px 22px;border:2px solid var(--a1);position:relative}
+.diploma::after{content:"";position:absolute;inset:8px;border:1px dashed var(--line);border-radius:12px;pointer-events:none}
+.dip-title{font:900 clamp(40px,10vw,72px)/.9 var(--f-display);text-transform:uppercase}
+.dip-name{font:900 clamp(34px,8vw,58px)/1 var(--f-display);text-transform:uppercase;color:var(--a1);overflow-wrap:anywhere}
+.dip-eras{display:flex;gap:6px;justify-content:center}
+.dip-eras i{width:26px;height:6px;border-radius:3px}
+.rank{display:grid;gap:4px;justify-items:center}
+.rank strong{font:900 clamp(40px,11vw,78px)/.9 var(--f-display);text-transform:uppercase;background:linear-gradient(90deg,#E7A93E,#FFD447,#48E5A4,#2FD6F2,#5AB0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rank p{max-width:30em}
+.over{display:grid;gap:14px;justify-items:center;text-align:center;padding-block:30px}
+.over-ico{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);color:var(--heart)}
+.over-ico .ic{width:46px;height:46px}
+.review{display:grid;gap:12px}
+.rv{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rv li{background:var(--panel2);border-radius:14px;padding:14px 16px;display:grid;gap:6px}
+.rv-q{font-weight:700;font-size:17px}
+.rv-a{display:flex;gap:8px;align-items:flex-start;font-size:15.5px}
+.rv-a .ic{margin-top:3px}
+.rv-a.bad .ic{color:var(--bad)}
+.rv-a.ok .ic{color:var(--ok)}
+.rv-ex{color:var(--muted);font-size:15px}
+
+/* ---------- capas: salto temporal, modal, destellos ---------- */
+.overlay{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg);padding:24px;text-align:center;overflow:hidden;animation:fadeIn .25s ease-out}
+.overlay.out{animation:fadeOut .38s ease-in forwards}
+.warp{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 58px,rgba(255,255,255,.06) 58px 60px);animation:warp .35s linear infinite}
+.warp::after{content:"";position:absolute;inset:0;background:radial-gradient(closest-side,var(--glow),transparent)}
+.jump{position:relative;display:grid;gap:12px;justify-items:center}
+.jump-year{font:900 clamp(110px,32vw,260px)/.82 var(--f-display);color:var(--a1);font-variant-numeric:tabular-nums;text-transform:uppercase;text-shadow:0 0 50px var(--glow)}
+.jump-sub{font:700 clamp(16px,4vw,21px)/1.35 var(--f-body);max-width:26em}
+.jump.glitch .jump-year{animation:glitchText .8s steps(2) infinite}
+.modal{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:16px;background:rgba(5,5,10,.7)}
+.modal-box{width:min(780px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 30px 80px -20px rgba(0,0,0,.85)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.menu-list{display:grid;gap:10px}
+.menu-list .btn{justify-content:flex-start}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab{appearance:none;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 14px;font:700 14px/1 var(--f-body);cursor:pointer}
+.tab.on{background:var(--st);border-color:var(--st);color:var(--on)}
+.notes-stack{display:grid;gap:12px}
+.note-mini{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:12px}
+.note-mini h3{font:800 28px/1 var(--f-display);text-transform:uppercase}
+.flash{position:fixed;inset:0;z-index:45;pointer-events:none;background:radial-gradient(circle,transparent 35%,rgba(255,50,70,.4))}
+.flash.go{animation:flash .45s ease-out forwards}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 120px);z-index:55;transform:translateX(-50%);background:var(--a1);color:var(--on);font:900 30px/1 var(--f-display);text-transform:uppercase;letter-spacing:.02em;padding:12px 20px;border-radius:14px;box-shadow:0 12px 40px -10px var(--a1);pointer-events:none;white-space:nowrap;display:flex;gap:8px;align-items:center}
+.toast.go{animation:toast 1.2s ease-out forwards}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+.noscript{max-width:640px;margin:40px auto;padding:20px;border:1px solid var(--line);border-radius:14px}
+
+/* ---------- animaciones ---------- */
+@keyframes fbIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@keyframes heartBreak{0%{transform:scale(1);color:var(--heart)}35%{transform:scale(1.6) rotate(-14deg);color:var(--heart)}100%{transform:none}}
+@keyframes heartGain{0%{transform:scale(.2)}60%{transform:scale(1.6)}100%{transform:none}}
+@keyframes starPop{from{transform:scale(0) rotate(-40deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}15%{opacity:1;transform:translate(-50%,0) scale(1.06)}25%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px)}}
+@keyframes flash{from{opacity:1}to{opacity:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{to{opacity:0}}
+@keyframes warp{to{background-position:60px 0}}
+@keyframes belt{to{background-position:24px 0}}
+@keyframes beltIn{from{transform:translateX(-70px);opacity:0}to{transform:none;opacity:1}}
+@keyframes nodePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.28)}50%{box-shadow:0 0 0 10px rgba(255,255,255,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bossBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes orbit{from{transform:translate(0,0) rotate(0)}to{transform:translate(4px,-10px) rotate(16deg)}}
+@keyframes badge{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+@keyframes glitch{0%,90%,100%{filter:none;translate:0 0}91%{filter:drop-shadow(-3px 0 var(--a3)) drop-shadow(3px 0 var(--a2));translate:3px 0}93%{filter:drop-shadow(3px 0 var(--a3));translate:-3px 1px}95%{filter:none;translate:0 0}}
+@keyframes glitchText{0%{text-shadow:-4px 0 var(--a3),4px 0 var(--a2);translate:0 0}50%{text-shadow:4px 0 var(--a3),-4px 0 var(--a2);translate:2px -1px}}
+@keyframes hurt{0%{transform:none;filter:brightness(3)}25%{transform:translateX(-10px)}50%{transform:translateX(8px);filter:brightness(1.6)}75%{transform:translateX(-4px)}100%{transform:none;filter:none}}
+@keyframes laugh{0%,100%{transform:none}50%{transform:translateY(-8px) rotate(-3deg)}}
+@keyframes die{0%{transform:none;opacity:1;filter:none}35%{transform:rotate(-8deg) scale(1.06);filter:brightness(2.2)}100%{transform:rotate(18deg) scale(.35) translateY(70px);opacity:0;filter:grayscale(1)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div id="screen"></div>
+<div id="overlay" class="overlay" hidden></div>
+<div id="modal" class="modal" hidden></div>
+<div id="flash" class="flash" hidden></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<noscript><div class="noscript">Misión 4.0 necesita JavaScript para funcionar. Actívalo en tu navegador y vuelve a abrir la página.</div></noscript>
+
+<script>
+/* ============================================================
+   CONTENIDO DEL JUEGO · UT1 Digitalización de los sectores productivos
+   ------------------------------------------------------------
+   Puedes cambiar o añadir preguntas en este bloque.
+   · quiz  → la PRIMERA opción de «o» es siempre la correcta
+             (el juego baraja las opciones al mostrarlas).
+   · tf    → a: true (verdadero) o false (falso).
+   · order → escribe los «items» en el orden correcto.
+   · sort  → cada item indica su «bin» (cajón) correcto.
+   · match → «pairs»: [concepto, definición].
+   · ex    → explicación que se muestra tras responder.
+   · h     → pista (el jugador tiene 3 en toda la partida).
+   ============================================================ */
+const ICONS = {
+  gear:'<circle cx="12" cy="12" r="7.6" stroke-width="3.4" stroke-dasharray="2.55 2.23"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.4"/>',
+  bolt:'<path d="M13.2 2.5 5 13.6h6.1l-1 7.9 8.3-11.2h-6.2z"/>',
+  chip:'<rect x="6.5" y="6.5" width="11" height="11" rx="2"/><rect x="10" y="10" width="4" height="4" rx=".6"/><path d="M9.5 2.5v4M14.5 2.5v4M9.5 17.5v4M14.5 17.5v4M2.5 9.5h4M2.5 14.5h4M17.5 9.5h4M17.5 14.5h4"/>',
+  digit:'<path d="M13 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21H10"/><path d="M13 3l5 5v2"/><rect x="13" y="13" width="3.2" height="3.2" rx=".4"/><rect x="17.8" y="13" width="3.2" height="3.2" rx=".4"/><rect x="13" y="17.8" width="3.2" height="3.2" rx=".4"/><rect x="17.8" y="17.8" width="3.2" height="3.2" rx=".4"/>',
+  loop:'<path d="M19.5 10.5A7.7 7.7 0 0 0 5.4 7.6"/><path d="M4.5 13.5a7.7 7.7 0 0 0 14.1 2.9"/><path d="M5 3.5v4.4h4.4"/><path d="M19 20.5v-4.4h-4.4"/><circle cx="12" cy="12" r="1.8"/>',
+  merge:'<circle cx="9" cy="12" r="6.2"/><circle cx="15" cy="12" r="6.2"/>',
+  scale:'<path d="M12 4v16M8 20h8M4.5 7.5h15"/><path d="M4.5 7.5 2 13.5a2.6 2.6 0 0 0 5 0z"/><path d="M19.5 7.5 17 13.5a2.6 2.6 0 0 0 5 0z"/><circle cx="12" cy="4" r="1.2"/>',
+  boss:'<rect x="3" y="4" width="18" height="12.5" rx="2.5"/><path d="M12 16.5V20M8 20.5h8"/><path d="M7.2 8.2 10 9.6M16.8 8.2 14 9.6"/><path d="M8.5 13.2l1.2-1 1.2 1 1.2-1 1.2 1 1.2-1"/>',
+  heart:'<path d="M12 20.8s-7.6-4.7-9.4-9.4C1.2 7.9 3.4 4.4 7 4.4c2.1 0 3.6 1.1 5 2.9 1.4-1.8 2.9-2.9 5-2.9 3.6 0 5.8 3.5 4.4 7-1.8 4.7-9.4 9.4-9.4 9.4z"/>',
+  bulb:'<path d="M9.2 18h5.6M10.2 21h3.6"/><path d="M12 3a6 6 0 0 0-3.7 10.7c.8.7 1.2 1.5 1.2 2.5v.3h5v-.3c0-1 .4-1.8 1.2-2.5A6 6 0 0 0 12 3z"/>',
+  star:'<path d="M12 2.7l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.2l-5.7 3 1.1-6.3-4.6-4.5 6.4-.9z"/>',
+  flame:'<path d="M12 21.5c3.9 0 6.8-2.6 6.8-6.4 0-3-1.9-5.2-3.5-7-.3 1.6-1.1 2.8-2.3 3.3.4-3.3-1.2-6.6-4.3-8.4.2 2.9-1.3 4.9-2.9 6.8-1.4 1.7-2.4 3.4-2.4 5.3 0 3.8 2.9 6.4 6.8 6.4z"/>',
+  book:'<path d="M3 5.8c2.6-1.5 5.6-1.5 9 .6 3.4-2.1 6.4-2.1 9-.6v13.4c-2.6-1.5-5.6-1.5-9 .6-3.4-2.1-6.4-2.1-9-.6z"/><path d="M12 6.4v13.4"/>',
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+  sound:'<path d="M4 9.5v5h3.8l5.2 4.3V5.2L7.8 9.5z"/><path d="M16.3 8.8a4.6 4.6 0 0 1 0 6.4M18.8 6.3a8.2 8.2 0 0 1 0 11.4"/>',
+  mute:'<path d="M4 9.5v5h3.8l5.2 4.3V5.2L7.8 9.5z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7"/>',
+  check:'<path d="M4.5 12.5l4.8 4.8L19.5 7"/>',
+  cross:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  arrow:'<path d="M5 12h14M13.5 6.5 19 12l-5.5 5.5"/>',
+  play:'<path d="M7.5 5v14l11-7z"/>',
+  trophy:'<path d="M8 3.5h8V9a4 4 0 0 1-8 0z"/><path d="M8 5.5H4.8a3.2 3.2 0 0 0 3.6 4.2M16 5.5h3.2a3.2 3.2 0 0 1-3.6 4.2"/><path d="M12 13v3.5M8.5 20.5h7M9.8 16.5h4.4v4H9.8z"/>',
+  cube:'<path d="M12 2.8 20.2 7.3v9.4L12 21.2 3.8 16.7V7.3z"/><path d="M3.8 7.3 12 11.8l8.2-4.5M12 11.8v9.4"/>',
+  train:'<rect x="5.5" y="3" width="13" height="13" rx="3"/><path d="M5.5 10h13"/><circle cx="9" cy="13" r=".9"/><circle cx="15" cy="13" r=".9"/><path d="M8.5 16l-2.5 5M15.5 16l2.5 5M7.2 19h9.6"/>',
+  user:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c0-4.1 3.4-6.7 7.5-6.7s7.5 2.6 7.5 6.7"/>',
+  shield:'<path d="M12 3 4.8 5.9v5.6c0 4.5 3.1 7.8 7.2 9 4.1-1.2 7.2-4.5 7.2-9V5.9z"/><path d="M9 12l2.1 2.1L15.2 10"/>',
+  plus:'<circle cx="12" cy="12" r="8.8"/><path d="M12 8v8M8 12h8"/>',
+  leaf:'<path d="M5 19.5C5 11 10 5.8 20 4.5 19 14.5 14 19.5 5.5 19.5"/><path d="M5 19.5l8.5-8.5"/>',
+  spark:'<path d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5M5.3 5.3l3.4 3.4M15.3 15.3l3.4 3.4M18.7 5.3l-3.4 3.4M8.7 15.3l-3.4 3.4"/>',
+  clock:'<circle cx="12" cy="12" r="8.8"/><path d="M12 7.2V12l3.2 2"/>'
+};
+function icon(name){ return '<svg class="ic ic-' + name + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (ICONS[name] || '') + '</svg>'; }
+
+const ICEBERG = `<svg class="iceberg" viewBox="0 0 360 222" role="img" font-family="Atkinson Hyperlegible, Segoe UI, Arial, sans-serif" aria-label="Iceberg del coste real: sobre el agua asoma la licencia de software; bajo el agua, mucho más grandes, quedan la migración de datos, la formación del personal, el mantenimiento y el tiempo de adaptación.">
+  <rect x="0" y="64" width="360" height="158" rx="12" fill="#173049"/>
+  <path d="M0 64H360" stroke="#7FD6FF" stroke-width="2" stroke-dasharray="7 6"/>
+  <polygon points="168,64 186,30 198,38 212,14 234,64" fill="#EAF6FF"/>
+  <polygon points="168,64 234,64 292,92 310,146 268,204 158,210 102,172 92,116 126,82" fill="#8DB6D6"/>
+  <path d="M166 27H194" stroke="currentColor" stroke-width="1.5"/>
+  <text x="14" y="31" font-size="14" font-weight="700" fill="currentColor">Licencia de software</text>
+  <text x="14" y="208" font-size="11" font-weight="700" fill="#7FD6FF" letter-spacing="1">LO QUE NO SE VE</text>
+  <text x="200" y="106" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0B1A2A">Migración de datos</text>
+  <text x="200" y="130" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0B1A2A">Formación del personal</text>
+  <text x="200" y="154" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0B1A2A">Mantenimiento</text>
+  <text x="200" y="178" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0B1A2A">Tiempo de adaptación</text>
+</svg>`;
+
+const M40 = {
+ERAS: [
+  { y:'1780', n:'Vapor', c:'#E7A93E' },
+  { y:'1870', n:'Electricidad', c:'#FFD447' },
+  { y:'1970', n:'Información', c:'#48E5A4' },
+  { y:'2011', n:'Industria 4.0', c:'#2FD6F2' },
+  { y:'Hoy', n:'Digitalización', c:'#5AB0FF' },
+  { y:'¿5.0?', n:'El villano', c:'#FF2E88' }
+],
+
+WORLDS: [
+/* ---------------- 1 · VAPOR ---------------- */
+{
+  id:'vapor', era:1, yearNum:1780, yearLabel:'1780–1840', jump:'1780', color:'#E7A93E', icon:'gear',
+  name:'La era del vapor', short:'Vapor', place:'Inglaterra',
+  sub:'1ª revolución industrial · Industria 1.0',
+  mission:'El Sobredigitalizador ha gripado la máquina de vapor. Arráncala demostrando que sabes cómo empezó todo.',
+  doneTitle:'¡Vapor a toda máquina!',
+  cards:[
+    { title:'Industria 1.0', html:`
+      <div class="facts">
+        <div class="fact"><b>Inglaterra</b><span>Dónde</span></div>
+        <div class="fact"><b>1780–1840</b><span>Cuándo</span></div>
+        <div class="fact"><b>1.0</b><span>Nombre</span></div>
+      </div>
+      <ul class="pts">
+        <li>Llegan la <b>máquina de vapor</b>, la <b>energía hidráulica</b> y la <b>mecanización</b>.</li>
+        <li>La economía pasa de basarse en la <b>agricultura</b> a basarse en la <b>industria</b>.</li>
+        <li>El trabajo se traslada <b>del taller a la fábrica</b>.</li>
+      </ul>` },
+    { title:'La máquina de James Watt', html:`
+      <div class="flow" role="img" aria-label="Carbón, máquina de vapor, transporte y fábricas"><span>Carbón</span><i>→</i><span>Máquina de vapor</span><i>→</i><span>Transporte y fábricas</span></div>
+      <ul class="pts">
+        <li>La máquina de vapor de <b>James Watt</b> fue un invento innovador que cambió la forma de vivir de la sociedad.</li>
+        <li>Se aplicó al <b>transporte</b>: <b>locomotoras</b>, <b>barcos de vapor</b> y vehículos que llevaban materias primas por tierra y por mar.</li>
+        <li>También a las <b>fábricas</b>, para <b>mecanizar tareas</b>.</li>
+        <li>La materia prima que lo movía todo era el <b>carbón</b>, que se sacaba de las minas.</li>
+      </ul>` },
+    { title:'Luces y sombras', html:`
+      <div class="duo">
+        <div class="duo-col bad"><span class="eyebrow">Sombras</span><ul>
+          <li>Al principio <b>agudizó la pobreza</b> de los trabajadores.</li>
+          <li>No había <b>seguridad</b>, <b>protecciones</b> ni <b>regulaciones laborales</b>.</li>
+          <li>Adultos y <b>niños</b> trabajaban sin descanso en las <b>minas de carbón</b>.</li></ul></div>
+        <div class="duo-col good"><span class="eyebrow">Luces</span><ul>
+          <li><b>Viajes más rápidos</b>.</li>
+          <li><b>Mejor comunicación</b>.</li>
+          <li>Más <b>comodidades materiales</b> para las personas.</li></ul></div>
+      </div>` }
+  ],
+  fixed:[
+    { t:'sort', q:'¿Avance o problema? Clasifica cada consecuencia de la 1ª revolución industrial.',
+      bins:[{ id:'luz', label:'Avance', sub:'luz' },{ id:'sombra', label:'Problema', sub:'sombra' }],
+      items:[
+        { txt:'Viajes más rápidos', bin:'luz' },
+        { txt:'Niños trabajando en minas de carbón', bin:'sombra', why:'Fue una de las grandes sombras de la época.' },
+        { txt:'Mejor comunicación', bin:'luz' },
+        { txt:'Trabajo sin protecciones ni regulaciones laborales', bin:'sombra' },
+        { txt:'Más comodidades materiales', bin:'luz' },
+        { txt:'Más pobreza entre los trabajadores al principio', bin:'sombra' }
+      ],
+      ex:'Al principio la 1ª revolución agudizó la pobreza: no había seguridad ni regulaciones laborales, y adultos y niños trabajaban en las minas. A la vez trajo viajes más rápidos, mejor comunicación y más comodidades materiales.',
+      h:'Las mejoras eran para la vida diaria; los problemas estaban en las condiciones de trabajo.' }
+  ],
+  pick:4,
+  pool:[
+    { t:'quiz', q:'¿Dónde se produjo la primera revolución industrial?', o:['En Inglaterra','En Alemania','En Estados Unidos','En Francia'],
+      ex:'Se produjo en Inglaterra entre 1780 y 1840 y se conoce como industria 1.0.', h:'Es el país donde trabajaba James Watt.' },
+    { t:'quiz', q:'¿Qué trío de avances define la industria 1.0?', o:['Máquina de vapor, energía hidráulica y mecanización','Electricidad, petróleo y producción en serie','Transistores, ordenadores e Internet','Datos, sensores y conectividad'],
+      ex:'La 1ª revolución se caracterizó por la llegada de la máquina de vapor, la energía hidráulica y la mecanización.', h:'Piensa en la energía que se obtiene calentando agua.' },
+    { t:'tf', q:'Desde el principio, la primera revolución industrial mejoró las condiciones de los trabajadores.', a:false,
+      ex:'Al principio agudizó la pobreza de los trabajadores, que no tenían seguridad, protecciones ni regulaciones laborales.', h:'Recuerda la figura de las minas de carbón.' },
+    { t:'quiz', q:'¿Qué cambio de modelo económico trajo la 1ª revolución industrial?', o:['De la agricultura a la industria','De la industria a los servicios digitales','Del comercio a la agricultura','De las fábricas a los talleres'],
+      ex:'Se pasó de un modelo económico basado en la agricultura a uno basado en la industria.', h:'Antes, casi todo el mundo trabajaba en el campo.' },
+    { t:'quiz', q:'¿Qué materia prima, sacada de las minas, movía la industria y el transporte en el siglo XVIII?', o:['El carbón','El petróleo','El silicio','El uranio'],
+      ex:'Adultos y niños trabajaban en minas de carbón, la materia prima que hacía funcionar la industria y el transporte.', h:'Se quemaba para calentar el agua de las máquinas de vapor.' },
+    { t:'quiz', q:'¿A quién se asocia la máquina de vapor que cambió la forma de vivir de la sociedad?', o:['James Watt','Thomas Alva Edison','Henry Ford','Nikola Tesla'],
+      ex:'La figura 1.4 muestra la máquina de vapor de James Watt, un invento innovador que cambió la manera en la que vivía la sociedad.', h:'Hoy la unidad de potencia, el vatio, lleva su apellido.' },
+    { t:'tf', q:'La máquina de vapor se usó en locomotoras y barcos, y también en las fábricas para mecanizar tareas.', a:true,
+      ex:'Una de sus aplicaciones fue el transporte (locomotoras, barcos de vapor) y otra, las fábricas, para mecanizar tareas.', h:'Piensa en el tren de vapor… y en los telares.' },
+    { t:'quiz', q:'¿Cómo cambió el lugar de trabajo con la 1ª revolución industrial?', o:['Del taller a la fábrica','De la fábrica a la oficina','De la oficina al teletrabajo','Del campo al laboratorio'],
+      ex:'En la tabla «Cuatro saltos», la 1ª revolución (vapor y mecanización) supone pasar del taller a la fábrica.', h:'Las máquinas eran enormes y necesitaban un gran edificio.' }
+  ]
+},
+/* ---------------- 2 · ELECTRICIDAD ---------------- */
+{
+  id:'electricidad', era:2, yearNum:1870, yearLabel:'Desde 1870', jump:'1870', color:'#FFD447', icon:'bolt',
+  name:'Electricidad y cadena de montaje', short:'Electricidad', place:'Inglaterra, EE. UU. y Alemania',
+  sub:'2ª revolución industrial · Industria 2.0',
+  mission:'Se ha ido la luz en la fábrica y la cadena de montaje está parada. Vuelve a ponerla en marcha.',
+  doneTitle:'¡Se hizo la luz!',
+  cards:[
+    { title:'Industria 2.0', html:`
+      <div class="facts">
+        <div class="fact"><b>1870</b><span>Inicio</span></div>
+        <div class="fact"><b>Luz + crudo</b><span>Electricidad y petróleo</span></div>
+        <div class="fact"><b>En serie</b><span>Producción</span></div>
+      </div>
+      <ul class="pts">
+        <li>La <b>electricidad</b> y el <b>petróleo</b> se convierten en las fuentes de energía de la <b>producción masiva</b>.</li>
+        <li>Inglaterra es primera potencia mundial junto a <b>EE. UU.</b> y <b>Alemania</b>, por sus avances científico-técnicos.</li>
+        <li>Rasgos: expansión geográfica, <b>producción en serie</b>, desarrollo del transporte, nuevos materiales (también sintéticos) y grandes avances en <b>telecomunicaciones</b>.</li>
+        <li>Imagen típica: operarios <b>trabajando en cadena</b> para fabricar motores de automóvil en masa.</li>
+      </ul>` },
+    { title:'Las bases de la 2ª revolución', html:`
+      <div class="tiles c3">
+        <div class="tile"><span class="tile-ico">${icon('bolt')}</span><b>Nuevas fuentes de energía</b><p><b>Petróleo</b>: se perforan pozos por todo el mundo. <b>Electricidad</b>: transforma la vida en fábricas y ciudades y hace posibles inventos como el <b>fonógrafo de Edison</b>, el primer aparato que grababa y reproducía sonidos.</p></div>
+        <div class="tile"><span class="tile-ico">${icon('cube')}</span><b>Nuevos materiales</b><p><b>Acero</b>, <b>aluminio</b>, zinc, níquel y cromo, <b>caucho vulcanizado</b> y <b>plásticos</b>.</p></div>
+        <div class="tile"><span class="tile-ico">${icon('train')}</span><b>Desarrollo del transporte</b><p>Expansión del <b>ferrocarril</b>, <b>tranvía eléctrico</b>, barcos de <b>acero</b> con <b>turbina de vapor</b> (más velocidad a menor coste) y la invención del <b>automóvil</b> y el <b>avión</b>.</p></div>
+      </div>` },
+    { title:'Ciencia y química', html:`
+      <p class="lead">La 2ª revolución no solo cambió las fábricas: la ciencia avanzó a gran velocidad.</p>
+      <div class="tiles c3">
+        <div class="tile"><span class="tile-ico">${icon('plus')}</span><b>Salud</b><p><b>Vacunas</b>, <b>antibióticos</b> y <b>pasteurización</b> para controlar enfermedades.</p></div>
+        <div class="tile"><span class="tile-ico">${icon('leaf')}</span><b>Agricultura</b><p><b>Fertilizantes</b> para mejorar las cosechas.</p></div>
+        <div class="tile"><span class="tile-ico">${icon('spark')}</span><b>Explosivos</b><p>Que, con el tiempo, hicieron posible el <b>armamento nuclear</b>.</p></div>
+      </div>` }
+  ],
+  fixed:[
+    { t:'match', q:'Une cada base de la 2ª revolución industrial con su ejemplo.',
+      pairs:[
+        ['Nuevas fuentes de energía','Petróleo y electricidad'],
+        ['Nuevos materiales','Acero, aluminio y plásticos'],
+        ['Desarrollo del transporte','Ferrocarril, tranvía eléctrico y turbina de vapor'],
+        ['Ciencia y química','Vacunas, antibióticos y pasteurización']
+      ],
+      ex:'Las bases de la 2ª revolución son las nuevas fuentes de energía, los nuevos materiales y el desarrollo del transporte, junto al progreso de la ciencia y la química.',
+      h:'Empieza por la pareja más fácil: ¿qué base encaja con «ferrocarril»?' }
+  ],
+  pick:4,
+  pool:[
+    { t:'quiz', q:'¿Con qué dos fuentes de energía arranca la 2ª revolución industrial?', o:['Electricidad y petróleo','Vapor y carbón','Energía solar y eólica','Energía nuclear e hidrógeno'],
+      ex:'La industria 2.0 empieza en 1870 con la introducción de la electricidad y del petróleo como fuentes de energía para la producción masiva.', h:'Una llega por cables; la otra sale de pozos.' },
+    { t:'quiz', q:'¿Cuál de estos materiales NO es de los «nuevos materiales» de la 2ª revolución industrial?', o:['El silicio','El acero','El aluminio','El caucho vulcanizado'],
+      ex:'Los nuevos materiales fueron acero, aluminio, zinc, níquel y cromo, caucho vulcanizado y plásticos. El silicio es el protagonista de la electrónica (3ª revolución).', h:'Uno de ellos es la base de los chips de los ordenadores.' },
+    { t:'quiz', q:'Según los apuntes, ¿qué inventó Thomas Alva Edison?', o:['El fonógrafo, el primer aparato que grababa y reproducía sonidos','La máquina de vapor','El transistor','El automóvil'],
+      ex:'La figura 1.7 recuerda que Edison inventó el fonógrafo, el primer aparato que reproducía y grababa sonidos. La electricidad hizo posibles inventos así.', h:'Tiene que ver con el sonido.' },
+    { t:'tf', q:'En la 2ª revolución industrial, Inglaterra comparte el liderazgo mundial con EE. UU. y Alemania.', a:true,
+      ex:'Inglaterra se posiciona como primera potencia mundial junto a EE. UU. y Alemania por sus avances científico-técnicos.', h:'Los apuntes nombran tres países.' },
+    { t:'quiz', q:'¿Qué aportó la turbina de vapor a los barcos de acero?', o:['Más velocidad a menor coste','Navegar sin tripulación','Funcionar con energía solar','Poder hacerlos de madera'],
+      ex:'La construcción de barcos con acero y la turbina de vapor permitieron mayor velocidad a menor coste.', h:'Piensa en rapidez y en dinero.' },
+    { t:'tf', q:'Las vacunas, los antibióticos y la pasteurización son avances ligados a la 2ª revolución industrial.', a:true,
+      ex:'Durante la 2ª revolución hubo grandes avances para controlar enfermedades: vacunas, antibióticos y pasteurización.', h:'Es el apartado «progreso de la ciencia y la química».' },
+    { t:'quiz', q:'La foto de operarios montando motores en cadena ilustra…', o:['La producción en serie de la 2ª revolución industrial','La fabricación aditiva de la industria 4.0','El trabajo en las minas de la 1ª revolución','Los robots de la 3ª revolución'],
+      ex:'La figura 1.5 muestra operarios trabajando en cadena: la producción masiva típica de la industria 2.0.', h:'Cadena de montaje = producción en masa.' },
+    { t:'tf', q:'El automóvil y el avión se inventaron durante la 4ª revolución industrial.', a:false,
+      ex:'La invención del automóvil y del avión forma parte del desarrollo del transporte de la 2ª revolución industrial.', h:'Mira las características de la industria 2.0.' },
+    { t:'quiz', q:'¿Qué medio de transporte urbano llegó con la electricidad y sustituyó al transporte de tracción animal?', o:['El tranvía eléctrico','El autobús de hidrógeno','El patinete eléctrico','El vehículo autónomo'],
+      ex:'El primer tranvía eléctrico en España favoreció el reemplazo del transporte urbano de tracción.', h:'Circula sobre raíles por la ciudad.' },
+    { t:'quiz', q:'¿Qué más trajo el progreso de la química en la 2ª revolución industrial?', o:['Fertilizantes para la agricultura y explosivos','Chips de silicio y ordenadores','Paneles solares y baterías','Aplicaciones móviles'],
+      ex:'La 2ª revolución trajo fertilizantes para la agricultura y explosivos, que acabaron haciendo posible el armamento nuclear.', h:'Uno sirve para el campo; el otro, para la minería y la guerra.' }
+  ]
+},
+/* ---------------- 3 · SILICIO Y 4.0 ---------------- */
+{
+  id:'silicio', era:3, yearNum:1970, yearLabel:'1970 · 2011', jump:'1970', color:'#48E5A4', icon:'chip',
+  name:'Del silicio a la industria 4.0', short:'Información y 4.0', place:'Años 70 → 2011',
+  sub:'3ª y 4ª revolución industrial',
+  mission:'Alguien ha desordenado la línea del tiempo. Recoloca las revoluciones y conecta la fábrica 4.0.',
+  doneTitle:'¡Conexión establecida!',
+  cards:[
+    { title:'Industria 3.0 · La era de la información', html:`
+      <div class="facts">
+        <div class="fact"><b>Años 70</b><span>Inicio</span></div>
+        <div class="fact"><b>TIC</b><span>Protagonistas</span></div>
+        <div class="fact"><b>3.0</b><span>Nombre</span></div>
+      </div>
+      <ul class="pts">
+        <li>Llegan la <b>automatización</b>, las <b>TIC</b> (tecnologías de la información y la comunicación) y los <b>sistemas electrónicos</b>.</li>
+        <li>Nace la <b>informática</b>; después se extienden los <b>ordenadores</b> y, más adelante, <b>Internet</b>.</li>
+        <li>Los <b>transistores</b> son la base de la informática, y el <b>silicio</b> es el rey de la electrónica.</li>
+        <li>Empieza la <b>descarbonización</b> del transporte con <b>energías renovables</b>.</li>
+      </ul>` },
+    { title:'Industria 4.0', html:`
+      <div class="facts">
+        <div class="fact"><b>2011</b><span>Inicio</span></div>
+        <div class="fact"><b>4IR</b><span>Otro nombre</span></div>
+        <div class="fact"><b>IoT</b><span>Todo conectado</span></div>
+      </div>
+      <ul class="pts">
+        <li>La impulsan el aumento de los <b>datos</b>, la <b>conectividad</b> y las mejoras en <b>robótica</b>: producción <b>automatizada e interconectada</b>.</li>
+        <li>El <b>Internet de las cosas</b> conecta los dispositivos para que se comuniquen entre ellos.</li>
+        <li>Gran reto: la <b>recapacitación</b> tecnológica del personal, sobre todo en las empresas más tradicionales.</li>
+      </ul>
+      <span class="eyebrow block">Tipos de tecnologías disruptivas</span>
+      <div class="tiles c2">
+        <div class="tile"><b>Conectividad, datos y potencia computacional</b><p>Nube, Internet, blockchain y sensores.</p></div>
+        <div class="tile"><b>Análisis e inteligencia</b><p>Aprendizaje automático.</p></div>
+        <div class="tile"><b>Interacción persona-máquina</b><p>Realidad virtual y aumentada, robótica y vehículos guiados autónomos.</p></div>
+        <div class="tile"><b>Ingeniería avanzada</b><p>Fabricación aditiva, energía renovable y nanopartículas.</p></div>
+      </div>` },
+    { title:'Ventajas y sostenibilidad', html:`
+      <div class="duo">
+        <div class="duo-col good"><span class="eyebrow">Ventajas de la 4.0</span><ul>
+          <li>Productos y servicios más <b>accesibles y transmisibles</b>.</li>
+          <li>Cadenas de suministro más <b>eficientes</b>.</li>
+          <li><b>Menos desperdicio</b> en las fábricas.</li></ul></div>
+        <div class="duo-col"><span class="eyebrow">Ecoeficiencia</span><ul>
+          <li>Une <b>sostenibilidad</b> y <b>excelencia competitiva</b>.</li>
+          <li>Permite decidir con <b>datos</b> en la producción y en la cadena de valor.</li>
+          <li>Mejora <b>costes, agilidad y calidad</b>.</li>
+          <li>Limita <b>consumo, emisiones y desperdicio</b>.</li></ul></div>
+      </div>
+      <p class="callout">La <b>pandemia</b> aceleró la transición: obligó a las empresas a digitalizarse y a operar <b>sin contacto</b>.</p>` },
+    { title:'Cuatro saltos', html:`
+      <ol class="leaps">
+        <li class="leaps-h"><span></span><span class="eyebrow">Motor tecnológico</span><span class="eyebrow">Cambio en el trabajo</span></li>
+        <li><b class="leap-n">1ª</b><span class="leap-m">Vapor y mecanización</span><span class="leap-c">Del taller a la fábrica</span></li>
+        <li><b class="leap-n">2ª</b><span class="leap-m">Electricidad y cadena de montaje</span><span class="leap-c">Producción en masa</span></li>
+        <li><b class="leap-n">3ª</b><span class="leap-m">Electrónica e informática</span><span class="leap-c">Ordenadores, PLC y robots</span></li>
+        <li><b class="leap-n">4ª</b><span class="leap-m">Datos y conectividad</span><span class="leap-c">Sistemas ciberfísicos</span></li>
+      </ol>
+      <blockquote class="quote">Cada revolución se apoya en la anterior. La cuarta no añade máquinas: <b>añade información sobre ellas</b>.</blockquote>
+      <p class="muted small"><b>PLC</b>: autómata programable que controla las máquinas de una planta. ¿Estamos ya en una <b>5ª revolución industrial</b>? Guárdate la pregunta para la actividad E1.</p>` }
+  ],
+  fixed:[
+    { t:'order', q:'Ordena los motores tecnológicos de las cuatro revoluciones, de la más antigua a la más reciente.',
+      items:['Vapor y mecanización','Electricidad y cadena de montaje','Electrónica e informática','Datos y conectividad'],
+      ex:'1ª: vapor y mecanización (1780–1840) · 2ª: electricidad y cadena de montaje (desde 1870) · 3ª: electrónica e informática (años 70) · 4ª: datos y conectividad (desde 2011). Cada revolución se apoya en la anterior.',
+      h:'Sin electricidad no hay informática, y sin informática no hay datos.' },
+    { t:'match', q:'Une cada tipo de tecnología disruptiva de la industria 4.0 con sus ejemplos.',
+      pairs:[
+        ['Conectividad, datos y potencia computacional','Nube, blockchain y sensores'],
+        ['Análisis e inteligencia','Aprendizaje automático'],
+        ['Interacción persona-máquina','Realidad virtual y aumentada, robótica'],
+        ['Ingeniería avanzada','Fabricación aditiva y nanopartículas']
+      ],
+      ex:'Son los cuatro tipos fundamentales de tecnologías disruptivas de la industria 4.0.',
+      h:'Una máquina que aprende de los datos hace «análisis e inteligencia».' }
+  ],
+  pick:4,
+  pool:[
+    { t:'quiz', q:'¿Qué componente electrónico es la base de la informática?', o:['El transistor','La turbina de vapor','El fonógrafo','El caucho vulcanizado'],
+      ex:'La figura 1.9 lo resume: los transistores son la base de la informática.', h:'Es diminuto y está hecho de silicio.' },
+    { t:'quiz', q:'¿Cuándo empieza la industria 4.0, según los apuntes?', o:['En 2011','En 1870','En la década de 1970','En 1780'],
+      ex:'La industria 4.0 o 4IR se inicia en 2011, impulsada por el aumento de los datos, la conectividad y las mejoras en robótica.', h:'Es la más reciente: ya en el siglo XXI.' },
+    { t:'quiz', q:'¿Qué impulsa la 4ª revolución industrial?', o:['El aumento de los datos, la conectividad y las mejoras en robótica','El vapor, el carbón y el ferrocarril','La electricidad, el petróleo y el acero','La radio, la televisión y el teléfono fijo'],
+      ex:'La 4ª revolución está impulsada por el aumento de los datos, la conectividad y las mejoras en robótica.', h:'Piensa en sensores, redes y robots.' },
+    { t:'tf', q:'A la 3ª revolución industrial también se la llama «era de la información».', a:true,
+      ex:'La 3ª revolución (década de los 70) se conoce como industria 3.0 o era de la información.', h:'Es la revolución de las TIC.' },
+    { t:'tf', q:'La pandemia frenó la digitalización porque las empresas dejaron de invertir en tecnología.', a:false,
+      ex:'Fue al revés: la pandemia aceleró la transición al obligar a las empresas a adoptar la digitalización y las operaciones sin contacto.', h:'Recuerda el teletrabajo y las compras online durante el confinamiento.' },
+    { t:'quiz', q:'¿Qué frase resume la 4ª revolución, según la tabla «Cuatro saltos»?', o:['No añade máquinas: añade información sobre ellas','Sustituye las máquinas por personas','Vuelve al vapor, pero con energía renovable','Hace innecesarios los datos'],
+      ex:'«Cada revolución se apoya en la anterior. La cuarta no añade máquinas: añade información sobre ellas.»', h:'La 4.0 va de datos.' },
+    { t:'quiz', q:'¿Qué es el Internet de las cosas (IoT)?', o:['Dispositivos interconectados que se comunican entre ellos','Una red social para fábricas','Un tipo de ordenador portátil','Un programa para escanear documentos'],
+      ex:'La figura 1.11 lo explica: el Internet de las cosas interconecta los dispositivos, que se comunican entre ellos.', h:'Las «cosas» (máquinas, sensores, electrodomésticos) se conectan.' },
+    { t:'tf', q:'La ecoeficiencia digital ayuda a limitar el consumo, las emisiones y el desperdicio de recursos.', a:true,
+      ex:'La tecnología digital permite decidir con datos, mejora costes, agilidad y calidad y limita el consumo, las emisiones y el desperdicio.', h:'Eco + eficiencia.' },
+    { t:'quiz', q:'¿Qué gran desafío supone la industria 4.0 para las empresas más tradicionales?', o:['La recapacitación tecnológica de su personal','La falta de electricidad','La prohibición de usar Internet','La escasez de carbón'],
+      ex:'La recapacitación en tecnologías es un gran desafío para las empresas más tradicionales por el cambio de parámetros que implica.', h:'Tiene que ver con formar a las personas.' },
+    { t:'tf', q:'La descarbonización del transporte con energías renovables empieza ya en la 3ª revolución industrial.', a:true,
+      ex:'En la 3ª revolución se inicia la descarbonización de las materias primas en los medios de transporte con el uso de energías renovables.', h:'Aparece en la diapositiva de la industria 3.0.' },
+    { t:'quiz', q:'¿Cuál de estas NO es una ventaja de la 4ª revolución industrial?', o:['Más desperdicio en las fábricas para producir más rápido','Cadenas de suministro más eficientes','Productos y servicios más accesibles y transmisibles','Reducción del desperdicio en las fábricas'],
+      ex:'Las ventajas son productos y servicios más accesibles y transmisibles, cadenas de suministro más eficientes y reducción del desperdicio en las fábricas.', h:'Busca la opción que contradice a otra.' },
+    { t:'quiz', q:'¿Qué cambio en el trabajo trajo la 3ª revolución, según la tabla «Cuatro saltos»?', o:['Ordenadores, PLC y robots','Del taller a la fábrica','Producción en masa','Sistemas ciberfísicos'],
+      ex:'3ª revolución: electrónica e informática → ordenadores, PLC y robots.', h:'La electrónica y la informática entran en la fábrica.' }
+  ]
+},
+/* ---------------- 4 · DIGITALIZACIÓN ---------------- */
+{
+  id:'digitalizacion', era:4, yearNum:'now', yearLabel:'Hoy', jump:'Hoy', color:'#5AB0FF', icon:'digit',
+  name:'¿Qué es la digitalización?', short:'Digitalización', place:'',
+  sub:'Digitización, digitalización y transformación digital',
+  mission:'El villano presume de que escanear un papel ya es «transformación digital». Demuéstrale que no es lo mismo.',
+  doneTitle:'¡Proceso rediseñado!',
+  cards:[
+    { title:'Tres pasos que no son lo mismo', html:`
+      <div class="steps">
+        <div class="step"><span class="eyebrow">Paso 1</span><b>Digitización</b><p>De <b>analógico a digital</b>. Ej.: escanear fichas.</p><em>El proceso se mantiene igual</em></div>
+        <div class="step"><span class="eyebrow">Paso 2</span><b>Digitalización</b><p><b>Rediseño del proceso</b>. Ej.: colaboración en línea, alertas.</p><em>El proceso cambia</em></div>
+        <div class="step"><span class="eyebrow">Paso 3</span><b>Transformación digital</b><p><b>Cambio del modelo de negocio</b>. Ej.: nuevos servicios centrados en datos.</p><em>La organización cambia</em></div>
+      </div>
+      <div class="callout rule"><span class="eyebrow">Regla práctica</span><p>Si al <b>quitar la tecnología</b> el proceso funciona <b>igual</b>, era <b>digitización</b>.</p></div>` },
+    { title:'Los cinco elementos que la definen', html:`
+      <div class="hub">
+        <div class="hub-core"><span class="eyebrow">Cinco elementos de la</span><b>Digitalización</b></div>
+        <div class="tile"><b>Conectividad</b><p>Los elementos se comunican, no funcionan aislados.</p></div>
+        <div class="tile"><b>Datos</b><p>Toda actividad deja rastro medible.</p></div>
+        <div class="tile"><b>Automatización inteligente</b><p>El sistema no solo ejecuta: ajusta.</p></div>
+        <div class="tile"><b>Personalización</b><p>El servicio se adapta a cada persona usuaria.</p></div>
+        <div class="tile"><b>Escalabilidad</b><p>Crecer no exige multiplicar recursos igual.</p></div>
+      </div>` },
+    { title:'Digitalizar no es comprar tecnología', html:`
+      <blockquote class="quote big">Si el procedimiento es innecesariamente complicado, digitalizarlo produce un procedimiento innecesariamente complicado… <b>y además digital</b>.</blockquote>
+      <p class="lead">Antes de meter tecnología hay que preguntarse si el proceso tiene sentido. Si no, aparece la <b>sobredigitalización</b>: justo el poder del villano de esta misión.</p>` }
+  ],
+  fixed:[
+    { t:'sort', q:'¿Digitización, digitalización o transformación digital? Clasifica cada caso.',
+      bins:[{ id:'dz', label:'Digitización', sub:'paso 1' },{ id:'dl', label:'Digitalización', sub:'paso 2' },{ id:'tr', label:'Transformación', sub:'paso 3' }],
+      items:[
+        { txt:'Una escuela infantil escanea las fichas de matrícula y las guarda en PDF.', bin:'dz', why:'Solo pasa de papel a digital: el proceso sigue igual.' },
+        { txt:'Un centro de día pasa sus actas de papel a documentos de texto, pero las revisa igual que antes.', bin:'dz', why:'Cambia el soporte, no el proceso.' },
+        { txt:'El equipo educativo escribe las programaciones en un documento compartido en línea y recibe alertas de cambios.', bin:'dl', why:'Se rediseña la forma de trabajar: colaboración en línea y alertas.' },
+        { txt:'Las citas con las familias pasan a una agenda compartida que envía avisos automáticos.', bin:'dl', why:'El proceso cambia gracias a la tecnología.' },
+        { txt:'Una asociación crea un servicio nuevo de apoyo a domicilio diseñado a partir de los datos de sus usuarios.', bin:'tr', why:'Nace un servicio nuevo centrado en datos: cambia la organización.' },
+        { txt:'Una librería de barrio pasa a funcionar por suscripción online, con recomendaciones basadas en datos.', bin:'tr', why:'Cambia el modelo de negocio.' }
+      ],
+      ex:'Digitización: de analógico a digital, el proceso se mantiene. Digitalización: se rediseña el proceso. Transformación digital: cambia el modelo de negocio y la organización.',
+      h:'Aplica la regla práctica: si al quitar la tecnología el proceso funciona igual, es digitización.' },
+    { t:'match', q:'Une cada elemento de la digitalización con su definición.',
+      pairs:[
+        ['Conectividad','Los elementos se comunican, no funcionan aislados'],
+        ['Datos','Toda actividad deja rastro medible'],
+        ['Automatización inteligente','El sistema no solo ejecuta: ajusta'],
+        ['Personalización','El servicio se adapta a cada persona usuaria'],
+        ['Escalabilidad','Crecer no exige multiplicar recursos igual']
+      ],
+      ex:'Son los cinco elementos que definen la digitalización: conectividad, datos, automatización inteligente, personalización y escalabilidad.',
+      h:'«Escalar» es crecer. «Rastro medible» son datos.' }
+  ],
+  pick:4,
+  pool:[
+    { t:'quiz', q:'Regla práctica: si al quitar la tecnología el proceso funciona igual, era…', o:['Digitización','Digitalización','Transformación digital','Sobredigitalización'],
+      ex:'Si al quitar la tecnología el proceso funciona igual, era digitización: solo cambió el soporte (de papel a digital).', h:'Es el paso 1.' },
+    { t:'quiz', q:'En la transformación digital, ¿qué es lo que cambia?', o:['La organización y su modelo de negocio','Solo el formato de los documentos','Nada: el proceso se mantiene igual','Únicamente el ordenador que se usa'],
+      ex:'Paso 3, transformación: cambio de modelo de negocio (por ejemplo, nuevos servicios centrados en datos). La organización cambia.', h:'Es el más profundo de los tres pasos.' },
+    { t:'tf', q:'Digitalizar consiste, sobre todo, en comprar tecnología.', a:false,
+      ex:'«Digitalizar no es comprar tecnología.» Si el procedimiento es innecesariamente complicado, digitalizarlo solo lo vuelve complicado y además digital.', h:'Recuerda la frase grande de la diapositiva.' },
+    { t:'tf', q:'Si un procedimiento es innecesariamente complicado, digitalizarlo lo simplifica automáticamente.', a:false,
+      ex:'Al revés: produce un procedimiento innecesariamente complicado… y además digital. Primero hay que simplificar el proceso.', h:'Piensa en el villano de esta misión.' },
+    { t:'quiz', q:'Un sistema que no se limita a ejecutar una orden fija, sino que la ajusta él solo según lo que mide, es un ejemplo de…', o:['Automatización inteligente','Escalabilidad','Digitización','Conectividad'],
+      ex:'Automatización inteligente: el sistema no solo ejecuta, también ajusta.', h:'Ejecutar + ajustar.' },
+    { t:'quiz', q:'Una plataforma educativa que adapta las actividades al ritmo de cada alumno o alumna es un ejemplo de…', o:['Personalización','Escalabilidad','Conectividad','Digitización'],
+      ex:'Personalización: el servicio se adapta a cada persona usuaria.', h:'Hecho a medida de cada persona.' },
+    { t:'quiz', q:'¿Qué ejemplo corresponde a la digitalización (paso 2)?', o:['Trabajar en línea de forma colaborativa, con alertas automáticas','Escanear las fichas en papel y guardarlas en PDF','Crear un servicio nuevo basado en datos','Imprimir los correos para archivarlos'],
+      ex:'Paso 2, digitalización: rediseño del proceso, por ejemplo colaboración en línea y alertas. El proceso cambia.', h:'En el paso 2 el proceso cambia, pero el modelo de negocio no.' },
+    { t:'quiz', q:'Un servicio online que atiende a 100 o a 10 000 personas sin necesitar 100 veces más recursos demuestra…', o:['Escalabilidad','Personalización','Datos','Digitización'],
+      ex:'Escalabilidad: crecer no exige multiplicar los recursos por igual.', h:'Crecer sin multiplicar.' }
+  ]
+},
+/* ---------------- 5 · CIBERFÍSICOS ---------------- */
+{
+  id:'cps', era:5, yearNum:'now', yearLabel:'Hoy', jump:'Hoy', color:'#2FD6F2', icon:'loop',
+  name:'Sistemas ciberfísicos', short:'Ciberfísicos', place:'',
+  sub:'Sensores, actuadores y gemelos digitales',
+  mission:'El ciclo entre lo físico y lo digital se ha roto. Vuelve a cerrarlo, del sensor al actuador.',
+  doneTitle:'¡Ciclo cerrado!',
+  cards:[
+    { title:'Sistemas ciberfísicos (CPS)', html:`
+      <div class="eq" role="img" aria-label="Hardware más software más redes es igual a sistema ciberfísico"><span>Hardware</span><i>+</i><span>Software</span><i>+</i><span>Redes</span><i>=</i><span class="eq-res">CPS</span></div>
+      <ul class="pts">
+        <li>Combinan hardware, software y redes para <b>interactuar con el mundo físico y controlarlo</b> a partir de los datos que recogen.</li>
+        <li>Usan <b>sensores</b> y <b>actuadores inteligentes</b> para <b>automatizar</b> y <b>tomar decisiones en tiempo real</b>.</li>
+        <li>La industria está ciberconectada y guarda la información en la <b>nube</b>.</li>
+      </ul>` },
+    { title:'El ciclo de un sistema ciberfísico', html:`
+      <div class="loop">
+        <div class="loop-node n1"><span class="loop-k">1</span><b>Sensor</b><p>Mide una magnitud real: temperatura, presencia, peso, acceso.</p></div>
+        <span class="loop-arrow" aria-hidden="true">→</span>
+        <div class="loop-node n2"><span class="loop-k">2</span><b>Red</b><p>Transporta el dato hasta donde se procesa.</p></div>
+        <span class="loop-arrow" aria-hidden="true">↑</span>
+        <span class="loop-center" aria-hidden="true">${icon('loop')}</span>
+        <span class="loop-arrow" aria-hidden="true">↓</span>
+        <div class="loop-node n4"><span class="loop-k">4</span><b>Actuador</b><p>Ejecuta sobre el mundo físico.</p></div>
+        <span class="loop-arrow" aria-hidden="true">←</span>
+        <div class="loop-node n3"><span class="loop-k">3</span><b>Decisión</b><p>Compara, calcula o predice, y decide.</p></div>
+      </div>
+      <p class="muted center">Lo físico y lo digital se cierran en un ciclo… y vuelta a empezar.</p>` },
+    { title:'¿Dónde los encontramos?', html:`
+      <ul class="chipset">
+        <li>Robots industriales colaborativos</li><li>Edificios inteligentes</li><li>Vehículos autónomos y sin piloto</li><li>Salud de pacientes en tiempo real</li><li>Mapeo de la actividad del cerebro</li><li>Tráfico y transporte público</li><li>Alimentos rastreables</li><li>Energía fiable y sostenible</li>
+      </ul>
+      <div class="tiles c2">
+        <div class="tile"><b>Ciberseguridad</b><p>Comunicaciones cifradas y vigilancia de redes y dispositivos al instante.</p></div>
+        <div class="tile"><b>Agricultura</b><p>Drones, riego inteligente y robots agrícolas.</p></div>
+        <div class="tile"><b>Aeroespacial</b><p>Más seguridad y estabilidad en el vuelo, y menos carga para los pilotos.</p></div>
+        <div class="tile"><b>Militar</b><p>Vigilancia autónoma y recogida de datos en tiempo real.</p></div>
+        <div class="tile wide"><b>Industria: la «Dark Factory»</b><p>Una fábrica tan automatizada que puede funcionar a oscuras, sin personas.</p></div>
+      </div>
+      <p class="muted">Estamos acostumbrados a verlos en la sociedad… pero ¿y si los aplicamos a los seres humanos?</p>` },
+    { title:'El gemelo digital', html:`
+      <div class="twin" aria-hidden="true"><span class="twin-box">Original</span><span class="twin-sync">⇄<br>datos en<br>tiempo real</span><span class="twin-box ghost">Gemelo</span></div>
+      <div class="tiles c3">
+        <div class="tile"><b>Qué es</b><p>Réplica virtual de un objeto, espacio o proceso, alimentada con <b>datos en tiempo real</b>.</p></div>
+        <div class="tile"><b>Para qué sirve</b><p>Simular, predecir y optimizar <b>sin tocar el original</b>: ¿qué pasaría si…?</p></div>
+        <div class="tile"><b>Qué lo distingue</b><p>No es un plano ni un modelo 3D: <b>está vivo</b>. Si cambia el original, cambia el gemelo.</p></div>
+      </div>` }
+  ],
+  fixed:[
+    { t:'order', q:'Ordena el ciclo de un sistema ciberfísico.',
+      items:['Sensor: mide una magnitud real','Red: transporta el dato','Decisión: compara, calcula o predice','Actuador: ejecuta sobre el mundo físico'],
+      ex:'Sensor → red → decisión → actuador… y vuelta a empezar: lo físico y lo digital se cierran en un ciclo.',
+      h:'Primero hay que medir; lo último es actuar.' },
+    { t:'sort', q:'¿Sensor o actuador? Clasifica cada pieza de un sistema ciberfísico.',
+      bins:[{ id:'s', label:'Sensor', sub:'mide' },{ id:'a', label:'Actuador', sub:'ejecuta' }],
+      items:[
+        { txt:'Termómetro que mide la temperatura de una sala', bin:'s' },
+        { txt:'Motor que abre una puerta automática', bin:'a' },
+        { txt:'Detector de presencia en un pasillo', bin:'s' },
+        { txt:'Válvula que abre el riego', bin:'a' },
+        { txt:'Báscula que registra el peso', bin:'s' },
+        { txt:'Alarma que suena para avisar', bin:'a' },
+        { txt:'Lector de tarjetas en la entrada', bin:'s' }
+      ],
+      ex:'El sensor mide una magnitud real (temperatura, presencia, peso, acceso). El actuador ejecuta la decisión sobre el mundo físico (abrir, mover, avisar).',
+      h:'Si «mide» o «detecta», es sensor. Si «hace» algo en el mundo físico, es actuador.' }
+  ],
+  pick:4,
+  pool:[
+    { t:'quiz', q:'Un sistema ciberfísico combina…', o:['Hardware, software y redes','Solo software en la nube','Papel, lápiz y archivadores','Vapor, electricidad y petróleo'],
+      ex:'Los CPS combinan hardware, software y redes para interactuar con el mundo físico y controlarlo a partir de los datos que recogen.', h:'Tres ingredientes: lo que se toca, lo que se programa y lo que conecta.' },
+    { t:'quiz', ctx:'En una residencia, una pulsera detecta una caída, envía el aviso por wifi, un programa decide que es una emergencia y suena una alarma en el puesto de control.', q:'En este ciclo, ¿qué papel tiene la alarma?', o:['Actuador','Sensor','Red','Decisión'],
+      ex:'La pulsera es el sensor, el wifi es la red, el programa toma la decisión y la alarma es el actuador: ejecuta una acción en el mundo físico.', h:'Es el último paso del ciclo.' },
+    { t:'quiz', q:'¿Qué es un gemelo digital?', o:['Una réplica virtual alimentada con datos en tiempo real','Un plano en 3D que no cambia','Una copia de seguridad de los archivos','Un robot idéntico al original'],
+      ex:'Un gemelo digital es una réplica virtual de un objeto, espacio o proceso, alimentada con datos en tiempo real.', h:'Virtual + datos en tiempo real.' },
+    { t:'tf', q:'Un gemelo digital es lo mismo que un modelo 3D: se dibuja una vez y ya no cambia.', a:false,
+      ex:'No es un plano ni un modelo 3D: está vivo. Si cambia el original, cambia el gemelo.', h:'¿Qué lo distingue?' },
+    { t:'quiz', q:'¿Para qué sirve un gemelo digital?', o:['Para simular, predecir y optimizar sin tocar el original','Para sustituir al original y desecharlo','Para decorar la fábrica','Para guardar fotos antiguas'],
+      ex:'Sirve para simular, predecir y optimizar sin tocar el original: ¿qué pasaría si…?', h:'«¿Qué pasaría si…?»' },
+    { t:'quiz', q:'¿Qué es una «Dark Factory»?', o:['Una fábrica tan automatizada que puede funcionar a oscuras, sin personas','Una fábrica que solo trabaja de noche con turnos de personas','Una fábrica sin conexión a Internet','Una fábrica abandonada'],
+      ex:'Es el ejemplo de CPS en la industria: máquinas, sensores y robots trabajan solos, así que no hace falta ni encender la luz.', h:'Si no hay personas, ¿hace falta luz?' },
+    { t:'tf', q:'La monitorización en tiempo real de la salud de pacientes es un uso de los sistemas ciberfísicos.', a:true,
+      ex:'Entre los usos de los CPS está el monitoreo en tiempo real de la salud de los pacientes.', h:'Piensa en los relojes y pulseras que miden el pulso.' },
+    { t:'quiz', q:'En agricultura, los sistemas ciberfísicos se aplican con…', o:['Drones, riego inteligente y robots agrícolas','Arados tirados por animales','Calendarios de siembra en papel','Molinos de viento tradicionales'],
+      ex:'En agricultura se usan drones, sistemas de riego inteligentes y robots agrícolas.', h:'Todos miden o actúan solos.' },
+    { t:'quiz', q:'En el ciclo de un CPS, ¿qué hace la red?', o:['Transporta el dato hasta donde se procesa','Mide la temperatura','Decide qué hacer','Ejecuta la acción física'],
+      ex:'Sensor (mide) → red (transporta el dato) → decisión (compara, calcula o predice) → actuador (ejecuta).', h:'Es el camino del dato.' },
+    { t:'tf', q:'En el sector aeroespacial, los CPS aumentan la seguridad y reducen la carga de trabajo de los pilotos.', a:true,
+      ex:'Los sistemas de control aeroespaciales usan datos para aumentar la seguridad, mejorar la estabilidad del vuelo y reducir la carga de los pilotos.', h:'Piensa en el piloto automático.' }
+  ]
+},
+/* ---------------- 6 · IT / OT ---------------- */
+{
+  id:'itot', era:6, yearNum:'now', yearLabel:'Hoy', jump:'Hoy', color:'#3FD08A', icon:'merge',
+  name:'Entornos IT y OT', short:'IT y OT', place:'',
+  sub:'Dos mundos con lógicas opuestas que hoy se conectan',
+  mission:'La oficina y la planta no se hablan. Manda cada tecnología a su mundo y haz que converjan.',
+  doneTitle:'¡Mundos conectados!',
+  cards:[
+    { title:'Dos mundos con lógicas opuestas', html:`
+      <div class="itot">
+        <div class="itot-col it"><span class="itot-tag">IT</span><b>Tecnología de la Información</b><p>Gestiona <b>datos e información</b>.</p><ul><li>Ordenadores y servidores</li><li>Redes y correo electrónico</li><li>Programas de gestión y bases de datos</li></ul></div>
+        <div class="itot-col ot"><span class="itot-tag">OT</span><b>Tecnología Operativa</b><p>Controla <b>máquinas y procesos físicos</b>.</p><ul><li>Robots y cintas transportadoras</li><li>Sensores en la planta</li><li>PLC que gobiernan máquinas</li></ul></div>
+        <div class="itot-merge"><b>Convergencia IT/OT</b><span>Hoy los dos mundos se conectan y comparten datos.</span></div>
+      </div>` },
+    { title:'Lo que consigue la convergencia', html:`
+      <span class="eyebrow block">Las organizaciones consiguen</span>
+      <ul class="pts">
+        <li><b>Reducir gastos</b> en hardware y software (equipamiento y programas).</li>
+        <li><b>Mejorar la eficiencia</b> de sus procesos.</li>
+        <li><b>Automatizar y digitalizar</b> algunos procesos.</li>
+        <li>Más <b>trazabilidad</b> en la fabricación del producto.</li>
+      </ul>
+      <span class="eyebrow block">Beneficios</span>
+      <div class="tiles c2">
+        <div class="tile"><b>Intercambio de datos</b><p>La información fluye entre el mundo digital y el físico: <b>visión integral</b> de la organización y <b>respuestas más ágiles</b>.</p></div>
+        <div class="tile"><b>Más eficacia operativa</b><p>Optimizar procesos y <b>prever fallos</b> de los equipos.</p></div>
+      </div>` },
+    { title:'Desafíos de la convergencia', html:`
+      <div class="tiles c3">
+        <div class="tile"><span class="tile-ico">${icon('cube')}</span><b>Obstáculos tecnológicos</b><p>Integrar sistemas que nacieron separados.</p></div>
+        <div class="tile"><span class="tile-ico">${icon('user')}</span><b>Capacidad del elemento humano</b><p>Las personas necesitan formación para moverse entre los dos mundos.</p></div>
+        <div class="tile"><span class="tile-ico">${icon('shield')}</span><b>Riesgos de seguridad</b><p>Si la red de dispositivos no está bien protegida, aparecen <b>vulnerabilidades permanentes en ambos sistemas</b>.</p></div>
+      </div>
+      <p class="callout">Por eso la convergencia IT/OT debe <b>reforzar la ciberseguridad</b>: así se garantizan la integridad y la continuidad de las operaciones.</p>` }
+  ],
+  fixed:[
+    { t:'sort', q:'¿IT u OT? Manda cada elemento a su mundo.',
+      bins:[{ id:'it', label:'IT', sub:'información' },{ id:'ot', label:'OT', sub:'operación' }],
+      items:[
+        { txt:'Servidor de correo electrónico', bin:'it' },
+        { txt:'Brazo robótico de la línea de montaje', bin:'ot' },
+        { txt:'Programa de nóminas y facturación', bin:'it' },
+        { txt:'Cinta transportadora', bin:'ot' },
+        { txt:'Base de datos de clientes', bin:'it' },
+        { txt:'Sensor de temperatura de un horno industrial', bin:'ot' },
+        { txt:'PLC que controla una máquina', bin:'ot' },
+        { txt:'Ordenador de la oficina', bin:'it' }
+      ],
+      ex:'IT (tecnología de la información) gestiona datos: ordenadores, servidores, programas. OT (tecnología operativa) controla máquinas y procesos físicos: robots, cintas, sensores, PLC.',
+      h:'¿Maneja información o mueve y controla algo físico?' }
+  ],
+  pick:4,
+  pool:[
+    { t:'quiz', q:'¿Qué significan las siglas OT?', o:['Tecnología Operativa','Oficina Técnica','Organización del Trabajo','Operaciones Telemáticas'],
+      ex:'IT = Tecnología de la Información; OT = Tecnología Operativa, la que controla máquinas y procesos físicos.', h:'Tiene que ver con operar máquinas.' },
+    { t:'quiz', q:'¿Cuál es un beneficio de la convergencia IT/OT?', o:['Prever fallos de los equipos y optimizar procesos','No necesitar ciberseguridad','Separar aún más la oficina de la planta','Trabajar sin datos'],
+      ex:'La convergencia da más eficacia operativa: las organizaciones pueden optimizar procesos y prever fallos de equipos.', h:'Con datos de las máquinas, te adelantas a las averías.' },
+    { t:'tf', q:'Si la red de dispositivos no está bien protegida, la convergencia IT/OT puede crear vulnerabilidades en ambos sistemas.', a:true,
+      ex:'Si la red no está protegida adecuadamente, se generan vulnerabilidades permanentes en ambos sistemas. Por eso hay que reforzar la ciberseguridad.', h:'Es uno de los desafíos.' },
+    { t:'quiz', q:'¿Cuál NO es un desafío de la convergencia IT/OT?', o:['Tener más trazabilidad del producto','Los obstáculos tecnológicos','La capacidad del elemento humano','Los riesgos de seguridad'],
+      ex:'Los desafíos son los obstáculos tecnológicos, la capacidad del elemento humano y los riesgos de seguridad. La trazabilidad es un beneficio.', h:'Una de las cuatro opciones es algo bueno.' },
+    { t:'quiz', q:'La convergencia IT/OT permite tener mayor ________ en la fabricación del producto.', o:['trazabilidad','contaminación','papeleo','incertidumbre'],
+      ex:'Las organizaciones consiguen una trazabilidad mayor en la fabricación del producto.', h:'Poder seguir el rastro del producto.' },
+    { t:'tf', q:'La convergencia IT/OT hace que las organizaciones gasten más en hardware y software.', a:false,
+      ex:'Al contrario: permite reducir gastos en hardware y software (equipamiento y programas).', h:'Compartir sistemas ahorra.' },
+    { t:'quiz', q:'¿Por qué la convergencia IT/OT mejora la toma de decisiones?', o:['Porque da una visión integral de la organización y respuestas más ágiles','Porque elimina a las personas de las decisiones','Porque separa los datos de la planta de los de la oficina','Porque evita tener que medir nada'],
+      ex:'Facilita el intercambio de datos entre el mundo digital y el físico: visión integral y respuestas más ágiles.', h:'Ver todo el conjunto a la vez.' }
+  ]
+},
+/* ---------------- 7 · BALANCE ---------------- */
+{
+  id:'balance', era:7, yearNum:'now', yearLabel:'Hoy', jump:'Hoy', color:'#4FE0C8', icon:'scale',
+  name:'Ventajas y límites', short:'Balance', place:'',
+  sub:'Pros, contras y sobredigitalización',
+  mission:'Última parada antes del jefe: aprende a pesar las ventajas y los límites de digitalizar.',
+  doneTitle:'¡Balance hecho!',
+  cards:[
+    { title:'Digitalizar de extremo a extremo', html:`
+      <p class="lead">Es implantar tecnologías digitales en <b>todas o algunas</b> de las operaciones de una empresa industrial. Sus ventajas van en cadena:</p>
+      <ol class="chain">
+        <li>Acceso y almacenamiento más rápidos</li><li>Disponibilidad 7/24</li><li>Reducción de costes</li><li>Mejora de la competitividad</li><li>Aumento de la productividad</li>
+      </ol>` },
+    { title:'Balance de la digitalización', html:`
+      <div class="duo">
+        <div class="duo-col good"><span class="eyebrow">Ventajas</span><ul>
+          <li><b>Mayor eficiencia</b>: procesos optimizados y automatizados.</li>
+          <li><b>Reducción de costes</b>: ahorro en papel, almacenamiento y recursos.</li>
+          <li><b>Mejor experiencia del cliente</b>: procesos más rápidos y transparentes.</li>
+          <li><b>Decisiones basadas en datos</b>: información en tiempo real.</li></ul></div>
+        <div class="duo-col bad"><span class="eyebrow">Desafíos y límites</span><ul>
+          <li><b>Brecha digital y exclusión</b>: parte de la población y de los profesionales se queda fuera por falta de formación.</li>
+          <li><b>Dependencia tecnológica</b>: si el sistema cae, la organización se detiene por completo.</li>
+          <li><b>Coste real oculto</b>: mucho más que la licencia.</li>
+          <li><b>Impacto ambiental</b>: consumo energético de los centros de datos y residuos electrónicos.</li>
+          <li><b>Resistencia al cambio</b>: puede ser legítima, porque el nuevo sistema puede ignorar la experiencia de años.</li></ul></div>
+      </div>` },
+    { title:'El iceberg del coste oculto', html:`
+      ${ICEBERG}
+      <p>La licencia es solo la punta. Debajo están la <b>migración de datos</b>, la <b>formación del personal</b>, el <b>mantenimiento</b> y el <b>tiempo de adaptación</b>. Los costes ocultos <b>superan a menudo</b> el precio de la licencia.</p>
+      <blockquote class="quote">La digitalización es más sostenible que lo que sustituye, pero <b>no es neutra</b>.</blockquote>` },
+    { title:'Sobredigitalización', html:`
+      <p class="lead">Incorporar tecnologías digitales de forma <b>excesiva, forzada o innecesaria</b>, hasta el punto en que los inconvenientes superan claramente a los beneficios reales.</p>
+      <ul class="chipset warn"><li>Complejidad</li><li>Costes</li><li>Exclusión</li></ul>
+      <p class="callout">Recuerda: <b>digitalizar no es comprar tecnología</b>. Con esto ya puedes enfrentarte al jefe final.</p>` }
+  ],
+  fixed:[
+    { t:'sort', q:'¿Pro o contra? Haz el balance de la digitalización.',
+      bins:[{ id:'pro', label:'Pro', sub:'ventaja' },{ id:'con', label:'Contra', sub:'límite' }],
+      items:[
+        { txt:'Ahorro en papel, almacenamiento y recursos', bin:'pro' },
+        { txt:'Si el sistema cae, la organización se detiene', bin:'con' },
+        { txt:'Información en tiempo real para decidir mejor', bin:'pro' },
+        { txt:'Riesgo de exclusión por falta de formación', bin:'con' },
+        { txt:'Procesos más rápidos y transparentes para el cliente', bin:'pro' },
+        { txt:'Consumo energético de los centros de datos', bin:'con' },
+        { txt:'Optimización de procesos y automatización', bin:'pro' },
+        { txt:'Costes ocultos de migración y mantenimiento', bin:'con' }
+      ],
+      ex:'Pros: eficiencia, reducción de costes, mejor experiencia del cliente y decisiones basadas en datos. Contras: brecha digital, dependencia tecnológica, coste oculto, impacto ambiental y resistencia al cambio.',
+      h:'Pregúntate si ayuda a la organización o si es un riesgo que hay que gestionar.' }
+  ],
+  pick:4,
+  pool:[
+    { t:'quiz', q:'En el iceberg del coste real, ¿qué parte es la que se ve (la punta)?', o:['La licencia de software','La formación del personal','La migración de datos','El tiempo de adaptación'],
+      ex:'La licencia es la punta visible; debajo quedan la migración de datos, la formación del personal, el mantenimiento y el tiempo de adaptación.', h:'Es lo que aparece en la factura el primer día.' },
+    { t:'quiz', q:'¿Cuál NO aparece entre las ventajas de digitalizar una empresa de extremo a extremo?', o:['Prescindir por completo del personal','Disponibilidad 7/24','Reducción de costes','Aumento de la productividad'],
+      ex:'Las ventajas son acceso y almacenamiento más rápidos, disponibilidad 7/24, reducción de costes, mejora de la competitividad y aumento de la productividad.', h:'Una de las opciones no está en la figura 1.23.' },
+    { t:'tf', q:'La resistencia al cambio siempre es un capricho sin fundamento.', a:false,
+      ex:'Puede ser legítima: el nuevo sistema puede ignorar matices que da la experiencia de años.', h:'Recuerda al trabajador veterano del balance.' },
+    { t:'quiz', q:'¿Qué es la sobredigitalización?', o:['Meter tecnología de forma excesiva, forzada o innecesaria hasta que los inconvenientes superan a los beneficios','Digitalizar solo la mitad de los procesos','Usar ordenadores muy potentes','Pasar todos los documentos a PDF'],
+      ex:'Sobredigitalización: incorporar tecnologías digitales de forma excesiva, forzada o innecesaria, hasta que los inconvenientes (complejidad, costes, exclusión) superan claramente a los beneficios reales.', h:'«Sobre» significa «de más».' },
+    { t:'tf', q:'Según los apuntes, la digitalización es más sostenible que lo que sustituye, pero no es neutra.', a:true,
+      ex:'Es la conclusión del balance: más sostenible que lo que sustituye, pero con impacto (consumo energético, residuos electrónicos…).', h:'Es la frase final del balance.' },
+    { t:'quiz', ctx:'Un centro obliga a pedir cita con una app nueva. Muchas personas mayores no saben usarla y el trámite tarda más que antes.', q:'¿Qué está pasando?', o:['Sobredigitalización','Una transformación digital con éxito','Convergencia IT/OT','Un gemelo digital'],
+      ex:'La tecnología se ha impuesto de forma forzada: añade complejidad y excluye a personas. Los inconvenientes superan a los beneficios.', h:'Complejidad + exclusión = …' },
+    { t:'quiz', q:'«Si el sistema cae, la organización se detiene por completo». ¿Qué límite describe?', o:['Dependencia tecnológica','Brecha digital','Resistencia al cambio','Coste oculto'],
+      ex:'Es la dependencia tecnológica: cuanto más depende todo del sistema, más grave es que falle.', h:'Depender de algo que puede fallar.' },
+    { t:'tf', q:'Los costes ocultos (formación, migración de datos, mantenimiento…) superan a menudo el precio de la licencia.', a:true,
+      ex:'Los costes ocultos superan a menudo el precio de la licencia: es la parte sumergida del iceberg.', h:'Mira el tamaño de la parte sumergida del iceberg.' },
+    { t:'quiz', q:'¿Qué tres inconvenientes cita la definición de sobredigitalización?', o:['Complejidad, costes y exclusión','Rapidez, ahorro y eficiencia','Vapor, carbón y humo','Sensores, redes y actuadores'],
+      ex:'Cuando la complejidad, los costes y la exclusión superan claramente a los beneficios reales, hay sobredigitalización.', h:'Los tres son problemas.' }
+  ]
+}
+],
+
+BOSS_STATION: {
+  id:'boss', era:8, yearNum:null, yearLabel:'¿5.0?', jump:'¿5.0?', color:'#FF2E88', icon:'boss',
+  name:'El Sobredigitalizador', short:'Jefe final', place:'', sub:'Jefe final · preguntas de toda la unidad'
+},
+
+BOSS_POOL: [
+  { t:'quiz', q:'¿Qué revolución se conoce como la «era de la información»?', o:['La 3ª','La 1ª','La 2ª','La 4ª'], ex:'La 3ª revolución industrial (años 70): automatización, TIC, informática e Internet.', h:'La de los ordenadores.' },
+  { t:'quiz', q:'Escanear las fichas de las familias y guardarlas en PDF es…', o:['Digitización','Digitalización','Transformación digital','Un gemelo digital'], ex:'Pasar de analógico a digital sin cambiar el proceso es digitización (paso 1).', h:'El proceso sigue igual.' },
+  { t:'quiz', q:'¿En qué revolución aparecen la electricidad y la producción en serie?', o:['En la 2ª','En la 1ª','En la 3ª','En la 4ª'], ex:'La 2ª revolución (desde 1870): electricidad, petróleo y producción en serie.', h:'Cadena de montaje.' },
+  { t:'quiz', q:'¿Qué pieza del ciclo ciberfísico «compara, calcula o predice, y decide»?', o:['La decisión','El sensor','La red','El actuador'], ex:'Sensor (mide) → red (transporta) → decisión (compara, calcula o predice, y decide) → actuador (ejecuta).', h:'Es el paso 3.' },
+  { t:'quiz', q:'«Toda actividad deja rastro medible» define el elemento…', o:['Datos','Conectividad','Escalabilidad','Personalización'], ex:'Datos: toda actividad deja rastro medible.', h:'Rastro medible = …' },
+  { t:'quiz', q:'¿Qué significan las siglas IT?', o:['Tecnología de la Información','Industria Total','Ingeniería Técnica','Internet de las Cosas'], ex:'IT = Tecnología de la Información: el mundo de los datos. OT = Tecnología Operativa: el de las máquinas.', h:'Information Technology.' },
+  { t:'tf', q:'La máquina de vapor es el gran invento de la 2ª revolución industrial.', a:false, ex:'La máquina de vapor es de la 1ª revolución (Inglaterra, 1780–1840). La 2ª es la de la electricidad y el petróleo.', h:'Vapor = industria 1.0.' },
+  { t:'tf', q:'Un gemelo digital permite probar «¿qué pasaría si…?» sin tocar el original.', a:true, ex:'Sirve para simular, predecir y optimizar sin tocar el original.', h:'Para eso sirve.' },
+  { t:'quiz', q:'¿Qué cambio en el trabajo trajo la 4ª revolución, según la tabla «Cuatro saltos»?', o:['Sistemas ciberfísicos','Del taller a la fábrica','Producción en masa','Ordenadores, PLC y robots'], ex:'4ª revolución: datos y conectividad → sistemas ciberfísicos.', h:'Lo físico y lo digital en un ciclo.' },
+  { t:'tf', q:'La brecha digital puede dejar fuera a parte de la población y de los profesionales.', a:true, ex:'Es uno de los límites de la digitalización: riesgo de exclusión, sobre todo por falta de formación.', h:'Brecha = separación.' },
+  { t:'tf', q:'Digitización y digitalización son sinónimos.', a:false, ex:'Digitización: de analógico a digital (el proceso se mantiene). Digitalización: se rediseña el proceso (el proceso cambia).', h:'Paso 1 y paso 2.' },
+  { t:'quiz', q:'¿Qué paso implica cambiar el modelo de negocio?', o:['Transformación digital','Digitización','Digitalización','Sobredigitalización'], ex:'Transformación digital (paso 3): cambio de modelo de negocio; la organización cambia.', h:'El paso 3.' },
+  { t:'tf', q:'La convergencia IT/OT debe reforzar la ciberseguridad para garantizar la continuidad de las operaciones.', a:true, ex:'La convergencia IT/OT fortalece las medidas de ciberseguridad para garantizar la integridad y la continuidad de las operaciones.', h:'Ciberseguridad = continuidad.' },
+  { t:'quiz', q:'¿Cuál de estos es un actuador?', o:['Un motor que abre una puerta','Un termómetro','Un detector de presencia','Una báscula'], ex:'El actuador ejecuta sobre el mundo físico; los otros tres miden (son sensores).', h:'El que «hace».' },
+  { t:'quiz', q:'¿Qué avances médicos trajo la 2ª revolución industrial?', o:['Vacunas, antibióticos y pasteurización','Robots quirúrgicos','Historias clínicas digitales','Pulseras que miden el pulso'], ex:'La 2ª revolución trajo vacunas, antibióticos y la pasteurización.', h:'Siglo XIX: química y biología.' },
+  { t:'tf', q:'Escalabilidad significa que para crecer hay que multiplicar los recursos por igual.', a:false, ex:'Es justo lo contrario: crecer no exige multiplicar recursos por igual.', h:'Crecer sin multiplicar.' },
+  { t:'quiz', q:'¿Cuál es el «motor tecnológico» de la 4ª revolución?', o:['Datos y conectividad','Vapor y mecanización','Electricidad y cadena de montaje','Electrónica e informática'], ex:'4ª: datos y conectividad. 3ª: electrónica e informática. 2ª: electricidad y cadena de montaje. 1ª: vapor y mecanización.', h:'La del Internet de las cosas.' },
+  { t:'tf', q:'Según los apuntes, la cuarta revolución no añade máquinas: añade información sobre ellas.', a:true, ex:'«Cada revolución se apoya en la anterior. La cuarta no añade máquinas: añade información sobre ellas.»', h:'La 4.0 va de datos.' }
+],
+
+TAUNTS: {
+  intro:['¡Ja! ¿Un proceso sencillo que funciona? ¡Le pondré tres apps, dos contraseñas y un formulario de 40 pasos!','¡Si algo es complicado, lo digitalizo tal cual! ¡Complicado… y además digital!'],
+  attack:['¡Voy a convertir cada trámite en una app con contraseña de 16 caracteres!','¡Compraré tecnología carísima sin preguntar a nadie!','¡Pondré siete pantallas donde bastaba un papel!','¡Quien no sepa usar la app, que se quede fuera!','¡Los costes ocultos son mi especialidad!','¡Si el sistema cae, que se pare todo!','¡Notificaciones cada cinco minutos para todo el mundo!','¡Digitalizar es comprar cacharros! ¡Todo el mundo lo sabe!'],
+  hurt:['¡Argh! ¡Sabes distinguir digitizar de digitalizar!','¡Nooo! ¡Eso es tecnología con sentido!','¡Mis notificaciones pierden fuerza!','¡Deja de pensar antes de digitalizar!','¡Mi licencia de software se agrieta!','¡Eso duele más que un iceberg de costes!'],
+  laugh:['¡Ja! Error 404: respuesta no encontrada.','¡Otra actualización obligatoria para ti!','¡Ups! Se te ha caído el sistema.','¡Eso no venía en los apuntes… ¿o sí?!'],
+  dead:'¡Imposible! Un proceso sencillo… que funciona… ¡y sin apps innecesarias!'
+},
+
+RANKS: [
+  { lvl:'Industria 5.0', txt:'¿Existe ya la quinta revolución? Tú vas por delante: misión completa sin un solo fallo.' },
+  { lvl:'Industria 4.0', txt:'Dominas la unidad: datos, conectividad, sistemas ciberfísicos y sentido común digital.' },
+  { lvl:'Industria 3.0', txt:'Muy buen nivel. Repasa tus fallos y darás el salto a la 4.0.' },
+  { lvl:'Industria 2.0', txt:'Vas en cadena, pero quedan piezas por ajustar. Repasa los apuntes y vuelve a jugar.' },
+  { lvl:'Industria 1.0', txt:'Has llegado a base de vapor. Repasa los apuntes y vuelve a intentarlo para subir de nivel.' }
+]
+};
+</script>
+
+<script>
+/* ============================================================
+   MOTOR DEL JUEGO
+   ============================================================ */
+(function () {
+  'use strict';
+  const { WORLDS, BOSS_STATION, BOSS_POOL, TAUNTS, RANKS, ERAS } = M40;
+  const MAX_LIVES = 5, START_HINTS = 3, BOSS_HP = 6, BOSS_TIME = 30;
+  const TOTAL = WORLDS.length + 1;
+  const MAX_STARS = WORLDS.length * 3;
+  const NOW_YEAR = new Date().getFullYear();
+  document.documentElement.lang = 'es';
+
+  /* ---------- utilidades ---------- */
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const strip = (s) => String(s).replace(/<[^>]*>/g, '');
+  const fmt = (n) => Number(n || 0).toLocaleString('es-ES');
+  const fmtTime = (ms) => { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const station = (i) => (i < WORLDS.length ? WORLDS[i] : BOSS_STATION);
+  const yearOf = (st) => (st.yearNum === 'now' ? NOW_YEAR : st.yearNum);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
+    del(k) { try { localStorage.removeItem(k); } catch (e) { /* sin almacenamiento */ } }
+  };
+  const KEY = { save: 'mision40.save', prefs: 'mision40.prefs', best: 'mision40.best', seen: 'mision40.seen' };
+
+  /* ---------- estado ---------- */
+  let prefs = Object.assign({ sound: true, name: '' }, store.get(KEY.prefs, {}));
+  let best = store.get(KEY.best, null);
+  let seen = store.get(KEY.seen, {}) || {};
+  let run = null;   // partida en curso
+  let pos = null;   // dónde está el jugador dentro de la partida
+  let ui = {};      // estado del reto que se está jugando
+  let timer = null;
+  let navToken = 0;
+  let lastBeat = Date.now();
+  let lastFocus = null;
+  const screen = $('#screen');
+
+  const savePrefs = () => store.set(KEY.prefs, prefs);
+  function newRun() {
+    return { lives: MAX_LIVES, score: 0, hints: START_HINTS, streak: 0, bestStreak: 0, world: 0, stars: [], mistakes: [], correct: 0, answered: 0, elapsed: 0, worldErrors: 0, worldScore0: 0, flawless: true, bossDone: false };
+  }
+  function persist() {
+    if (!run) return;
+    const now = Date.now();
+    run.elapsed += Math.min(now - lastBeat, 90000);
+    lastBeat = now;
+    store.set(KEY.save, { v: 1, run, pos });
+  }
+  const clearSave = () => store.del(KEY.save);
+
+  /* ---------- sonido (sintetizado, sin archivos) ---------- */
+  const Sound = {
+    ctx: null,
+    unlock() {
+      if (!prefs.sound) return;
+      try {
+        if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; this.ctx = new AC(); }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      } catch (e) { /* sin audio */ }
+    },
+    tone(f, d, type, v, t0, f2) {
+      if (!prefs.sound) return;
+      this.unlock();
+      const c = this.ctx; if (!c) return;
+      try {
+        const t = c.currentTime + (t0 || 0);
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = type || 'triangle';
+        o.frequency.setValueAtTime(f, t);
+        if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(v || 0.06, t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        o.connect(g); g.connect(c.destination);
+        o.start(t); o.stop(t + d + 0.03);
+      } catch (e) { /* sin audio */ }
+    },
+    noise(d, v, t0) {
+      if (!prefs.sound) return;
+      this.unlock();
+      const c = this.ctx; if (!c) return;
+      try {
+        const len = Math.floor(c.sampleRate * d), buf = c.createBuffer(1, len, c.sampleRate), data = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        const src = c.createBufferSource(), g = c.createGain(), f = c.createBiquadFilter();
+        src.buffer = buf; g.gain.value = v || 0.08; f.type = 'bandpass'; f.frequency.value = 900;
+        src.connect(f); f.connect(g); g.connect(c.destination);
+        src.start(c.currentTime + (t0 || 0));
+      } catch (e) { /* sin audio */ }
+    },
+    tick() { this.tone(1300, 0.035, 'square', 0.018); },
+    blip() { this.tone(880, 0.08, 'triangle', 0.05); },
+    ok() { this.tone(660, 0.1, 'triangle', 0.07); this.tone(990, 0.18, 'triangle', 0.07, 0.08); },
+    bad() { this.tone(210, 0.3, 'sawtooth', 0.045, 0, 105); this.tone(150, 0.32, 'square', 0.025, 0.02, 75); },
+    streak() { [784, 988, 1175, 1568].forEach((f, i) => this.tone(f, 0.09, 'square', 0.03, i * 0.055)); },
+    win() { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.2, 'triangle', 0.06, i * 0.1)); this.tone(1319, 0.4, 'triangle', 0.05, 0.42); },
+    lose() { [392, 349, 311, 262].forEach((f, i) => this.tone(f, 0.32, 'sawtooth', 0.04, i * 0.22)); },
+    jump() { this.tone(160, 1.0, 'sawtooth', 0.03, 0, 1500); this.noise(0.9, 0.035); },
+    hit() { this.noise(0.2, 0.14); this.tone(140, 0.22, 'square', 0.05, 0, 55); },
+    life() { [523, 784, 1047].forEach((f, i) => this.tone(f, 0.14, 'triangle', 0.06, i * 0.1)); }
+  };
+
+  /* ---------- efectos ---------- */
+  function setEra(n) { document.documentElement.setAttribute('data-era', String(n)); }
+  function render(html) { navToken++; stopTimer(); $('#toast').hidden = true; screen.innerHTML = html; window.scrollTo(0, 0); }
+  function flash() {
+    if (reduceMotion) return;
+    const f = $('#flash'); f.hidden = false; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+    clearTimeout(flash.t); flash.t = setTimeout(() => { f.hidden = true; }, 480);
+  }
+  function toast(html) {
+    const t = $('#toast'); t.innerHTML = html; t.hidden = false; t.classList.remove('go'); void t.offsetWidth; t.classList.add('go');
+    clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 1200);
+  }
+  function confetti(n) {
+    if (reduceMotion) return;
+    const cv = $('#fx'), ctx = cv.getContext && cv.getContext('2d'); if (!ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = (cv.width = Math.floor(window.innerWidth * dpr)), H = (cv.height = Math.floor(window.innerHeight * dpr));
+    const cs = getComputedStyle(document.documentElement);
+    const cols = ['--a1', '--a2', '--a3', '--ok', '--gold'].map((v) => cs.getPropertyValue(v).trim() || '#ffffff');
+    const ps = Array.from({ length: n || 140 }, () => ({
+      x: W / 2 + (Math.random() - 0.5) * W * 0.35, y: H * 0.38,
+      vx: (Math.random() - 0.5) * 15 * dpr, vy: (-Math.random() * 15 - 4) * dpr, g: 0.36 * dpr,
+      s: (5 + Math.random() * 6) * dpr, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: pick(cols)
+    }));
+    const t0 = performance.now();
+    cancelAnimationFrame(confetti.raf);
+    const frame = (t) => {
+      const el = t - t0;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalAlpha = Math.max(0, 1 - el / 2600);
+      ps.forEach((p) => {
+        p.vy += p.g; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
+      });
+      if (el < 2600) confetti.raf = requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
+    };
+    confetti.raf = requestAnimationFrame(frame);
+  }
+  function flyTo(el, target, cb) {
+    if (reduceMotion || !el || !el.animate || !target) { setTimeout(cb, 160); return; }
+    const a = el.getBoundingClientRect(), b = target.getBoundingClientRect();
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
+    const anim = el.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.3)', opacity: 0.1 }], { duration: 360, easing: 'cubic-bezier(.5,0,.75,0)' });
+    anim.onfinish = cb;
+  }
+
+  /* ---------- piezas de interfaz ---------- */
+  const livesLabel = () => run.lives + (run.lives === 1 ? ' vida' : ' vidas') + ' de ' + MAX_LIVES;
+  const heartsHTML = () => Array.from({ length: MAX_LIVES }, (_, i) => '<span class="heart' + (i < run.lives ? '' : ' off') + '">' + icon('heart') + '</span>').join('');
+  const starsHTML = (n) => [0, 1, 2].map((k) => '<span class="' + (k < n ? 'on' : '') + '">' + icon('star') + '</span>').join('');
+  const streakChip = () => (run && run.streak >= 2 ? icon('flame') + ' Racha ' + run.streak : '');
+  const soundBtn = () => '<button type="button" class="icon-btn" data-act="sound" aria-pressed="' + prefs.sound + '" aria-label="' + (prefs.sound ? 'Silenciar el sonido' : 'Activar el sonido') + '">' + icon(prefs.sound ? 'sound' : 'mute') + '</button>';
+  const statsHTML = (items, cls) => '<dl class="stats ' + (cls || '') + '">' + items.map((it) => '<div><dt>' + it[0] + '</dt><dd>' + it[1] + '</dd></div>').join('') + '</dl>';
+  const totalStars = () => run.stars.reduce((a, b) => a + (b || 0), 0);
+  function segsHTML() {
+    if (!pos || !pos.list) return '';
+    return pos.list.map((_, k) => {
+      const r = pos.results && pos.results[k];
+      const cls = r || (k === pos.ci && pos.screen === 'challenge' ? 'cur' : '');
+      return '<i class="seg ' + cls + '"></i>';
+    }).join('');
+  }
+  function hudHTML(mode, wi) {
+    let ico = 'gear', eb = 'Misión 4.0', title = 'Mapa del tiempo';
+    if (mode === 'world' || mode === 'done') {
+      const w = WORLDS[wi];
+      ico = w.icon; eb = 'Estación ' + (wi + 1) + '/' + TOTAL + ' · ' + w.yearLabel; title = w.short;
+    } else if (mode === 'boss') {
+      ico = 'boss'; eb = 'Estación ' + TOTAL + '/' + TOTAL + ' · Jefe final'; title = 'Sobredigitalizador';
+    }
+    const showHint = mode === 'world' || mode === 'boss';
+    const showSegs = mode === 'world' && pos && pos.list;
+    return '<header class="hud" id="hud">' +
+      '<div class="hud-left"><span class="hud-ico" aria-hidden="true">' + icon(ico) + '</span><div class="hud-title"><span class="eyebrow">' + eb + '</span><strong>' + title + '</strong></div></div>' +
+      '<div class="hud-right">' +
+        '<div class="hearts" id="hearts" role="img" aria-label="' + livesLabel() + '">' + heartsHTML() + '</div>' +
+        '<div class="hud-score"><span class="eyebrow">Puntos</span><b id="hud-score">' + fmt(run.score) + '</b></div>' +
+        (showHint ? '<button type="button" class="hud-btn hint-btn" id="btn-hint" data-act="hint" title="Pista (tecla P)" aria-label="Usar una pista. Quedan ' + run.hints + '">' + icon('bulb') + '<span id="hint-n">' + run.hints + '</span></button>' : '') +
+        '<button type="button" class="hud-btn" data-act="menu" title="Menú (Esc)" aria-label="Abrir el menú de pausa">' + icon('menu') + '</button>' +
+      '</div>' +
+      (showSegs ? '<div class="segs" id="segs" aria-hidden="true">' + segsHTML() + '</div>' : '') +
+    '</header>';
+  }
+  function updateHud() {
+    if (!run) return;
+    const h = $('#hearts');
+    if (h) { h.innerHTML = heartsHTML(); h.setAttribute('aria-label', livesLabel()); }
+    const s = $('#hud-score'); if (s) s.textContent = fmt(run.score);
+    const hb = $('#btn-hint');
+    if (hb) {
+      $('#hint-n').textContent = run.hints;
+      hb.disabled = !(ui && ui.c && !ui.done && !ui.hint && run.hints > 0);
+      hb.setAttribute('aria-label', 'Usar una pista. Quedan ' + run.hints);
+    }
+    const sg = $('#segs'); if (sg) sg.innerHTML = segsHTML();
+    const sc = $('#streak-chip'); if (sc) sc.innerHTML = streakChip();
+  }
+
+  /* ---------- portada ---------- */
+  function showTitle() {
+    setEra(0);
+    const s = store.get(KEY.save, null);
+    const canResume = !!(s && s.run && s.run.lives > 0);
+    const anySeen = WORLDS.some((w) => seen[w.id]);
+    const bestTxt = best ? 'Récord en este dispositivo: <b>' + fmt(best.score) + '</b> puntos' : 'Todavía no hay récord en este dispositivo.';
+    const eras = '<ol class="eras" aria-label="Épocas del viaje">' + ERAS.map((e) => '<li style="--c:' + e.c + '"><b>' + e.y + '</b><span>' + e.n + '</span></li>').join('') + '</ol>';
+    render('<main class="wrap title-screen">' +
+      '<div class="title-bar"><div class="plates"><span class="plate">UT1</span><span class="plate">RA1</span><span class="plate">Digitalización aplicada a los sectores productivos</span></div>' + soundBtn() + '</div>' +
+      '<h1 class="logo" aria-label="Misión 4.0"><span class="logo-a">Misión</span><span class="logo-b">4.0</span></h1>' +
+      '<p class="tagline">De la máquina de vapor al gemelo digital. Recorre los apuntes de la unidad, supera los retos de cada época y derrota al <b>Sobredigitalizador</b>.</p>' +
+      eras +
+      '<ul class="rules">' +
+        '<li>' + icon('heart') + '<span><b>5 vidas</b> para toda la misión. Cada reto fallado cuesta una.</span></li>' +
+        '<li>' + icon('bulb') + '<span><b>3 pistas</b> sacadas de los apuntes. Usarlas deja el reto en la mitad de puntos.</span></li>' +
+        '<li>' + icon('flame') + '<span><b>Rachas</b>: acierta seguido y multiplica tus puntos por 2 o por 3.</span></li>' +
+        '<li>' + icon('star') + '<span>Termina una estación <b>sin fallos</b> y recuperas una vida.</span></li>' +
+      '</ul>' +
+      '<section class="panel start">' +
+        '<label class="eyebrow" for="player-name">Tu nombre para el diploma</label>' +
+        '<input id="player-name" type="text" maxlength="40" autocomplete="off" placeholder="Escribe tu nombre" value="' + esc(prefs.name) + '">' +
+        '<div class="row-btns">' +
+          (canResume
+            ? '<button type="button" class="btn big" data-act="resume" id="btn-main">' + icon(s.run.bossDone ? 'trophy' : 'play') + '<span class="btn-stack">' + (s.run.bossDone ? 'Recoger tu diploma<small>Jefe final derrotado</small>' : 'Continuar la misión<small>Estación ' + (s.run.world + 1) + ' · ' + s.run.lives + (s.run.lives === 1 ? ' vida' : ' vidas') + '</small>') + '</span></button><button type="button" class="btn ghost" data-act="start">Empezar de cero</button>'
+            : '<button type="button" class="btn big" data-act="start" id="btn-main">' + icon('play') + ' Empezar la misión</button>') +
+          (anySeen ? '<button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Cuaderno de apuntes</button>' : '') +
+        '</div>' +
+        '<p class="best">' + icon('trophy') + '<span>' + bestTxt + '</span></p>' +
+      '</section>' +
+    '</main>');
+  }
+  function readName() { const i = $('#player-name'); if (i) { prefs.name = i.value.trim().slice(0, 40); savePrefs(); } }
+
+  /* ---------- mapa ---------- */
+  function goMap() {
+    setEra(0);
+    pos = { screen: 'map' };
+    persist();
+    const items = Array.from({ length: TOTAL }, (_, i) => {
+      const w = station(i);
+      const st = i < run.world ? 'done' : i === run.world ? 'cur' : 'locked';
+      const isBoss = i === WORLDS.length;
+      let foot = '';
+      if (st === 'done' && !isBoss) foot = '<div class="st-foot"><span class="stars" role="img" aria-label="' + run.stars[i] + ' de 3 estrellas">' + starsHTML(run.stars[i]) + '</span><button type="button" class="linkbtn" data-act="notes" data-w="' + i + '">' + icon('book') + ' Apuntes</button></div>';
+      const btn = st === 'cur' ? '<button type="button" class="btn" data-act="play">' + (isBoss ? 'Enfrentarte al jefe' : 'Viajar a esta época') + ' ' + icon('arrow') + '</button>' : '';
+      return '<li class="station ' + st + '" style="--st:' + w.color + '">' +
+        '<div class="st-node" aria-hidden="true">' + icon(st === 'locked' ? 'lock' : w.icon) + '</div>' +
+        '<div class="st-card"><span class="eyebrow">' + w.yearLabel + ' · Estación ' + (i + 1) + (st === 'locked' ? ' · bloqueada' : '') + '</span><h3>' + w.name + '</h3><p>' + w.sub + '</p>' + foot + btn + '</div>' +
+      '</li>';
+    }).join('');
+    const intro = run.world === 0
+      ? 'Tu viaje empieza en la Inglaterra del vapor. Cada estación es una parte de la UT1.'
+      : run.world >= WORLDS.length ? 'Has reparado todas las épocas. Solo queda el jefe final.' : 'Llevas ' + run.world + ' de ' + TOTAL + ' estaciones. ¡Sigue el viaje!';
+    render(hudHTML('map') + '<main class="wrap"><div class="map-head"><h1 class="h-display">Mapa del tiempo</h1><p class="muted">' + intro + ' Estrellas: ' + totalStars() + '/' + MAX_STARS + ' · Pistas: ' + run.hints + '</p></div><ol class="rail">' + items + '</ol></main>');
+    const cur = $('.station.cur');
+    if (cur && run.world > 1) cur.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+    const b = $('.station.cur .btn'); if (b) b.focus({ preventScroll: true });
+  }
+
+  /* ---------- salto temporal ---------- */
+  function timeJump(i, cb) {
+    const st = station(i);
+    const prev = i === 0 ? 1712 : yearOf(station(i - 1));
+    const to = yearOf(st);
+    const token = navToken;
+    setEra(st.era);
+    const ov = $('#overlay');
+    const sub = (st.place ? st.place + ' · ' : '') + st.sub;
+    const counts = !reduceMotion && typeof to === 'number' && typeof prev === 'number' && prev !== to;
+    ov.innerHTML = '<div class="warp" aria-hidden="true"></div><div class="jump' + (st.id === 'boss' ? ' glitch' : '') + '" role="status"><span class="eyebrow">Salto temporal · Estación ' + (i + 1) + ' de ' + TOTAL + '</span><div class="jump-year" id="jump-year">' + (counts ? prev : st.jump) + '</div><div class="jump-sub">' + sub + '</div></div>';
+    ov.classList.remove('out');
+    ov.hidden = false;
+    Sound.jump();
+    if (counts) {
+      const el = $('#jump-year'), t0 = performance.now(), dur = 1150;
+      const step = (t) => {
+        const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = p < 1 ? Math.round(prev + (to - prev) * e) : st.jump;
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    setTimeout(() => {
+      ov.classList.add('out');
+      setTimeout(() => {
+        ov.hidden = true; ov.classList.remove('out'); ov.innerHTML = '';
+        if (token === navToken && run) cb();
+      }, reduceMotion ? 0 : 380);
+    }, reduceMotion ? 650 : 1900);
+  }
+
+  /* ---------- estaciones ---------- */
+  function buildList(w) {
+    const list = shuffle(w.pool).slice(0, w.pick);
+    const fx = w.fixed || [];
+    if (fx.length > 1) { list.splice(Math.min(2, list.length), 0, fx[0]); list.push(fx[1]); }
+    else if (fx.length === 1) list.push(fx[0]);
+    return list;
+  }
+  function enterStation(i) {
+    if (i >= WORLDS.length) return enterBoss();
+    const w = WORLDS[i];
+    run.worldErrors = 0;
+    run.worldScore0 = run.score;
+    pos = { screen: 'intro', world: i, list: buildList(w), ci: 0, results: [], card: 0 };
+    persist();
+    timeJump(i, () => showIntro());
+  }
+  function showIntro() {
+    const i = pos.world, w = WORLDS[i];
+    setEra(w.era);
+    pos.screen = 'intro'; persist();
+    render(hudHTML('world', i) + '<main class="wrap intro">' +
+      '<div class="intro-badge" aria-hidden="true">' + icon(w.icon) + '</div>' +
+      '<span class="eyebrow">Estación ' + (i + 1) + ' de ' + TOTAL + ' · ' + w.yearLabel + (w.place ? ' · ' + w.place : '') + '</span>' +
+      '<h1 class="intro-title" tabindex="-1" id="intro-title">' + w.name + '</h1>' +
+      '<p class="intro-sub">' + w.sub + '</p>' +
+      '<section class="panel mission"><div class="panel-head"><span class="led"></span><span class="eyebrow">Tu misión</span></div><p>' + w.mission + '</p></section>' +
+      '<p class="intro-meta">' + w.cards.length + ' tarjetas de apuntes · ' + pos.list.length + ' retos</p>' +
+      '<div class="row-btns"><button type="button" class="btn big" data-act="read">' + icon('book') + ' Leer los apuntes</button>' +
+      (seen[w.id] ? '<button type="button" class="btn ghost" data-act="skip-cards">Ir directo a los retos</button>' : '') + '</div>' +
+    '</main>');
+    const b = $('[data-act="read"]'); if (b) b.focus({ preventScroll: true });
+  }
+  function showCards(k) {
+    const i = pos.world, w = WORLDS[i], c = w.cards[k], last = k === w.cards.length - 1;
+    setEra(w.era);
+    pos.screen = 'cards'; pos.card = k; persist();
+    render(hudHTML('world', i) + '<main class="wrap">' +
+      '<article class="panel note" aria-labelledby="note-title">' +
+        '<div class="panel-head"><span class="led"></span><span class="eyebrow">Apuntes · ' + w.short + ' · ' + (k + 1) + '/' + w.cards.length + '</span></div>' +
+        '<h2 class="note-title" id="note-title" tabindex="-1">' + c.title + '</h2>' +
+        '<div class="note-body">' + c.html + '</div>' +
+      '</article>' +
+      '<nav class="note-nav" aria-label="Tarjetas de apuntes">' +
+        '<button type="button" class="btn ghost" data-act="card-prev"' + (k === 0 ? ' disabled' : '') + '>Anterior</button>' +
+        '<div class="dots" aria-hidden="true">' + w.cards.map((_, j) => '<i class="' + (j === k ? 'on' : '') + '"></i>').join('') + '</div>' +
+        '<button type="button" class="btn" data-act="card-next">' + (last ? '¡A los retos!' : 'Siguiente') + ' ' + icon('arrow') + '</button>' +
+      '</nav>' +
+      (!last && seen[w.id] ? '<p class="center"><button type="button" class="linkbtn" data-act="skip-cards">Saltar a los retos</button></p>' : '') +
+    '</main>');
+    $('#note-title').focus({ preventScroll: true });
+  }
+  function startChallenges() {
+    const w = WORLDS[pos.world];
+    seen[w.id] = true; store.set(KEY.seen, seen);
+    pos.screen = 'challenge';
+    showChallenge();
+  }
+
+  /* ---------- retos ---------- */
+  const TYPE = { quiz: 'Elige la respuesta', tf: '¿Verdadero o falso?', order: 'Ordena', sort: 'Clasifica', match: 'Relaciona' };
+  const typeLabel = (c) => (c.ctx ? 'Caso práctico' : TYPE[c.t]);
+  function freshUI(c, kind) { return { c, kind, done: false, failed: false, lifeLost: false, hint: false, busy: false, readyAt: performance.now() + 300 }; }
+
+  function showChallenge() {
+    const i = pos.world, w = WORLDS[i], c = pos.list[pos.ci];
+    setEra(w.era);
+    ui = freshUI(c, 'world');
+    pos.screen = 'challenge'; persist();
+    render(hudHTML('world', i) + '<main class="wrap"><section class="panel ch" id="ch" aria-labelledby="q">' +
+      '<div class="panel-head"><span class="led"></span><span class="eyebrow">Reto ' + (pos.ci + 1) + ' de ' + pos.list.length + ' · ' + typeLabel(c) + '</span><span class="streak-chip" id="streak-chip">' + streakChip() + '</span></div>' +
+      bodyHTML(c) +
+      '<div id="hint-slot"></div><div id="fb-slot" aria-live="polite"></div>' +
+    '</section></main>');
+    updateHud();
+    const q = $('#q'); if (q) q.focus({ preventScroll: true });
+  }
+  function bodyHTML(c) {
+    if (c.t === 'quiz') return quizHTML(c);
+    if (c.t === 'tf') return tfHTML(c);
+    if (c.t === 'order') return orderHTML(c);
+    if (c.t === 'sort') return sortHTML(c);
+    return matchHTML(c);
+  }
+
+  // elegir respuesta
+  function quizHTML(c) {
+    ui.opts = shuffle(c.o.map((txt, i) => ({ txt, ok: i === 0 })));
+    return (c.ctx ? '<div class="case"><span class="eyebrow">Caso</span><p>' + c.ctx + '</p></div>' : '') +
+      '<h2 class="q" id="q" tabindex="-1">' + c.q + '</h2>' +
+      '<div class="opts">' + ui.opts.map((o, i) => '<button type="button" class="opt" data-act="opt" data-i="' + i + '"><kbd>' + 'ABCD'[i] + '</kbd><span>' + o.txt + '</span></button>').join('') + '</div>';
+  }
+  function pickOpt(i) {
+    if (ui.done || !ui.opts || !ui.opts[i]) return;
+    const btns = $$('.opt');
+    btns.forEach((b, j) => { b.disabled = true; if (ui.opts[j].ok) b.classList.add('is-ok'); else if (j === i) b.classList.add('is-bad'); });
+    resolve(ui.opts[i].ok, { yours: ui.opts[i].txt, right: ui.opts.find((o) => o.ok).txt });
+  }
+  // verdadero o falso
+  function tfHTML(c) {
+    return '<h2 class="q" id="q" tabindex="-1">' + c.q + '</h2>' +
+      '<div class="tf"><button type="button" class="opt" data-act="tf" data-v="1"><kbd>V</kbd><span>Verdadero</span></button><button type="button" class="opt" data-act="tf" data-v="0"><kbd>F</kbd><span>Falso</span></button></div>';
+  }
+  function pickTF(v) {
+    if (ui.done) return;
+    const c = ui.c, btns = $$('.tf .opt');
+    btns.forEach((b) => {
+      const bv = b.dataset.v === '1';
+      b.disabled = true;
+      if (bv === c.a) b.classList.add('is-ok'); else if (bv === v) b.classList.add('is-bad');
+    });
+    resolve(v === c.a, { yours: v ? 'Verdadero' : 'Falso', right: c.a ? 'Verdadero' : 'Falso' });
+  }
+  // ordenar
+  function orderHTML(c) {
+    ui.pool = shuffle(c.items.map((txt, i) => ({ txt, i })));
+    if (ui.pool.every((p, k) => p.i === k)) ui.pool.reverse();
+    ui.seq = [];
+    return '<h2 class="q" id="q" tabindex="-1">' + c.q + '</h2>' +
+      '<p class="help">Toca las tarjetas en el orden correcto. Si te equivocas, toca un hueco lleno para devolver su tarjeta.</p>' +
+      '<div class="slots" id="slots">' + slotsHTML() + '</div>' +
+      '<div class="chips" id="chips">' + chipsHTML() + '</div>' +
+      '<div class="row-btns end order-btns"><button type="button" class="btn ghost" id="order-reset" data-act="order-reset">Vaciar</button><button type="button" class="btn" id="order-check" data-act="order-check" disabled>Comprobar ' + icon('check') + '</button></div>';
+  }
+  function slotsHTML(marks) {
+    return ui.c.items.map((_, k) => {
+      const j = ui.seq[k], filled = j != null;
+      const m = marks ? (marks[k] ? ' ok' : ' bad') : '';
+      return '<button type="button" class="slot' + (filled ? ' filled' : '') + m + '" data-act="unslot" data-k="' + k + '"' + (!filled || marks ? ' disabled' : '') + ' aria-label="Hueco ' + (k + 1) + (filled ? ': ' + esc(strip(ui.pool[j].txt)) + '. Toca para devolverla' : ': vacío') + '"><span class="slot-n">' + (k + 1) + '</span><span>' + (filled ? ui.pool[j].txt : 'Hueco libre') + '</span></button>';
+    }).join('');
+  }
+  function chipsHTML(lock) {
+    return ui.pool.map((p, j) => '<button type="button" class="chip" data-act="slot" data-j="' + j + '"' + (lock || ui.seq.includes(j) ? ' disabled' : '') + '>' + p.txt + '</button>').join('');
+  }
+  function orderRender() {
+    $('#slots').innerHTML = slotsHTML();
+    $('#chips').innerHTML = chipsHTML();
+    $('#chips').hidden = ui.seq.length === ui.c.items.length;
+    $('#order-check').disabled = ui.seq.length !== ui.c.items.length;
+  }
+  function orderPick(j) {
+    if (ui.done || ui.seq.includes(j) || ui.seq.length >= ui.c.items.length) return;
+    ui.seq.push(j); Sound.tick(); orderRender();
+    if (ui.seq.length === ui.c.items.length) $('#order-check').focus();
+    else { const next = $('#chips .chip:not(:disabled)'); if (next) next.focus({ preventScroll: true }); }
+  }
+  function orderUnpick(k) { if (ui.done || k >= ui.seq.length) return; ui.seq.splice(k, 1); Sound.tick(); orderRender(); }
+  function orderReset() { if (ui.done) return; ui.seq = []; orderRender(); }
+  function orderCheck() {
+    if (ui.done || ui.seq.length !== ui.c.items.length) return;
+    const marks = ui.seq.map((j, k) => ui.pool[j].i === k);
+    $('#slots').innerHTML = slotsHTML(marks);
+    $('#chips').innerHTML = chipsHTML(true);
+    $('#chips').hidden = true;
+    $('#order-check').disabled = true; $('#order-reset').disabled = true;
+    resolve(marks.every(Boolean), {
+      yours: ui.seq.map((j) => strip(ui.pool[j].txt)).join(' → '),
+      right: ui.c.items.map((t, k) => (k + 1) + '. ' + t).join(' · ')
+    });
+  }
+  // clasificar (cinta transportadora)
+  function sortHTML(c) {
+    ui.items = shuffle(c.items); ui.k = 0;
+    const n = c.bins.length, vars = ['--a1', '--a2', '--a3'];
+    return '<h2 class="q" id="q" tabindex="-1">' + c.q + '</h2>' +
+      '<div class="belt" id="belt"><span class="belt-count eyebrow" id="belt-count">1 / ' + ui.items.length + '</span><div class="belt-item in" id="belt-item">' + ui.items[0].txt + '</div><div class="belt-track" aria-hidden="true"></div></div>' +
+      '<div class="bins n' + n + '" style="--n:' + n + '">' + c.bins.map((b, i) => '<button type="button" class="bin" data-act="bin" data-b="' + b.id + '" style="--bin:var(' + vars[i] + ')"><strong>' + b.label + '</strong>' + (b.sub ? '<small>' + b.sub + '</small>' : '') + '</button>').join('') + '</div>' +
+      '<ol class="belt-log" id="belt-log" aria-live="polite"></ol>';
+  }
+  function sortPick(binId, btn) {
+    if (ui.done || ui.busy) return;
+    const u = ui, it = ui.items[ui.k], ok = it.bin === binId;
+    const label = (id) => ui.c.bins.find((b) => b.id === id).label;
+    ui.busy = true;
+    btn.classList.add(ok ? 'flash-ok' : 'flash-bad');
+    setTimeout(() => btn.classList.remove('flash-ok', 'flash-bad'), 450);
+    $('#belt-log').insertAdjacentHTML('afterbegin', '<li class="log ' + (ok ? 'ok' : 'bad') + '">' + icon(ok ? 'check' : 'cross') + '<span><b>' + it.txt + '</b> → ' + label(it.bin) + (ok ? '' : ' (no ' + label(binId) + ')' + (it.why ? '. ' + it.why : '')) + '</span></li>');
+    if (ok) Sound.blip();
+    else if (!ui.failed) { ui.failed = true; ui.firstWrong = { yours: strip(it.txt) + ' → ' + label(binId), right: strip(it.txt) + ' → ' + label(it.bin) }; loseLife(); }
+    else Sound.bad();
+    flyTo($('#belt-item'), btn, () => {
+      if (ui !== u) return;
+      ui.k++;
+      if (run.lives <= 0 || ui.k >= ui.items.length) { ui.busy = false; finishSort(); return; }
+      const el = $('#belt-item');
+      el.innerHTML = ui.items[ui.k].txt; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
+      $('#belt-count').textContent = (ui.k + 1) + ' / ' + ui.items.length;
+      ui.busy = false;
+    });
+  }
+  function finishSort() {
+    $$('.bin').forEach((b) => { b.disabled = true; });
+    const el = $('#belt-item');
+    if (el) { el.classList.remove('in'); el.textContent = run.lives <= 0 ? 'Cinta detenida' : ui.failed ? 'Cinta completada con algún error' : '¡Cinta completada sin errores!'; }
+    resolve(!ui.failed, ui.firstWrong || {});
+  }
+  // relacionar
+  function matchHTML(c) {
+    ui.L = shuffle(c.pairs.map((p, i) => ({ txt: p[0], i })));
+    ui.R = shuffle(c.pairs.map((p, i) => ({ txt: p[1], i })));
+    ui.sel = { L: null, R: null }; ui.matched = 0; ui.pairNo = 0;
+    return '<h2 class="q" id="q" tabindex="-1">' + c.q + '</h2>' +
+      '<p class="help">Toca un concepto y después su pareja.</p>' +
+      '<div class="match">' +
+        '<div class="mcol" role="group" aria-label="Conceptos">' + ui.L.map((p, j) => '<button type="button" class="mitem ml" data-act="ml" data-j="' + j + '"><span class="mnum" aria-hidden="true"></span><span>' + p.txt + '</span></button>').join('') + '</div>' +
+        '<div class="mcol" role="group" aria-label="Definiciones">' + ui.R.map((p, j) => '<button type="button" class="mitem mr" data-act="mr" data-j="' + j + '"><span class="mnum" aria-hidden="true"></span><span>' + p.txt + '</span></button>').join('') + '</div>' +
+      '</div>';
+  }
+  function matchSel(side, j) {
+    if (ui.done || ui.busy) return;
+    const btns = $$(side === 'L' ? '.ml' : '.mr');
+    if (!btns[j] || btns[j].classList.contains('done')) return;
+    ui.sel[side] = ui.sel[side] === j ? null : j;
+    btns.forEach((b, k) => b.classList.toggle('sel', k === ui.sel[side]));
+    Sound.tick();
+    if (ui.sel.L == null || ui.sel.R == null) return;
+    const l = ui.L[ui.sel.L], r = ui.R[ui.sel.R];
+    const bl = $$('.ml')[ui.sel.L], br = $$('.mr')[ui.sel.R];
+    if (l.i === r.i) {
+      ui.pairNo++; ui.matched++;
+      [bl, br].forEach((b) => { b.classList.remove('sel'); b.classList.add('done'); b.disabled = true; b.querySelector('.mnum').textContent = ui.pairNo; });
+      ui.sel = { L: null, R: null };
+      Sound.blip();
+      if (ui.matched === ui.c.pairs.length) { const u = ui; ui.busy = true; setTimeout(() => { if (ui === u) resolve(!ui.failed, ui.firstWrong || {}); }, 260); }
+    } else {
+      const u = ui;
+      ui.busy = true;
+      [bl, br].forEach((b) => { b.classList.remove('sel'); b.classList.add('wrong'); });
+      if (!ui.failed) { ui.failed = true; ui.firstWrong = { yours: strip(l.txt) + ' ↔ ' + strip(r.txt), right: strip(l.txt) + ' ↔ ' + ui.c.pairs[l.i][1] }; loseLife(); }
+      else Sound.bad();
+      setTimeout(() => {
+        if (ui !== u) return;
+        [bl, br].forEach((b) => b.classList.remove('wrong'));
+        ui.sel = { L: null, R: null }; ui.busy = false;
+        if (run.lives <= 0) { $$('.mitem').forEach((b) => { b.disabled = true; }); resolve(false, ui.firstWrong); }
+      }, 520);
+    }
+  }
+
+  /* ---------- pistas, vidas y resultado ---------- */
+  function useHint() {
+    if (!run || !ui || !ui.c || ui.done || ui.hint || run.hints <= 0) return;
+    run.hints--; ui.hint = true;
+    persist();
+    const slot = $('#hint-slot');
+    if (slot) slot.innerHTML = '<div class="hint">' + icon('bulb') + '<p><span class="eyebrow">Pista de los apuntes</span>' + (ui.c.h || 'Relee la última tarjeta de apuntes.') + '</p></div>';
+    Sound.tick();
+    updateHud();
+  }
+  function loseLife() {
+    ui.lifeLost = true;
+    run.lives = Math.max(0, run.lives - 1);
+    run.flawless = false;
+    Sound.bad();
+    flash();
+    const ch = $('#ch');
+    if (ch && !reduceMotion) { ch.classList.remove('shake'); void ch.offsetWidth; ch.classList.add('shake'); }
+    updateHud();
+    const hs = $$('#hearts .heart'); if (hs[run.lives]) hs[run.lives].classList.add('breaking');
+    persist();
+  }
+  const OK_T = ['¡Correcto!', '¡Exacto!', '¡Bien visto!', '¡Eso es!', '¡Perfecto!'];
+  const BAD_T = ['¡Casi!', 'No es así', '¡Ups!', 'Esta vez no'];
+  function resolve(ok, info) {
+    if (ui.done) return;
+    ui.done = true;
+    stopTimer();
+    info = info || {};
+    const c = ui.c, boss = ui.kind === 'boss';
+    let pts = 0, mult = 1;
+    if (ok) {
+      run.streak++;
+      run.bestStreak = Math.max(run.bestStreak, run.streak);
+      mult = run.streak >= 6 ? 3 : run.streak >= 3 ? 2 : 1;
+      pts = (boss ? 150 : (c.t === 'order' || c.t === 'sort' || c.t === 'match') ? 200 : 100) * mult;
+      if (ui.hint) pts = Math.round(pts / 2);
+      run.score += pts;
+      run.correct++;
+      Sound.ok();
+      if (run.streak === 3 || run.streak === 6) setTimeout(() => { toast(icon('flame') + ' ¡Racha x' + mult + '!'); Sound.streak(); }, 250);
+    } else {
+      run.streak = 0;
+      if (!ui.lifeLost) loseLife();
+      if (!boss) run.worldErrors++;
+      run.mistakes.push({ w: boss ? 'Jefe final' : WORLDS[pos.world].short, q: strip(c.q), yours: info.yours || '', right: info.right || '', ex: c.ex });
+    }
+    run.answered++;
+    if (boss) {
+      const b = pos.boss;
+      b.qi++;
+      if (ok) { b.hp = Math.max(0, b.hp - 1); bossReact('hurt'); }
+      else bossReact('laugh');
+    } else {
+      pos.results[pos.ci] = ok ? 'ok' : 'bad';
+      pos.ci++;
+    }
+    persist();
+    updateHud();
+    showFeedback(ok, pts, mult, info);
+  }
+  function showFeedback(ok, pts, mult, info) {
+    const c = ui.c, dead = run.lives <= 0, boss = ui.kind === 'boss';
+    let next = 'Continuar';
+    if (dead) next = 'Ver resultado';
+    else if (boss && pos.boss.hp <= 0) next = '¡Rematar al jefe!';
+    else if (!boss && pos.ci >= pos.list.length) next = 'Terminar la estación';
+    const ptsTxt = ok ? '+' + pts + ' puntos' + (mult > 1 ? ' · racha x' + mult : '') + (ui.hint ? ' · con pista' : '') : '−1 vida';
+    const right = !ok && info.right && c.t !== 'sort' && c.t !== 'match' ? '<p class="fb-right">' + icon('check') + '<span>Respuesta correcta: <b>' + info.right + '</b></span></p>' : '';
+    const slot = $('#fb-slot');
+    if (!slot) return;
+    slot.innerHTML = '<div class="fb ' + (ok ? 'ok' : 'bad') + '">' +
+      '<div class="fb-top"><strong class="fb-title">' + (ok ? pick(OK_T) : dead ? '¡Sin vidas!' : pick(BAD_T)) + '</strong><span class="fb-pts">' + ptsTxt + '</span></div>' +
+      right +
+      '<p class="fb-ex"><span class="eyebrow">De los apuntes</span>' + c.ex + '</p>' +
+      '<button type="button" class="btn" id="fb-next" data-act="next">' + next + ' ' + icon('arrow') + '</button>' +
+    '</div>';
+    const nb = $('#fb-next');
+    if (nb) nb.focus({ preventScroll: true });
+    slot.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+  function nextStep() {
+    if (!ui.done || !run) return;
+    if (run.lives <= 0) return gameOver();
+    if (ui.kind === 'boss') return pos.boss.hp <= 0 ? bossDefeated() : bossQuestion();
+    if (pos.ci >= pos.list.length) return worldComplete();
+    showChallenge();
+  }
+
+  /* ---------- fin de estación ---------- */
+  function worldComplete() {
+    const i = pos.world, w = WORLDS[i];
+    const errs = run.worldErrors, stars = errs === 0 ? 3 : errs === 1 ? 2 : 1;
+    const results = (pos.results || []).slice(), n = results.length, okN = results.filter((r) => r === 'ok').length;
+    let lifeBack = false;
+    run.stars[i] = stars;
+    if (errs === 0) { run.score += 300; if (run.lives < MAX_LIVES) { run.lives++; lifeBack = true; } }
+    const gained = run.score - (run.worldScore0 || 0);
+    run.world = i + 1;
+    seen[w.id] = true; store.set(KEY.seen, seen);
+    pos = { screen: 'map' };
+    persist();
+    setEra(w.era);
+    render(hudHTML('done', i) + '<main class="wrap"><section class="panel done-card">' +
+      '<div class="intro-badge" aria-hidden="true">' + icon(w.icon) + '</div>' +
+      '<span class="eyebrow">Estación ' + (i + 1) + ' completada · ' + w.short + '</span>' +
+      '<h1 class="intro-title" tabindex="-1" id="done-title">' + w.doneTitle + '</h1>' +
+      '<div class="big-stars" role="img" aria-label="' + stars + ' de 3 estrellas">' + [0, 1, 2].map((k) => '<span class="bstar' + (k < stars ? ' on' : '') + '" style="--d:' + k * 180 + 'ms">' + icon('star') + '</span>').join('') + '</div>' +
+      statsHTML([['Aciertos', okN + '/' + n], ['Puntos', '+' + fmt(gained)], ['Racha', run.streak]]) +
+      (errs === 0
+        ? '<p class="bonus">' + icon('heart') + ' Estación perfecta: +300 puntos' + (lifeBack ? ' y recuperas una vida.' : '.') + '</p>'
+        : '<p class="muted">Termina una estación sin fallos para ganar 3 estrellas y recuperar una vida.</p>') +
+      '<button type="button" class="btn big" data-act="go-map">' + (i + 1 < WORLDS.length ? 'Seguir el viaje' : 'Ir a por el jefe final') + ' ' + icon('arrow') + '</button>' +
+    '</section></main>');
+    $('#done-title').focus({ preventScroll: true });
+    Sound.win();
+    confetti(150);
+    if (lifeBack) setTimeout(() => { Sound.life(); const hs = $$('#hearts .heart'); if (hs[run.lives - 1]) hs[run.lives - 1].classList.add('gain'); }, 700);
+  }
+
+  /* ---------- jefe final ---------- */
+  function bossSVG(cls) {
+    return '<svg class="boss-svg ' + (cls || '') + '" viewBox="0 0 220 200" role="img" aria-label="El Sobredigitalizador: un monitor enfadado rodeado de notificaciones">' +
+      '<g class="boss-orbit"><rect x="6" y="56" width="26" height="26" rx="7" fill="var(--a3)"/><rect x="188" y="96" width="24" height="24" rx="7" fill="var(--a2)"/><rect x="20" y="130" width="20" height="20" rx="6" fill="var(--a2)"/><rect x="180" y="44" width="18" height="18" rx="5" fill="var(--a3)"/></g>' +
+      '<path d="M104 156C102 174 74 172 66 192" fill="none" stroke="var(--line)" stroke-width="5" stroke-linecap="round"/>' +
+      '<path d="M118 156C120 176 150 172 162 192" fill="none" stroke="var(--line)" stroke-width="5" stroke-linecap="round"/>' +
+      '<g class="boss-body">' +
+        '<rect x="46" y="30" width="128" height="104" rx="18" fill="var(--panel2)" stroke="var(--a1)" stroke-width="5"/>' +
+        '<rect x="60" y="44" width="100" height="76" rx="10" fill="#0A0306"/>' +
+        '<g class="boss-eyes"><rect x="76" y="66" width="20" height="16" rx="4" fill="var(--a1)"/><rect x="124" y="66" width="20" height="16" rx="4" fill="var(--a1)"/></g>' +
+        '<g class="boss-x"><path d="M78 66l16 16M94 66L78 82M126 66l16 16M142 66l-16 16" stroke="var(--a1)" stroke-width="5" stroke-linecap="round"/></g>' +
+        '<path d="M72 58 100 66M148 58 120 66" stroke="var(--a1)" stroke-width="6" stroke-linecap="round"/>' +
+        '<polyline points="80,104 90,96 100,104 110,96 120,104 130,96 140,104" fill="none" stroke="var(--a2)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '<rect x="98" y="134" width="24" height="14" fill="var(--panel2)"/>' +
+        '<rect x="78" y="146" width="64" height="10" rx="5" fill="var(--panel2)" stroke="var(--line)" stroke-width="2"/>' +
+      '</g>' +
+      '<g class="boss-badge"><circle cx="170" cy="30" r="17" fill="var(--bad)"/><text x="170" y="35.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="700" fill="#fff">99+</text></g>' +
+    '</svg>';
+  }
+  function enterBoss() {
+    pos = { screen: 'bossintro', boss: { hp: BOSS_HP, queue: shuffle(BOSS_POOL), qi: 0 } };
+    persist();
+    timeJump(WORLDS.length, showBossIntro);
+  }
+  function showBossIntro() {
+    setEra(8);
+    pos.screen = 'bossintro'; persist();
+    render(hudHTML('boss') + '<main class="wrap boss-wrap">' +
+      '<div class="boss-stage">' + bossSVG('big') + '</div>' +
+      '<div class="speech">' + pick(TAUNTS.intro) + '</div>' +
+      '<section class="panel"><div class="panel-head"><span class="led"></span><span class="eyebrow">Jefe final · Estación ' + TOTAL + '</span></div>' +
+        '<h1 class="intro-title" tabindex="-1" id="boss-title">El Sobredigitalizador</h1>' +
+        '<p style="margin-top:12px">Mete tecnología de forma <b>excesiva, forzada o innecesaria</b>: todo se vuelve más complicado, más caro y deja gente fuera. Derrótalo con lo que has aprendido en toda la unidad.</p>' +
+        '<ul class="boss-rules"><li>Necesitas <b>' + BOSS_HP + ' aciertos</b> para vaciar su barra de energía.</li><li>Tienes <b>' + BOSS_TIME + ' segundos</b> por pregunta.</li><li>Cada fallo te cuesta <b>una vida</b>. Te quedan ' + run.lives + '.</li></ul>' +
+        '<button type="button" class="btn big" data-act="boss-start">¡A por él! ' + icon('arrow') + '</button>' +
+      '</section>' +
+    '</main>');
+    $('#boss-title').focus({ preventScroll: true });
+  }
+  function bossQuestion() {
+    const b = pos.boss;
+    if (b.qi >= b.queue.length) { b.queue = shuffle(BOSS_POOL); b.qi = 0; }
+    const c = b.queue[b.qi];
+    ui = freshUI(c, 'boss');
+    pos.screen = 'boss'; persist();
+    setEra(8);
+    render(hudHTML('boss') + '<main class="wrap boss-wrap">' +
+      '<div class="boss-top">' + bossSVG('') + '<div class="boss-hp"><div class="hp-row"><span class="eyebrow">Energía del jefe</span><span class="hp-num" id="hp-num">' + b.hp + '/' + BOSS_HP + '</span></div>' +
+        '<div class="hpbar" role="meter" aria-label="Energía del Sobredigitalizador" aria-valuemin="0" aria-valuemax="' + BOSS_HP + '" aria-valuenow="' + b.hp + '"><i id="hp-fill" style="width:' + (b.hp / BOSS_HP) * 100 + '%"></i></div></div></div>' +
+      '<div class="speech" id="speech">' + pick(TAUNTS.attack) + '</div>' +
+      '<section class="panel ch" id="ch" aria-labelledby="q">' +
+        '<div class="panel-head"><span class="led"></span><span class="eyebrow">Repaso final · ' + typeLabel(c) + '</span><span class="streak-chip" id="streak-chip">' + streakChip() + '</span></div>' +
+        bodyHTML(c) +
+        '<div class="timer-row"><div class="timer" id="timer" aria-hidden="true"><i id="timer-fill"></i></div><span class="timer-num" id="timer-num" aria-label="Segundos restantes">' + BOSS_TIME + '</span></div>' +
+        '<div id="hint-slot"></div><div id="fb-slot" aria-live="polite"></div>' +
+      '</section>' +
+    '</main>');
+    updateHud();
+    const q = $('#q'); if (q) q.focus({ preventScroll: true });
+    startTimer(BOSS_TIME);
+  }
+  function bossReact(kind) {
+    const svg = $('.boss-top .boss-svg'), sp = $('#speech'), b = pos.boss;
+    if (kind === 'hurt') {
+      Sound.hit();
+      const fill = $('#hp-fill'); if (fill) fill.style.width = (b.hp / BOSS_HP) * 100 + '%';
+      const num = $('#hp-num'); if (num) num.textContent = b.hp + '/' + BOSS_HP;
+      const bar = $('.hpbar'); if (bar) bar.setAttribute('aria-valuenow', b.hp);
+      if (sp) { sp.textContent = b.hp <= 0 ? TAUNTS.dead : pick(TAUNTS.hurt); sp.classList.remove('pop'); void sp.offsetWidth; sp.classList.add('pop'); }
+    } else if (sp) { sp.textContent = pick(TAUNTS.laugh); sp.classList.remove('pop'); void sp.offsetWidth; sp.classList.add('pop'); }
+    if (svg && !reduceMotion) { svg.classList.remove('hurt', 'laugh'); void svg.getBoundingClientRect(); svg.classList.add(kind); }
+  }
+  function startTimer(sec) {
+    stopTimer();
+    const fill = $('#timer-fill'), num = $('#timer-num'), bar = $('#timer');
+    if (!fill) return;
+    let left = sec * 1000, last = performance.now();
+    const t = { raf: 0 };
+    timer = t;
+    const tick = (now) => {
+      if (timer !== t) return;
+      const dt = Math.min(now - last, 100); last = now;
+      if (!document.hidden && $('#modal').hidden) left -= dt;
+      fill.style.transform = 'scaleX(' + Math.max(0, left / (sec * 1000)) + ')';
+      num.textContent = Math.max(0, Math.ceil(left / 1000));
+      bar.classList.toggle('low', left < 8000);
+      if (left <= 0) { stopTimer(); timeUp(); return; }
+      t.raf = requestAnimationFrame(tick);
+    };
+    t.raf = requestAnimationFrame(tick);
+  }
+  function stopTimer() { if (timer) { cancelAnimationFrame(timer.raf); timer = null; } }
+  function timeUp() {
+    if (ui.done) return;
+    const c = ui.c;
+    let right = '';
+    if (c.t === 'quiz') { $$('.opt').forEach((b, j) => { b.disabled = true; if (ui.opts[j].ok) b.classList.add('is-ok'); }); right = ui.opts.find((o) => o.ok).txt; }
+    else { $$('.tf .opt').forEach((b) => { b.disabled = true; if ((b.dataset.v === '1') === c.a) b.classList.add('is-ok'); }); right = c.a ? 'Verdadero' : 'Falso'; }
+    resolve(false, { yours: 'Sin respuesta: se acabó el tiempo', right });
+  }
+  function bossDefeated() {
+    run.bossDone = true;
+    pos = { screen: 'bossdone' };
+    persist();
+    setEra(8);
+    render('<main class="wrap boss-wrap">' +
+      '<div class="boss-stage">' + bossSVG('big dead') + '</div>' +
+      '<div class="speech">' + TAUNTS.dead + '</div>' +
+      '<section class="panel center"><span class="eyebrow">Jefe final</span><h1 class="intro-title" tabindex="-1" id="win-title" style="margin:8px 0 12px">¡Sobredigitalizador derrotado!</h1><p style="margin-bottom:18px">Has recorrido la unidad completa: de la máquina de vapor al gemelo digital.</p><button type="button" class="btn big" data-act="victory">Recoger tu diploma ' + icon('arrow') + '</button></section>' +
+    '</main>');
+    $('#win-title').focus({ preventScroll: true });
+    Sound.win();
+    confetti(220);
+  }
+
+  /* ---------- finales ---------- */
+  function reviewHTML(list) {
+    if (!list.length) return '<section class="panel review"><div class="panel-head"><span class="led"></span><span class="eyebrow">Para repasar</span></div><h2 class="h-display">Ni un solo fallo</h2><p>No hay nada que repasar. Impresionante.</p></section>';
+    return '<section class="panel review"><div class="panel-head"><span class="led"></span><span class="eyebrow">Para repasar</span></div><h2 class="h-display">Tus fallos (' + list.length + ')</h2>' +
+      '<ol class="rv">' + list.map((m) => '<li><span class="eyebrow">' + m.w + '</span><p class="rv-q">' + m.q + '</p>' +
+        (m.yours ? '<p class="rv-a bad">' + icon('cross') + '<span>Tu respuesta: ' + m.yours + '</span></p>' : '') +
+        (m.right ? '<p class="rv-a ok">' + icon('check') + '<span>Correcta: ' + m.right + '</span></p>' : '') +
+        '<p class="rv-ex">' + m.ex + '</p></li>').join('') + '</ol></section>';
+  }
+  function saveBest(score) {
+    if (!best || score > best.score) { best = { score, date: Date.now() }; store.set(KEY.best, best); return true; }
+    return false;
+  }
+  function victory() {
+    stopTimer();
+    setEra(0);
+    run.score += 1000 + run.lives * 250;
+    const stars = totalStars();
+    const rank = run.flawless ? RANKS[0] : stars >= 18 ? RANKS[1] : stars >= 14 ? RANKS[2] : stars >= 10 ? RANKS[3] : RANKS[4];
+    const acc = run.answered ? Math.round((run.correct / run.answered) * 100) : 0;
+    const record = saveBest(run.score);
+    const name = prefs.name ? esc(prefs.name) : 'Agente temporal';
+    const date = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    const r = run;
+    clearSave();
+    render('<main class="wrap final">' +
+      '<section class="panel diploma">' +
+        '<span class="eyebrow">Diploma · UT1 · Digitalización de los sectores productivos</span>' +
+        '<div class="dip-eras" aria-hidden="true">' + ERAS.map((e) => '<i style="background:' + e.c + '"></i>').join('') + '</div>' +
+        '<h1 class="dip-title" tabindex="-1" id="dip-title">Misión 4.0 completada</h1>' +
+        '<p class="dip-name">' + name + '</p>' +
+        '<p>ha recorrido las siete épocas de la unidad y ha derrotado al Sobredigitalizador.</p>' +
+        '<div class="rank"><span class="eyebrow">Nivel alcanzado</span><strong>' + rank.lvl + '</strong><p>' + rank.txt + '</p></div>' +
+        statsHTML([['Puntos', fmt(r.score)], ['Estrellas', stars + '/' + MAX_STARS], ['Aciertos', acc + '%'], ['Mejor racha', r.bestStreak], ['Vidas', r.lives + '/' + MAX_LIVES], ['Tiempo', fmtTime(r.elapsed)]], 'six') +
+        (record ? '<p class="bonus">' + icon('trophy') + ' ¡Nuevo récord en este dispositivo!</p>' : '') +
+        '<p class="muted small">' + date + '</p>' +
+      '</section>' +
+      reviewHTML(r.mistakes) +
+      '<div class="row-btns"><button type="button" class="btn big" data-act="new">' + icon('play') + ' Jugar otra vez</button><button type="button" class="btn ghost" data-act="title">Volver a la portada</button></div>' +
+    '</main>');
+    run = null; pos = null; ui = {};
+    $('#dip-title').focus({ preventScroll: true });
+    Sound.win();
+    confetti(240);
+  }
+  function gameOver() {
+    stopTimer();
+    setEra(0);
+    const r = run, reachedIdx = Math.min(r.world, WORLDS.length), st = station(reachedIdx);
+    const acc = r.answered ? Math.round((r.correct / r.answered) * 100) : 0;
+    const record = saveBest(r.score);
+    clearSave();
+    render('<main class="wrap final">' +
+      '<section class="panel over">' +
+        '<div class="over-ico" aria-hidden="true">' + icon('heart') + '</div>' +
+        '<span class="eyebrow">Fin de la misión</span>' +
+        '<h1 class="intro-title" tabindex="-1" id="over-title">Sin vidas</h1>' +
+        '<p>El Sobredigitalizador gana esta ronda. Has llegado a la estación <b>' + (reachedIdx + 1) + ' de ' + TOTAL + ': ' + st.name + '</b>.</p>' +
+        statsHTML([['Puntos', fmt(r.score)], ['Aciertos', acc + '%'], ['Retos', r.answered], ['Estrellas', totalStars() + '/' + MAX_STARS], ['Mejor racha', r.bestStreak], ['Tiempo', fmtTime(r.elapsed)]], 'six') +
+        (record ? '<p class="bonus">' + icon('trophy') + ' Aun así, ¡nuevo récord en este dispositivo!</p>' : '') +
+        '<p class="muted">Repasa tus fallos y los apuntes. Las preguntas cambian en cada partida.</p>' +
+        '<div class="row-btns" style="justify-content:center"><button type="button" class="btn big" data-act="new">' + icon('play') + ' Volver a intentarlo</button><button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Repasar apuntes</button></div>' +
+      '</section>' +
+      reviewHTML(r.mistakes) +
+    '</main>');
+    run = null; pos = null; ui = {};
+    $('#over-title').focus({ preventScroll: true });
+    Sound.lose();
+  }
+
+  /* ---------- menú y cuaderno ---------- */
+  function openModal(html, era) {
+    const m = $('#modal');
+    if (!m.contains(document.activeElement)) lastFocus = document.activeElement;
+    m.innerHTML = '<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title"' + (era != null ? ' data-era="' + era + '"' : '') + '>' + html + '</div>';
+    m.hidden = false;
+    const f = m.querySelector('[data-autofocus]') || m.querySelector('button');
+    if (f) f.focus();
+  }
+  function closeModal() {
+    const m = $('#modal');
+    if (m.hidden) return;
+    m.hidden = true; m.innerHTML = '';
+    if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+  }
+  function openMenu() {
+    if (!run) return;
+    openModal('<div class="modal-head"><h2 id="modal-title" class="h-display">Pausa</h2><button type="button" class="icon-btn" data-act="close-modal" aria-label="Cerrar">' + icon('cross') + '</button></div>' +
+      '<div class="menu-list">' +
+        '<button type="button" class="btn" data-act="close-modal" data-autofocus>' + icon('play') + ' Seguir jugando</button>' +
+        '<button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Cuaderno de apuntes</button>' +
+        '<button type="button" class="btn ghost" data-act="sound" id="menu-sound">' + icon(prefs.sound ? 'sound' : 'mute') + ' Sonido: ' + (prefs.sound ? 'activado' : 'desactivado') + '</button>' +
+        '<button type="button" class="btn ghost danger" data-act="quit">' + icon('cross') + ' Abandonar la misión</button>' +
+      '</div>' +
+      '<p class="muted small" style="margin-top:14px">La partida se guarda sola en este dispositivo. Atajos: A–D o 1–4 para responder, V/F en verdadero o falso, P para pedir pista.</p>');
+  }
+  function openNotes(w) {
+    const avail = WORLDS.map((_, i) => i).filter((i) => seen[WORLDS[i].id] || (run && i <= run.world && i < WORLDS.length && pos && pos.world === i));
+    if (!avail.length) avail.push(0);
+    if (w == null || avail.indexOf(w) < 0) w = avail[avail.length - 1];
+    const W = WORLDS[w];
+    openModal('<div class="modal-head"><h2 id="modal-title" class="h-display">Cuaderno de apuntes</h2><button type="button" class="icon-btn" data-act="close-modal" aria-label="Cerrar">' + icon('cross') + '</button></div>' +
+      '<div class="tabs" role="tablist" aria-label="Épocas">' + avail.map((i) => '<button type="button" role="tab" class="tab' + (i === w ? ' on' : '') + '" aria-selected="' + (i === w) + '" data-act="notes-tab" data-w="' + i + '" style="--st:' + WORLDS[i].color + '">' + WORLDS[i].short + '</button>').join('') + '</div>' +
+      '<div class="notes-stack">' + W.cards.map((c, k) => '<article class="note-mini"><span class="eyebrow">' + W.short + ' · ' + (k + 1) + '/' + W.cards.length + '</span><h3>' + c.title + '</h3><div class="note-body">' + c.html + '</div></article>').join('') + '</div>' +
+      (avail.length < WORLDS.length ? '<p class="muted small" style="margin-top:14px">Las demás épocas aparecen aquí cuando llegas a ellas.</p>' : ''),
+      W.era);
+    const t = $('#modal .tab.on'); if (t) t.focus();
+  }
+  function abandon() { clearSave(); run = null; pos = null; ui = {}; closeModal(); showTitle(); }
+
+  /* ---------- reanudar ---------- */
+  function resume() {
+    if (!run) return showTitle();
+    if (run.bossDone) return victory();
+    if (run.lives <= 0) return gameOver();
+    const p = pos || { screen: 'map' };
+    if ((p.screen === 'intro' || p.screen === 'cards' || p.screen === 'challenge') && p.list && p.world != null) {
+      if (p.screen === 'intro') return showIntro();
+      if (p.screen === 'cards') return showCards(Math.min(p.card || 0, WORLDS[p.world].cards.length - 1));
+      return p.ci < p.list.length ? showChallenge() : worldComplete();
+    }
+    if ((p.screen === 'bossintro' || p.screen === 'boss') && p.boss) return p.screen === 'boss' ? bossQuestion() : showBossIntro();
+    goMap();
+  }
+
+  /* ---------- acciones ---------- */
+  function refreshSound() {
+    const had = document.activeElement && document.activeElement.matches && document.activeElement.matches('.icon-btn[data-act="sound"]');
+    $$('.icon-btn[data-act="sound"]').forEach((b) => { b.outerHTML = soundBtn(); });
+    if (had) { const nb = $('.icon-btn[data-act="sound"]'); if (nb) nb.focus(); }
+    const ms = $('#menu-sound');
+    if (ms) ms.innerHTML = icon(prefs.sound ? 'sound' : 'mute') + ' Sonido: ' + (prefs.sound ? 'activado' : 'desactivado');
+  }
+  const ACT = {
+    start() { readName(); Sound.unlock(); run = newRun(); lastBeat = Date.now(); goMap(); },
+    resume() {
+      readName(); Sound.unlock();
+      const s = store.get(KEY.save, null);
+      if (s && s.run) { run = s.run; pos = s.pos || { screen: 'map' }; lastBeat = Date.now(); resume(); } else showTitle();
+    },
+    'new'() { Sound.unlock(); run = newRun(); lastBeat = Date.now(); goMap(); },
+    title() { showTitle(); },
+    sound() { prefs.sound = !prefs.sound; savePrefs(); if (prefs.sound) { Sound.unlock(); Sound.blip(); } refreshSound(); },
+    play() { if (run) enterStation(run.world); },
+    read() { showCards(0); },
+    'card-next'() { const w = WORLDS[pos.world]; if (pos.card >= w.cards.length - 1) startChallenges(); else { Sound.tick(); showCards(pos.card + 1); } },
+    'card-prev'() { if (pos.card > 0) { Sound.tick(); showCards(pos.card - 1); } },
+    'skip-cards'() { startChallenges(); },
+    opt(b) { pickOpt(+b.dataset.i); },
+    tf(b) { pickTF(b.dataset.v === '1'); },
+    slot(b) { orderPick(+b.dataset.j); },
+    unslot(b) { orderUnpick(+b.dataset.k); },
+    'order-reset'() { orderReset(); },
+    'order-check'() { orderCheck(); },
+    bin(b) { sortPick(b.dataset.b, b); },
+    ml(b) { matchSel('L', +b.dataset.j); },
+    mr(b) { matchSel('R', +b.dataset.j); },
+    hint() { useHint(); },
+    next() { nextStep(); },
+    menu() { openMenu(); },
+    'close-modal'() { closeModal(); },
+    notes(b) { openNotes(b.dataset.w != null ? +b.dataset.w : null); },
+    'notes-tab'(b) { openNotes(+b.dataset.w); },
+    quit(b) {
+      if (b.dataset.armed) return abandon();
+      b.dataset.armed = '1';
+      b.innerHTML = icon('cross') + ' Pulsa otra vez para abandonar (se pierde la partida)';
+    },
+    'go-map'() { goMap(); },
+    'boss-start'() { bossQuestion(); },
+    victory() { victory(); }
+  };
+  const GUARDED = { opt: 1, tf: 1, slot: 1, unslot: 1, bin: 1, ml: 1, mr: 1, 'order-check': 1, 'order-reset': 1, next: 1 };
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    const act = b.dataset.act;
+    if (GUARDED[act] && ui && performance.now() < (ui.readyAt || 0)) return;
+    const fn = ACT[act];
+    if (fn) fn(b, e);
+  });
+  $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeModal(); });
+  document.addEventListener('keydown', (e) => {
+    const m = $('#modal');
+    if (!m.hidden) { if (e.key === 'Escape') { e.preventDefault(); closeModal(); } return; }
+    if (!$('#overlay').hidden) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input') { if (e.key === 'Enter') { e.preventDefault(); const b = $('#btn-main'); if (b) b.click(); } return; }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'Escape') { if (run) { e.preventDefault(); openMenu(); } return; }
+    const k = (e.key || '').toLowerCase();
+    const playing = pos && (pos.screen === 'challenge' || pos.screen === 'boss') && ui && ui.c && !ui.done;
+    if (playing) {
+      if (performance.now() < (ui.readyAt || 0)) return;
+      if (ui.c.t === 'quiz') {
+        const idx = { '1': 0, '2': 1, '3': 2, '4': 3, a: 0, b: 1, c: 2, d: 3 }[k];
+        if (idx != null && ui.opts && idx < ui.opts.length) { e.preventDefault(); pickOpt(idx); return; }
+      } else if (ui.c.t === 'tf') {
+        if (k === 'v' || k === '1') { e.preventDefault(); pickTF(true); return; }
+        if (k === 'f' || k === '2') { e.preventDefault(); pickTF(false); return; }
+      }
+      if (k === 'p') { e.preventDefault(); useHint(); return; }
+    }
+    if (pos && pos.screen === 'cards') {
+      if (e.key === 'ArrowRight') { e.preventDefault(); ACT['card-next'](); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); ACT['card-prev'](); }
+    }
+  });
+
+  /* ---------- arranque ---------- */
+  const hot = window.claude && window.claude.hot;
+  try { if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ run, pos })); } catch (e) { /* sin recarga en caliente */ }
+  function boot(data) {
+    if (data && data.run) { run = data.run; pos = data.pos || { screen: 'map' }; lastBeat = Date.now(); resume(); }
+    else showTitle();
+  }
+  if (hot && typeof hot.ready === 'function') hot.ready(boot);
+  else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>
