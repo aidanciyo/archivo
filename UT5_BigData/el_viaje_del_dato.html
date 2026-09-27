@@ -1,0 +1,1770 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El viaje del dato</title>
+<meta name="description" content="Juego para repasar la UT5 de Big Data: 8 estaciones, 5 vidas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;0,800;1,400&family=Bungee&family=Doto:wght@700;900&display=swap">
+<style>
+:root{
+  --bg:#EDF0F4; --bg-dot:rgba(17,26,44,.08);
+  --surface:#FFFFFF; --surface-2:#F4F6F9;
+  --ink:#111A2C; --ink-2:#46526A; --muted:#667189; --rule:#D3D9E3;
+  --line:#F2A900; --line-ink:#855700; --line-soft:#FFF0C7; --on-line:#1B1303;
+  --led-bg:#15120C; --led:#FFB21E; --led-dim:#5A4515;
+  --ok:#13864F; --ok-bg:#E0F4E8; --bad:#D2362F; --bad-bg:#FCE6E3;
+  --shadow:0 1px 2px rgba(17,26,44,.06),0 10px 28px rgba(17,26,44,.09);
+  --radius:16px;
+  --f-display:"Bungee","Arial Black",Impact,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-led:"Doto","Courier New",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1019; --bg-dot:rgba(238,242,248,.07);
+    --surface:#141B28; --surface-2:#1A2333;
+    --ink:#EEF2F8; --ink-2:#B6BFCF; --muted:#8A96AB; --rule:#2B3649;
+    --line:#FFB81C; --line-ink:#FFC94D; --line-soft:#3A2D0E; --on-line:#1B1303;
+    --ok:#3CCB84; --ok-bg:rgba(60,203,132,.14); --bad:#FF6B61; --bad-bg:rgba(255,107,97,.15);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.38);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1019; --bg-dot:rgba(238,242,248,.07);
+  --surface:#141B28; --surface-2:#1A2333;
+  --ink:#EEF2F8; --ink-2:#B6BFCF; --muted:#8A96AB; --rule:#2B3649;
+  --line:#FFB81C; --line-ink:#FFC94D; --line-soft:#3A2D0E; --on-line:#1B1303;
+  --ok:#3CCB84; --ok-bg:rgba(60,203,132,.14); --bad:#FF6B61; --bad-bg:rgba(255,107,97,.15);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.38);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0; background-color:var(--bg); color:var(--ink);
+  background-image:radial-gradient(var(--bg-dot) 1px,transparent 1.3px); background-size:22px 22px;
+  font-family:var(--f-body); font-size:17px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+}
+img{max-width:100%}
+button{font:inherit;color:inherit}
+a{color:var(--line-ink);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:10px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.15}
+p{margin:0}
+.app{min-height:100%;display:flex;flex-direction:column}
+
+/* ---------- HUD ---------- */
+.hud{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:var(--surface); border-bottom:1px solid var(--rule);
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center;
+  gap:10px 12px; padding:8px 16px 10px;
+}
+.lives{display:flex;gap:2px;align-items:center}
+.heart{width:22px;height:22px;display:block;color:var(--bad)}
+.heart.is-lost{color:var(--rule)}
+.heart.is-breaking{animation:heartbreak .7s ease-out}
+.heart.is-gained{animation:heartgain .7s ease-out}
+.led{
+  background-color:var(--led-bg); color:var(--led);
+  background-image:radial-gradient(rgba(255,178,30,.10) 1px,transparent 1.2px); background-size:4px 4px;
+  font-family:var(--f-led); font-weight:900; font-size:15px; letter-spacing:.04em; text-transform:uppercase;
+  text-shadow:0 0 6px rgba(255,178,30,.55);
+  border-radius:8px; padding:5px 10px; min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.score{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;line-height:1.1}
+.score small{display:block;font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.score .streak{color:var(--line-ink)}
+.iconbtn{
+  width:40px;height:40px;border-radius:10px;border:1px solid var(--rule);background:var(--surface-2);
+  display:grid;place-items:center;cursor:pointer;color:var(--ink);padding:0;
+}
+.iconbtn svg{width:20px;height:20px}
+.strip{grid-column:1/-1;display:flex;align-items:center;gap:0;padding-inline:4px}
+.strip i{flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:var(--surface);border:3px solid var(--ink);position:relative;z-index:1}
+.strip b{flex:1 1 auto;height:4px;background:var(--line);margin-inline:-1px}
+.strip i.done{background:var(--line)}
+.strip i.now{background:var(--line);box-shadow:0 0 0 4px var(--line-soft);animation:pulse 1.6s ease-in-out infinite}
+
+/* ---------- layout ---------- */
+.main{width:100%;max-width:800px;margin-inline:auto;padding-inline:16px;padding-block:22px 48px;flex:1}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.eyebrow{font-size:.76rem;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.display{font-family:var(--f-display);font-weight:400;letter-spacing:.01em}
+.lead{font-size:1.12rem;color:var(--ink-2);max-width:60ch}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.note{font-size:.86rem;color:var(--muted)}
+.fade-in{animation:fadeup .35s ease-out both}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  min-height:50px;padding:12px 22px;border-radius:12px;border:2px solid transparent;
+  font-weight:800;font-size:1.02rem;cursor:pointer;text-decoration:none;
+  transition:transform .12s ease,box-shadow .12s ease,background-color .12s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--line);color:var(--on-line);box-shadow:0 3px 0 var(--line-ink)}
+.btn-primary:hover{box-shadow:0 5px 0 var(--line-ink);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface);border-color:var(--rule);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ink-2)}
+.btn svg{width:20px;height:20px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.kbd{display:inline-grid;place-items:center;min-width:1.7em;height:1.7em;padding:0 .35em;border-radius:6px;border:1px solid var(--rule);background:var(--surface-2);font-size:.78rem;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ---------- start ---------- */
+.hero{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+.title-big{font-family:var(--f-display);font-size:clamp(2.35rem,8.6vw,4.4rem);line-height:.98;letter-spacing:.005em}
+.title-big span{display:block}
+.title-line{position:relative;height:22px;margin-block:4px 2px}
+.title-line::before{content:"";position:absolute;left:0;right:0;top:9px;height:6px;border-radius:3px;background:var(--line)}
+.title-line i{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:var(--surface);border:4px solid var(--ink)}
+.title-line .packet{position:absolute;top:0;width:24px;height:24px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px var(--line-soft);animation:ride 6s ease-in-out infinite}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.rule{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:12px}
+.rule svg{flex:0 0 22px;width:22px;height:22px;color:var(--line-ink)}
+.rule b{display:block;line-height:1.2}
+.rule span{font-size:.86rem;color:var(--muted);line-height:1.35;display:block;margin-top:2px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:800}
+.input{font:inherit;font-size:1.05rem;padding:12px 14px;border-radius:12px;border:2px solid var(--rule);background:var(--surface);color:var(--ink);width:100%;max-width:420px}
+.input:focus{outline:none;border-color:var(--line)}
+.avatars{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.avatar{display:flex;gap:10px;align-items:center;text-align:left;background:var(--surface);border:2px solid var(--rule);border-radius:12px;padding:10px 12px;cursor:pointer}
+.avatar .dot{flex:0 0 38px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--ink)}
+.avatar .dot svg{width:20px;height:20px}
+.avatar b{display:block;line-height:1.2}
+.avatar span{font-size:.8rem;color:var(--muted)}
+.avatar[aria-pressed="true"]{border-color:var(--line);box-shadow:0 0 0 3px var(--line-soft)}
+.avatar[aria-pressed="true"] .dot{background:var(--line);color:var(--on-line)}
+.best{font-size:.9rem;color:var(--muted)}
+.best b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ---------- map ---------- */
+.map-wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+@media (min-width:760px){.map-wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}}
+.ledboard{background-color:var(--led-bg);background-image:radial-gradient(rgba(255,178,30,.10) 1px,transparent 1.2px);background-size:4px 4px;border-radius:14px;padding:14px 16px;color:var(--led);font-family:var(--f-led);font-weight:900;text-transform:uppercase;text-shadow:0 0 8px rgba(255,178,30,.5)}
+.ledboard .l1{font-size:.9rem;letter-spacing:.08em;opacity:.8}
+.ledboard .l2{font-size:clamp(1.6rem,6vw,2.3rem);line-height:1.1;letter-spacing:.03em}
+.map{list-style:none;margin:0;padding:0;position:relative}
+.map li{position:relative;display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:10px;min-height:58px}
+.map li::before{content:"";position:absolute;left:21px;top:0;bottom:0;width:6px;background:var(--line)}
+.map li:first-child::before{top:50%}
+.map li:last-child::before{bottom:50%}
+.map .stop{position:relative;z-index:1;margin-left:11px;width:26px;height:26px;border-radius:50%;background:var(--surface);border:5px solid var(--ink)}
+.map li.done .stop{background:var(--line)}
+.map li.now .stop{background:var(--line);box-shadow:0 0 0 6px var(--line-soft)}
+.map .sname{display:flex;flex-direction:column;line-height:1.2}
+.map .sname b{font-weight:800}
+.map .sname span{font-size:.84rem;color:var(--muted)}
+.map li.next .sname b{color:var(--ink-2)}
+.map li.next .sname span{color:var(--muted)}
+.map li.done .sname b::after{content:" ✓";color:var(--ok)}
+.map .is-boss .stop{border-color:var(--bad)}
+.rider{position:absolute;left:5px;z-index:2;width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center;box-shadow:0 0 0 4px var(--line),0 6px 18px rgba(0,0,0,.25);transition:top .9s cubic-bezier(.6,.05,.25,1)}
+.rider svg{width:20px;height:20px}
+
+/* ---------- briefing ---------- */
+.brief-head{display:flex;gap:14px;align-items:center}
+.roundel{flex:0 0 auto;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--line);color:var(--on-line);font-family:var(--f-display);font-size:1.35rem;box-shadow:0 0 0 4px var(--surface),0 0 0 7px var(--ink)}
+.brief-head h2{font-family:var(--f-display);font-weight:400;font-size:clamp(1.5rem,5vw,2.1rem)}
+.brief p+p{margin-top:10px}
+.brief h3{font-size:1.05rem;font-weight:800;margin-bottom:8px}
+.key{background:var(--line-soft);color:var(--ink);padding:0 .25em;border-radius:4px;font-weight:800;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.quote{font-size:1.25rem;font-weight:800;line-height:1.35;border-left:0;padding:0}
+.pairs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pairs li{display:grid;grid-template-columns:minmax(0,17ch) auto minmax(0,1fr);gap:8px;align-items:baseline}
+.pairs li b{font-weight:800}
+.pairs li i{font-style:normal;color:var(--line-ink);font-weight:800}
+.bullets{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.video{display:inline-flex;gap:8px;align-items:center;font-weight:700;font-size:.92rem}
+.video svg{width:18px;height:18px;flex:0 0 18px}
+.videos{display:flex;flex-direction:column;gap:6px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface-2);border:1px solid var(--rule);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.tile b{font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile span{font-size:.84rem;color:var(--ink-2);line-height:1.3}
+.livecount{display:grid;gap:6px;margin-top:4px}
+.livecount div{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.livecount span{font-size:.8rem;letter-spacing:.06em}
+.livecount b{font-size:1.35rem;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px}
+.v{background:var(--surface-2);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.v .vl{font-family:var(--f-display);font-size:1.15rem;line-height:1.1}
+.v .vl::first-letter{color:var(--line-ink)}
+.v span{font-size:.9rem;color:var(--ink-2);line-height:1.35}
+.flow{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-items:center}
+@media (min-width:620px){.flow{grid-template-columns:minmax(0,1.3fr) auto minmax(0,1fr)}}
+.sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.src{display:flex;gap:8px;align-items:center;background:var(--surface-2);border:1px solid var(--rule);border-radius:10px;padding:8px 10px;font-weight:700;font-size:.92rem}
+.src svg{width:18px;height:18px;flex:0 0 18px;color:var(--line-ink)}
+.arrow{justify-self:center;color:var(--muted)}
+.arrow svg{width:28px;height:28px;display:block}
+@media (max-width:619px){.arrow svg{transform:rotate(90deg)}}
+.lake{border-radius:14px;padding:14px;text-align:center;color:var(--on-line);background:var(--line);position:relative;overflow:hidden}
+.lake b{font-family:var(--f-display);font-weight:400;font-size:1.2rem;display:block}
+.lake span{font-size:.85rem;font-weight:700}
+.lake::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-8px;height:22px;background:radial-gradient(circle at 10px -2px,transparent 12px,rgba(27,19,3,.14) 13px) 0 0/24px 22px repeat-x}
+.defs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.def{border:1px dashed var(--rule);border-radius:12px;padding:10px 12px;font-size:.9rem;color:var(--ink-2)}
+.def b{color:var(--ink);display:block}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;counter-reset:s}
+.steps li{counter-increment:s;background:var(--surface-2);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;font-weight:700;line-height:1.3}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--surface);font-family:var(--f-display);font-size:.85rem}
+.cluster{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--rule);overflow:hidden}
+.cluster .blk{width:46px;height:46px;border-radius:8px;background:var(--line);display:grid;place-items:center;color:var(--on-line);font-weight:800;font-size:.72rem;text-align:center;line-height:1.1}
+.cluster .nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;position:relative}
+.cluster .node{height:46px;border-radius:8px;border:2px solid var(--ink);display:grid;place-items:center;position:relative;background:var(--surface)}
+.cluster .node svg{width:20px;height:20px}
+.cluster .node::after{content:"";position:absolute;top:-6px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:2px;background:var(--line);animation:chunk 2.4s ease-in-out infinite}
+.cluster .node:nth-child(2)::after{animation-delay:.2s}
+.cluster .node:nth-child(3)::after{animation-delay:.4s}
+.cluster .node:nth-child(4)::after{animation-delay:.6s}
+.cluster .res{background:var(--ok);color:#fff}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.col{border-radius:12px;padding:14px;border:1px solid var(--rule);background:var(--surface-2)}
+.col h3{display:flex;align-items:center;gap:8px}
+.profile{display:grid;gap:8px;background:var(--surface-2);border:1px solid var(--rule);border-radius:14px;padding:14px}
+.profile header{display:flex;gap:12px;align-items:center}
+.profile .face{width:48px;height:48px;border-radius:50%;background:var(--ink);color:var(--surface);display:grid;place-items:center}
+.profile .face svg{width:26px;height:26px}
+.profile header b{font-family:var(--f-display);font-weight:400;font-size:1.05rem;line-height:1.1}
+.profile .pf{display:flex;gap:10px;align-items:center;background:var(--surface);border-radius:8px;padding:6px 10px;font-size:.92rem}
+.profile .pf svg{width:16px;height:16px;flex:0 0 16px;color:var(--line-ink)}
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{font-family:var(--f-body);fill:var(--ink-2);font-size:12px}
+.chart .cv{font-weight:800;fill:var(--ink)}
+.chart .ttl{font-weight:800;fill:var(--ink);font-size:13px}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.chart .bar{fill:var(--line)}
+.chart .bar:hover{fill:var(--line-ink)}
+.sectors{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.sector{background:var(--surface-2);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.sector svg{width:22px;height:22px;color:var(--line-ink)}
+.sector b{line-height:1.2}
+.sector span{font-size:.86rem;color:var(--ink-2);line-height:1.35}
+.bigstat{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.bigstat b{font-family:var(--f-display);font-weight:400;font-size:clamp(2rem,8vw,3rem);line-height:1;color:var(--ink)}
+.bigstat span{max-width:36ch;color:var(--ink-2)}
+
+/* ---------- challenge ---------- */
+.chead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 10px;background:var(--surface);border:1px solid var(--rule);color:var(--ink-2)}
+.chip.warm{background:var(--line-soft);border-color:transparent;color:var(--line-ink)}
+.q{font-size:clamp(1.2rem,3.6vw,1.45rem);font-weight:800;line-height:1.3}
+.ctx{color:var(--ink-2)}
+.opts{display:grid;gap:10px}
+@media (min-width:640px){.opts.two{grid-template-columns:1fr 1fr}}
+.opt{
+  display:flex;gap:12px;align-items:center;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:2px solid var(--rule);border-radius:12px;padding:13px 14px;
+  font-size:1.03rem;line-height:1.35;color:var(--ink);transition:border-color .12s,background-color .12s,transform .12s;
+}
+.opt:hover:not([disabled]){border-color:var(--ink-2);transform:translateY(-1px)}
+.opt[disabled]{cursor:default}
+.opt .kbd{flex:0 0 auto}
+.opt.is-correct{border-color:var(--ok);background:var(--ok-bg)}
+.opt.is-wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.is-dim{opacity:.5}
+.opt.is-sel{border-color:var(--line);box-shadow:0 0 0 3px var(--line-soft)}
+.opt .tag{margin-left:auto;flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.78rem;font-weight:800;background:var(--ok);color:#fff}
+.blank{display:inline-block;min-width:7ch;border-bottom:3px solid var(--line);color:var(--line-ink);text-align:center;padding-inline:4px}
+.feedback{border-radius:14px;padding:16px;border:2px solid;display:flex;flex-direction:column;gap:10px}
+.feedback.ok{border-color:var(--ok);background:var(--ok-bg)}
+.feedback.bad{border-color:var(--bad);background:var(--bad-bg)}
+.feedback .ft{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.08rem}
+.feedback.ok .ft{color:var(--ok)}
+.feedback.bad .ft{color:var(--bad)}
+.feedback .ft svg{width:22px;height:22px}
+.feedback p{color:var(--ink)}
+.match{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:10px}
+.match .mcol{display:flex;flex-direction:column;gap:8px}
+.match .opt{font-size:.95rem;padding:11px 12px;min-height:54px}
+.match .mcol:first-child .opt{font-weight:800}
+.sortcard{background:var(--surface);border:2px solid var(--ink);border-radius:16px;padding:22px 18px;text-align:center;font-size:1.2rem;font-weight:800;box-shadow:var(--shadow);min-height:96px;display:grid;place-items:center}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bin{display:flex;flex-direction:column;gap:6px;align-items:stretch;text-align:left;cursor:pointer;background:var(--surface);border:2px dashed var(--ink-2);border-radius:14px;padding:12px;min-height:84px}
+.bin:hover:not([disabled]){border-style:solid}
+.bin[disabled]{cursor:default}
+.bin .bl{font-weight:800;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.bin .bh{font-size:.82rem;color:var(--muted);line-height:1.3}
+.bin .got{display:flex;flex-wrap:wrap;gap:4px}
+.bin .got span{font-size:.72rem;font-weight:700;background:var(--surface-2);border:1px solid var(--rule);border-radius:999px;padding:2px 8px;color:var(--ink-2)}
+.bin.is-correct{border-color:var(--ok);border-style:solid;background:var(--ok-bg)}
+.bin.is-wrong{border-color:var(--bad);border-style:solid;background:var(--bad-bg)}
+.slots{list-style:none;margin:0;padding:0;display:grid;gap:8px;counter-reset:o}
+.slots li{counter-increment:o;display:flex;gap:10px;align-items:center;min-height:50px;border:2px dashed var(--rule);border-radius:12px;padding:8px 12px;color:var(--muted);font-weight:700}
+.slots li::before{content:counter(o);flex:0 0 28px;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--surface-2);border:2px solid var(--rule);font-family:var(--f-display);font-size:.8rem;color:var(--muted)}
+.slots li.filled{border-style:solid;border-color:var(--ok);background:var(--ok-bg);color:var(--ink)}
+.slots li.filled::before{background:var(--ok);border-color:var(--ok);color:#fff}
+.progress-dots{display:flex;gap:6px}
+.progress-dots i{width:9px;height:9px;border-radius:50%;background:var(--rule)}
+.progress-dots i.on{background:var(--ink)}
+.hl{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:600px){.hl{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:stretch}}
+.hlc{background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;justify-content:center;min-height:150px;box-shadow:var(--shadow)}
+.hlc .who{font-weight:800;font-size:1.05rem;line-height:1.25}
+.hlc .num{font-family:var(--f-display);font-size:clamp(1.7rem,6vw,2.3rem);line-height:1.05;font-variant-numeric:tabular-nums}
+.hlc .unit{font-size:.84rem;color:var(--muted)}
+.hlc.mystery .num{color:var(--line-ink)}
+.vs{align-self:center;justify-self:center;font-family:var(--f-display);color:var(--muted)}
+.hlbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* arcade */
+.arena{position:relative;height:min(62vh,440px);min-height:320px;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,var(--surface) 0%,var(--surface-2) 100%);border:1px solid var(--rule);touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.arena .drop{position:absolute;top:0;left:0;will-change:transform;display:flex;align-items:center;gap:6px;padding:6px 10px 6px 6px;border-radius:999px;background:var(--surface);border:2px solid var(--ink);font-weight:800;font-size:.8rem;white-space:nowrap;box-shadow:var(--shadow)}
+.arena .drop svg{width:18px;height:18px;padding:3px;border-radius:50%;background:var(--line);color:var(--on-line);box-sizing:content-box}
+.arena .drop.fake{border-color:var(--bad);color:var(--bad)}
+.arena .drop.fake svg{background:var(--bad);color:#fff}
+.arena .bucket{position:absolute;bottom:10px;left:0;height:46px;border-radius:10px 10px 22px 22px;background:var(--line);color:var(--on-line);display:grid;place-items:center;font-family:var(--f-display);font-size:.9rem;will-change:transform;box-shadow:0 6px 0 var(--line-ink)}
+.arena .pop{position:absolute;font-weight:800;font-size:.95rem;pointer-events:none;animation:popup .8s ease-out forwards}
+.arena .pop.plus{color:var(--ok)}
+.arena .pop.minus{color:var(--bad)}
+.arena .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:16px;text-align:center;background:var(--surface);background:color-mix(in srgb,var(--surface) 86%,transparent)}
+.arena .overlay .stack{max-width:420px;align-items:center}
+.arcade-hud{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:800;font-variant-numeric:tabular-nums}
+.arcade-hud .meter{flex:1 1 180px;height:12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--rule);overflow:hidden;align-self:center}
+.arcade-hud .meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
+
+/* boss */
+.boss{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;background:var(--led-bg);color:#F4EEE2;border-radius:16px;padding:14px 16px}
+.boss .eye{width:74px;height:74px;display:block}
+.boss .eye.hit{animation:hit .45s ease-out}
+.boss .eye.laugh{animation:laugh .6s ease-in-out}
+.boss .bn{font-family:var(--f-display);font-size:1.05rem;line-height:1.1;color:var(--led)}
+.boss .hp{height:12px;border-radius:999px;background:#3A2F1A;overflow:hidden;margin-top:8px}
+.boss .hp i{display:block;height:100%;background:linear-gradient(90deg,#FF6B61,#FFB21E);transition:width .35s ease-out}
+.boss .bs{font-size:.8rem;opacity:.75;margin-top:4px;font-variant-numeric:tabular-nums}
+.timer{height:8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--rule);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left center}
+.timer.low i{background:var(--bad)}
+
+/* results */
+.big-result{font-family:var(--f-display);font-size:clamp(2.2rem,9vw,3.6rem);line-height:1}
+.statrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:.8rem;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.review{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.review li{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:12px 14px}
+.review li .rq{font-weight:800;line-height:1.35}
+.review li .ra{font-size:.92rem;color:var(--ink-2);margin-top:4px}
+.review li .ra b{color:var(--ok)}
+.review li .rs{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ticket{position:relative;background:var(--surface);color:var(--ink);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--rule);max-width:560px;width:100%}
+.ticket .tb{background:var(--line);color:var(--on-line);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ticket .tb b{font-family:var(--f-display);font-weight:400;font-size:1.1rem;line-height:1.1}
+.ticket .tb span{font-family:var(--f-led);font-weight:900;font-size:1rem}
+.ticket .tbody{padding:16px 18px 14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;border-bottom:2px dashed var(--rule)}
+.ticket .tbody div span{display:block;font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ticket .tbody div b{font-size:1.05rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ticket .tbody .wide{grid-column:1/-1}
+.ticket .stripe{height:22px;background:var(--ink);margin:12px 18px 6px;border-radius:4px;opacity:.9}
+.ticket .tfoot{padding:0 18px 14px;font-family:var(--f-led);font-weight:900;font-size:.9rem;letter-spacing:.06em;color:var(--muted)}
+.ticket::before,.ticket::after{content:"";position:absolute;top:calc(100% - 64px);width:22px;height:22px;border-radius:50%;background:var(--bg)}
+.ticket::before{left:-11px}
+.ticket::after{right:-11px}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+/* overlay drawer (apuntes during challenge) */
+.drawer{position:fixed;inset:0;z-index:40;background:rgba(8,12,20,.55);display:flex;justify-content:center;align-items:flex-end}
+.drawer .sheet{background:var(--bg);width:100%;max-width:820px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+@media (min-width:760px){.drawer{align-items:center}.drawer .sheet{border-radius:18px;max-height:86vh}}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:45;width:min(560px,calc(100% - 32px));background:var(--ink);color:var(--surface);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);font-weight:700;animation:fadeup .25s ease-out;pointer-events:none}
+.toast.bad{background:var(--bad);color:#fff}
+.toast.ok{background:var(--ok);color:#fff}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:30;background:var(--bad);opacity:0}
+.flash.go{animation:flash .45s ease-out}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.bins.many{grid-template-columns:minmax(0,1fr)}
+.bins.many .bin{min-height:0;flex-direction:row;align-items:center;justify-content:space-between;padding:10px 14px}
+@media (min-width:640px){.bins.many{grid-template-columns:repeat(5,minmax(0,1fr))}.bins.many .bin{justify-content:center;text-align:center;min-height:56px}}
+@media (max-width:640px){
+  .sectors,.vgrid{grid-template-columns:1fr 1fr}
+  .sectors>:last-child:nth-child(odd),.vgrid>:last-child:nth-child(odd){grid-column:1/-1}
+}
+.between{justify-content:space-between}
+.sfb{min-height:1.6em;font-weight:700}
+.sfb.ok{color:var(--ok)}
+.sfb.bad{color:var(--bad)}
+details.ra{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:12px 14px}
+details.ra summary{cursor:pointer;font-weight:800}
+details.ra ol{margin:8px 0 0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px;font-size:.92rem;color:var(--ink-2)}
+.notes-sec{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+.notes-sec+.notes-sec{border-top:2px dashed var(--rule);padding-top:22px}
+
+.cluster .blk.res{width:auto;min-width:46px;padding:0 8px}
+.bullets{display:block;margin:0;padding-left:1.2em}
+.bullets li+li{margin-top:4px}
+details.ra ol{display:block}
+details.ra li+li{margin-top:4px}
+.arcade-hud svg{width:18px;height:18px;vertical-align:-3px}
+.hbar{margin:0;display:grid;gap:10px}
+.hbar figcaption{font-weight:800}
+.hrow{display:grid;grid-template-columns:minmax(0,13rem) minmax(0,1fr);gap:2px 12px;align-items:center}
+.hrow .hl{font-size:.88rem;color:var(--ink-2);line-height:1.3}
+.ht{display:flex;align-items:center;gap:8px;min-width:0}
+.ht i{display:block;height:18px;border-radius:0 4px 4px 0;background:var(--line);min-width:3px;flex:0 0 auto}
+.ht b{font-size:.9rem;font-variant-numeric:tabular-nums;color:var(--ink)}
+@media (max-width:540px){.hrow{grid-template-columns:minmax(0,1fr)}}
+.eye .pupil{animation:look 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes look{0%,100%{transform:translateX(0)}30%{transform:translateX(-5px)}65%{transform:translateX(5px)}}
+.hlbtns .btn{gap:8px}
+
+#view:focus{outline:none}
+.chip svg{width:14px;height:14px;flex:0 0 14px}
+.col h3{margin-bottom:8px}
+.col h3 svg{width:22px;height:22px;flex:0 0 22px;color:var(--line-ink)}
+@media (max-width:540px){
+  .pairs li{display:block}
+  .pairs li i{margin-inline:.35em}
+  .stat{padding:10px}
+  .stat b{font-size:1.2rem}
+  .stat span{font-size:.7rem}
+}
+.shake{animation:shake .42s ease-in-out}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@keyframes heartbreak{0%{transform:scale(1)}30%{transform:scale(1.45) rotate(-12deg)}60%{transform:scale(.8) rotate(8deg)}100%{transform:scale(1)}}
+@keyframes heartgain{0%{transform:scale(.4)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px var(--line-soft)}50%{box-shadow:0 0 0 7px var(--line-soft)}}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ride{0%{left:0}50%{left:calc(100% - 24px)}100%{left:0}}
+@keyframes chunk{0%{transform:translateY(-22px);opacity:0}30%{opacity:1}60%{transform:translateY(14px);opacity:1}100%{transform:translateY(14px);opacity:0}}
+@keyframes popup{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-34px)}}
+@keyframes flash{0%{opacity:.22}100%{opacity:0}}
+@keyframes hit{0%{transform:scale(1)}25%{transform:scale(.82) rotate(-8deg);filter:brightness(2)}100%{transform:scale(1)}}
+@keyframes laugh{0%,100%{transform:scale(1)}30%{transform:scale(1.15)}60%{transform:scale(.95)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+@media (max-width:420px){
+  body{font-size:16px}
+  .hud{gap:8px;padding-inline:12px}
+  .led{font-size:13px;padding:5px 8px}
+  .heart{width:19px;height:19px}
+  .match{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:8px}
+  .match .opt{font-size:.88rem;padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="hud" id="hud" hidden>
+    <div class="lives" id="lives" role="img" aria-label="Vidas"></div>
+    <div class="led" id="led"></div>
+    <div class="score"><small>Puntos</small><span id="scoreNum">0</span><small class="streak" id="streak"></small></div>
+    <button class="iconbtn" id="soundBtn" type="button" aria-label="Sonido"></button>
+    <div class="strip" id="strip" aria-hidden="true"></div>
+  </header>
+  <main class="main" id="view" tabindex="-1"></main>
+</div>
+<div class="flash" id="flash"></div>
+<div class="sr" id="announce" aria-live="polite"></div>
+<script>
+/* =========================================================
+   CONTENIDO · UT5 Big Data (apuntes de clase)
+   ========================================================= */
+const I = {
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  like:'<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
+  cart:'<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+  pin:'<path d="M20 10c0 5-5.5 10.2-7.4 11.8a1 1 0 0 1-1.2 0C9.5 20.2 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  watch:'<circle cx="12" cy="12" r="6"/><path d="M12 10v2l1 1"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/>',
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  play:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/>',
+  msg:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  photo:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
+  car:'<path d="M3 17v-5l2.2-5.2A2 2 0 0 1 7 5.6h10a2 2 0 0 1 1.8 1.2L21 12v5z"/><path d="M3 12h18"/><circle cx="7.5" cy="14.5" r=".6"/><circle cx="16.5" cy="14.5" r=".6"/><path d="M6 17v2M18 17v2"/>',
+  phone:'<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
+  server:'<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/>',
+  waves:'<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+  chart:'<path d="M3 3v18h18"/><path d="M8 17v-5M13 17V7M18 17V9"/>',
+  eye:'<path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  users:'<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  film:'<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 12h20M2 7.5h5M2 16.5h5M17 7.5h5M17 16.5h5"/>',
+  pulse:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>',
+  truck:'<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+  shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  city:'<path d="M3 21h18"/><path d="M6 21V8l5-3v16"/><path d="M11 21V9l7 3v9"/><path d="M8 10v.01M8 13v.01M8 16v.01M14 14v.01M14 17v.01"/>',
+  alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  arrow:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  back:'<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+  up:'<path d="m18 15-6-6-6 6"/>',
+  down:'<path d="m6 9 6 6 6-6"/>',
+  volOn:'<path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.4 18.4a9 9 0 0 0 0-12.7"/>',
+  volOff:'<path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5z"/><path d="m22 9-6 6M16 9l6 6"/>',
+  book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/>',
+  zap:'<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  retry:'<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  news:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  spark:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17v4M17 19h4"/>',
+  db:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+  shapes:'<path d="M8.3 10a.7.7 0 0 1-.63-1.08L11.4 3a.7.7 0 0 1 1.2-.04L16.3 8.9a.7.7 0 0 1-.57 1.1Z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/>',
+  gem:'<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
+  cap:'<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  map:'<path d="M14.1 5.55a2 2 0 0 0 1.8 0l3.66-1.83A1 1 0 0 1 21 4.62v12.76a1 1 0 0 1-.55.9l-4.55 2.27a2 2 0 0 1-1.8 0l-4.2-2.1a2 2 0 0 0-1.8 0l-3.66 1.83A1 1 0 0 1 3 19.38V6.62a1 1 0 0 1 .55-.9L8.1 3.45a2 2 0 0 1 1.8 0z"/><path d="M15 5.76v15M9 3.24v15"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  flag:'<path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.33 2q2 0 3.87-.96a1 1 0 0 1 1.3.96v9a1 1 0 0 1-.4.8A6 6 0 0 1 16 14c-3 0-5-2-8-2a6 6 0 0 0-4 1.53"/>'
+};
+function ico(n, cls){ return '<svg' + (cls ? ' class="' + cls + '"' : '') + ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (I[n] || '') + '</svg>'; }
+function heartSvg(cls){ return '<svg class="heart ' + (cls || '') + '" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + I.heart + '</svg>'; }
+function vid(url, label){ return '<a class="video" href="' + url + '" target="_blank" rel="noopener">' + ico('play') + '<span>' + label + '</span></a>'; }
+
+/* Quién eres (el dato protagonista) */
+const AVATARS = [
+  { id:'like',  icon:'like',  name:'Un like',        sub:'en Instagram',         phrase:'un like en Instagram' },
+  { id:'cart',  icon:'cart',  name:'Una compra',     sub:'en Amazon',            phrase:'una compra en Amazon' },
+  { id:'pin',   icon:'pin',   name:'Una posición GPS', sub:'del coche',          phrase:'una posición GPS mientras vas en coche' },
+  { id:'watch', icon:'watch', name:'Un paso',        sub:'del reloj inteligente', phrase:'un paso contado por un reloj inteligente' }
+];
+
+/* Infografía de los apuntes: «Every minute of the day», LocaliQ (2023) */
+const MINUTE = [
+  { who:'Snaps creados en Snapchat',              v:3.5e9,  d:'3.500 millones', show:1 },
+  { who:'Vídeos vistos en TikTok',                v:625e6,  d:'625 millones',   show:1 },
+  { who:'Emails enviados',                        v:231e6,  d:'231 millones',   show:1 },
+  { who:'Personas viendo directos de Facebook',   v:44e6,   d:'44 millones',    show:1 },
+  { who:'Mensajes de texto enviados',             v:16.2e6, d:'16,2 millones',  show:1 },
+  { who:'Búsquedas en Google',                    v:6.3e6,  d:'6,3 millones',   show:1 },
+  { who:'Personas comprando online',              v:6e6,    d:'6 millones',     show:1 },
+  { who:'Vídeos vistos en YouTube',               v:3.47e6, d:'3,47 millones',  show:1 },
+  { who:'Personas activas en Facebook',           v:2.1e6,  d:'2,1 millones',   show:0 },
+  { who:'Horas de contenido vistas en Netflix',   v:452e3,  d:'452.000',        show:1 },
+  { who:'Tuits enviados en X',                    v:350e3,  d:'350.000',        show:1 },
+  { who:'Apps descargadas',                       v:174e3,  d:'174.000',        show:1 },
+  { who:'Búsquedas en Pinterest',                 v:115.7e3,d:'115.700',        show:0 },
+  { who:'Fotos y vídeos compartidos en Instagram',v:66e3,   d:'66.000',         show:1 },
+  { who:'Usuarios activos en LinkedIn',           v:20.8e3, d:'20.800',         show:0 },
+  { who:'Viajes en coche compartido',             v:12.5e3, d:'12.500',         show:0 }
+];
+
+const STATIONS = [
+/* ---------------- 1 ---------------- */
+{
+  id:'minuto', name:'Minuto 0', sub:'Cada minuto en Internet', slides:'Diap. 2 y 3', icon:'clock', warmup:true,
+  story:function(a){ return 'Acabas de nacer: eres ' + a.phrase + '. Y como tú, cada minuto nacen millones de datos.'; },
+  brief:function(){ return '' +
+    '<p class="lead">¿Sabéis cuántos datos generamos cada minuto en WhatsApp, YouTube o TikTok? Todo esto pasa en <span class="key">un solo minuto</span> en Internet:</p>' +
+    '<div class="tiles">' + MINUTE.filter(function(m){ return m.show; }).map(function(m){ return '<div class="tile"><b>' + m.d + '</b><span>' + m.who + '</span></div>'; }).join('') + '</div>' +
+    '<div class="ledboard" data-live><div class="l1">Desde que abriste esta estación…</div><div class="livecount">' +
+      '<div><span>Emails enviados</span><b data-rate="3850000">0</b></div>' +
+      '<div><span>Vídeos vistos en TikTok</span><b data-rate="10416667">0</b></div>' +
+      '<div><span>Búsquedas en Google</span><b data-rate="105000">0</b></div>' +
+    '</div></div>' +
+    '<p class="note">Fuente: infografía «Every minute of the day», LocaliQ (2023), incluida en los apuntes.</p>';
+  },
+  challenges:[ { type:'hilo', rounds:5 } ]
+},
+/* ---------------- 2 ---------------- */
+{
+  id:'5v', name:'Las 5V', sub:'Qué es el Big Data', slides:'Diap. 4 y 5', icon:'db',
+  story:function(){ return 'Eres un dato, sí. Pero ¿formas parte del Big Data? Solo si se cumplen las 5V.'; },
+  brief:function(){ return '' +
+    '<p class="lead"><span class="key">Big Data</span> son datos tan grandes, variados y rápidos que no caben ni se procesan con herramientas tradicionales.</p>' +
+    '<h3>Se necesitan estas 5V para obtener el Big Data</h3>' +
+    '<div class="vgrid">' +
+      '<div class="v"><div class="vl">Volumen</div><span>Mucho volumen: la cantidad de datos que se procesa.</span></div>' +
+      '<div class="v"><div class="vl">Velocidad</div><span>Mucha velocidad: agilidad para el uso de datos.</span></div>' +
+      '<div class="v"><div class="vl">Variedad</div><span>Gran variedad: texto, vídeo, sensores IoT, GPS.</span></div>' +
+      '<div class="v"><div class="vl">Veracidad</div><span>Necesitamos veracidad: noticias falsas frente a datos fiables.</span></div>' +
+      '<div class="v"><div class="vl">Valor</div><span>Crear valor: el resultado debe servirnos para algo.</span></div>' +
+    '</div>' +
+    '<div class="videos">' + vid('https://www.youtube.com/watch?v=1oMThuGDZwg', 'Vídeo de clase: ¿Qué es Big Data y para qué sirve?') + '</div>';
+  },
+  challenges:[
+    { type:'fill', before:'El Big Data son datos tan grandes, variados y rápidos que no caben ni se procesan con herramientas', after:'.',
+      options:['tradicionales','modernas','de pago','de dibujo'], answer:0,
+      explain:'Si una hoja de cálculo o una base de datos normal pudiera con ellos, no hablaríamos de Big Data.' },
+    { type:'match', q:'Une cada V con su significado', pairs:[
+      ['Volumen','La cantidad de datos que se procesa'],
+      ['Velocidad','Agilidad para el uso de datos'],
+      ['Variedad','Texto, vídeo, sensores IoT, GPS…'],
+      ['Veracidad','Noticias falsas frente a datos fiables'],
+      ['Valor','El resultado debe servirnos para algo'] ],
+      explain:'Las 5V del Big Data: Volumen, Velocidad, Variedad, Veracidad y Valor.' },
+    { type:'sort', q:'¿Qué V aparece en cada caso?', pick:3,
+      bins:[ {id:'vol',label:'Volumen'}, {id:'vel',label:'Velocidad'}, {id:'var',label:'Variedad'}, {id:'ver',label:'Veracidad'}, {id:'val',label:'Valor'} ],
+      items:[
+        { t:'Una app de tráfico recibe miles de posiciones GPS por segundo y te avisa del atasco al momento.', bin:'vel', why:'Hay que usar los datos con agilidad, casi al instante: Velocidad.' },
+        { t:'Una empresa analiza a la vez reseñas escritas, vídeos, datos de sensores IoT y posiciones GPS.', bin:'var', why:'Texto, vídeo, sensores y GPS mezclados: Variedad.' },
+        { t:'Antes de analizar, un periódico separa los bulos de las noticias fiables.', bin:'ver', why:'Distinguir datos falsos de datos fiables es la Veracidad.' },
+        { t:'Tras analizar sus ventas, una tienda sabe qué productos reponer y vende más.', bin:'val', why:'El resultado sirve para algo: crea Valor.' },
+        { t:'Una red social guarda cada día millones de fotos, vídeos y mensajes.', bin:'vol', why:'Una cantidad enorme de datos: Volumen.' } ] }
+  ]
+},
+/* ---------------- 3 ---------------- */
+{
+  id:'lake', name:'Data Lake', sub:'Cómo funciona', slides:'Diap. 7', icon:'waves',
+  story:function(){ return 'Viajas por la red a toda velocidad. Tu destino: el lago donde se guardan todos los datos.'; },
+  brief:function(){ return '' +
+    '<p class="lead">Cada vez que usamos el móvil, la tarjeta, el coche o incluso un reloj inteligente, <span class="key">estamos generando datos</span>.</p>' +
+    '<div class="flow">' +
+      '<div class="sources">' +
+        '<div class="src">' + ico('phone') + 'El móvil</div>' +
+        '<div class="src">' + ico('card') + 'La tarjeta</div>' +
+        '<div class="src">' + ico('car') + 'El coche</div>' +
+        '<div class="src">' + ico('watch') + 'El reloj</div>' +
+      '</div>' +
+      '<div class="arrow">' + ico('arrow') + '</div>' +
+      '<div class="lake"><b>Data Lake</b><span>Cada dato se guarda aquí</span></div>' +
+    '</div>' +
+    '<ul class="pairs">' +
+      '<li><b>Un like en Instagram</b><i>→</i><span>un dato.</span></li>' +
+      '<li><b>Una compra en Amazon</b><i>→</i><span>otro dato.</span></li>' +
+      '<li><b>El GPS cuando vamos en coche</b><i>→</i><span>dato a dato.</span></li>' +
+    '</ul>' +
+    '<p><b>Cada dato se guarda en un Data Lake</b> (lago de datos): un gran almacén donde los datos se guardan en bruto, de cualquier tipo, para analizarlos después.</p>' +
+    '<div class="defs">' +
+      '<div class="def"><b>Data Warehouse</b>Almacén de datos ya limpios y ordenados en tablas, listos para hacer informes.</div>' +
+      '<div class="def"><b>Data Lake</b>Lago de datos: lo guarda todo tal cual llega (texto, fotos, vídeos, GPS…).</div>' +
+      '<div class="def"><b>Data Lakehouse</b>Mezcla de los dos: la flexibilidad del lago con el orden del almacén.</div>' +
+    '</div>' +
+    '<div class="videos">' + vid('https://www.youtube.com/watch?v=1cKGiEy9k4U', 'Vídeo de clase: Data Warehouse, Data Lake y Data Lakehouse') + '</div>';
+  },
+  challenges:[
+    { type:'mcq', q:'Según los apuntes, ¿dónde se guarda cada dato que generamos?',
+      options:['En un Data Lake','Solo en la memoria de tu móvil','En un pendrive de la empresa','En ningún sitio: se borra al momento'], answer:0,
+      explain:'Cada like, cada compra y cada posición GPS acaban guardados en un Data Lake para analizarlos después.' },
+    { type:'mcq', q:'¿Qué caracteriza a un Data Lake?',
+      options:['Guarda los datos en bruto, de cualquier tipo, tal y como llegan','Solo admite tablas ya limpias y ordenadas','Solo puede guardar texto','Borra todos los datos cada noche'], answer:0,
+      explain:'El lago lo guarda todo tal cual llega. El que guarda datos ya limpios y ordenados en tablas es el Data Warehouse.' },
+    { type:'arcade' }
+  ]
+},
+/* ---------------- 4 ---------------- */
+{
+  id:'cluster', name:'Clúster', sub:'Cómo se almacenan y qué se hace', slides:'Diap. 8', icon:'server',
+  story:function(){ return 'En el lago eres uno entre miles de millones. Para darte sentido, os parten en trozos y os reparten entre muchos ordenadores.'; },
+  brief:function(){ return '' +
+    '<p class="lead">Una vez almacenados, hay que <span class="key">darles sentido</span>. Aquí entran tecnologías que básicamente hacen esto:</p>' +
+    '<ol class="steps">' +
+      '<li>Dividen los datos en trozos.</li>' +
+      '<li>Los mandan a muchos ordenadores a la vez.</li>' +
+      '<li>Cada ordenador procesa una parte.</li>' +
+      '<li>Luego juntan los resultados.</li>' +
+    '</ol>' +
+    '<div class="cluster" aria-hidden="true"><div class="blk">DATOS</div><div class="nodes">' +
+      '<div class="node">' + ico('server') + '</div><div class="node">' + ico('server') + '</div><div class="node">' + ico('server') + '</div><div class="node">' + ico('server') + '</div>' +
+    '</div><div class="blk res">RESULTADO</div></div>' +
+    '<p class="note">A un grupo de ordenadores que trabajan juntos se le llama <b>clúster</b>. Así trabajan herramientas como Hadoop o Spark.</p>' +
+    '<h3>Y qué se hace con ellos</h3>' +
+    '<ul class="pairs">' +
+      '<li><b>Algoritmos</b><i>→</i><span>buscan patrones.</span></li>' +
+      '<li><b>Inteligencia Artificial</b><i>→</i><span>predice comportamientos.</span></li>' +
+      '<li><b>Estadísticas</b><i>→</i><span>nos dicen qué está pasando.</span></li>' +
+    '</ul>';
+  },
+  challenges:[
+    { type:'order', q:'Ordena lo que hacen estas tecnologías con los datos',
+      steps:['Dividen los datos en trozos','Los mandan a muchos ordenadores a la vez','Cada ordenador procesa una parte','Luego juntan los resultados'],
+      explain:'Dividir, repartir, procesar a la vez y juntar. Así se termina muchísimo antes que con un solo ordenador.' },
+    { type:'match', q:'¿Qué hace cada uno con los datos?', pairs:[
+      ['Algoritmos','Buscan patrones'],
+      ['Inteligencia Artificial','Predice comportamientos'],
+      ['Estadísticas','Nos dicen qué está pasando'] ],
+      explain:'Algoritmos: patrones. IA: predicciones. Estadísticas: qué está pasando.' },
+    { type:'pick', n:1, from:[
+      { type:'tf', q:'En un clúster, cada ordenador procesa todos los datos completos.', answer:false,
+        explain:'Falso. Los datos se dividen en trozos y cada ordenador procesa solo una parte. Después se juntan los resultados.' },
+      { type:'mcq', q:'¿Para qué se reparten los datos entre muchos ordenadores a la vez?',
+        options:['Para procesarlos a la vez y terminar mucho antes','Para que ocupen menos espacio','Para que nadie pueda leerlos','Porque lo obliga la ley'], answer:0,
+        explain:'Son tantos datos que un solo ordenador tardaría demasiado. Repartidos, cada uno hace su parte al mismo tiempo.' } ] }
+  ]
+},
+/* ---------------- 5 ---------------- */
+{
+  id:'perfil', name:'Tu perfil', sub:'Lo que saben de ti', slides:'Diap. 9 a 12', icon:'user',
+  story:function(){ return 'Te juntan con otros datos tuyos. Poco a poco, la red social dibuja tu perfil.'; },
+  brief:function(){ return '' +
+    '<p class="lead">En una red social, ¿qué le proporciona a la empresa la suma de los pequeños datos?</p>' +
+    '<div class="cols">' +
+      '<div class="col"><h3>' + ico('user') + 'Datos explícitos</h3><p>Lo que tú escribes en tu perfil: nombre, edad, ubicación, estudios…</p></div>' +
+      '<div class="col"><h3>' + ico('eye') + 'Datos implícitos</h3><p class="small"><span class="key">Los más valiosos.</span></p><ul class="bullets">' +
+        '<li>A qué publicaciones das like</li><li>Cuánto tiempo pasas mirando un vídeo</li><li>Qué cuentas sigues</li><li>Con quién interactúas más</li><li>Qué hashtags buscas o usas</li><li>Desde qué dispositivo entras y en qué horarios</li></ul></div>' +
+    '</div>' +
+    '<h3>Análisis de patrones</h3>' +
+    '<ul class="pairs">' +
+      '<li><b>Siempre das like a vídeos de fútbol</b><i>→</i><span>te etiquetan como «fan del deporte».</span></li>' +
+      '<li><b>Compras ropa online</b><i>→</i><span>te ponen en el perfil de «consumidor de moda».</span></li>' +
+      '<li><b>Ves contenido en inglés</b><i>→</i><span>deducen que hablas ese idioma.</span></li>' +
+    '</ul>' +
+    '<div class="profile"><header><div class="face">' + ico('user') + '</div><b>Perfil de usuario<br>Big Data</b></header>' +
+      '<div class="pf">' + ico('heart') + 'Intereses: viajes, gastronomía</div>' +
+      '<div class="pf">' + ico('activity') + 'Nivel de actividad: alto</div>' +
+      '<div class="pf">' + ico('cart') + 'Compras: ropa, electrónica</div>' +
+      '<div class="pf">' + ico('clock') + 'Hora: noche</div>' +
+      '<div class="pf">' + ico('phone') + 'Dispositivo: smartphone</div>' +
+      '<div class="pf">' + ico('users') + 'Conexiones: 529</div>' +
+    '</div>' +
+    '<div class="videos">' + vid('https://www.youtube.com/watch?v=cojLhNcBdBU', 'Vídeo de clase: lo que unos desconocidos saben de una adolescente') + vid('https://www.youtube.com/watch?v=lA33qmkpauU', 'Vídeo de clase: ¿Sabías que…?') + '</div>';
+  },
+  challenges:[
+    { type:'sort', q:'¿Dato explícito o implícito?', pick:6, ensure:{ exp:2, imp:3 },
+      bins:[ {id:'exp',label:'Explícito',hint:'Lo escribes tú en tu perfil'}, {id:'imp',label:'Implícito',hint:'Se deduce de lo que haces'} ],
+      items:[
+        { t:'Tu nombre', bin:'exp', why:'Lo escribes tú en el perfil: explícito.' },
+        { t:'Tu edad', bin:'exp', why:'La indicas tú al registrarte: explícito.' },
+        { t:'La ciudad que pones en tu perfil', bin:'exp', why:'La escribes tú: explícito.' },
+        { t:'Los estudios que indicas en tu bio', bin:'exp', why:'Los escribes tú: explícito.' },
+        { t:'A qué publicaciones das like', bin:'imp', why:'Nadie te lo pregunta: se deduce de lo que haces. Implícito.' },
+        { t:'Cuánto tiempo pasas mirando un vídeo', bin:'imp', why:'La app lo mide sin preguntarte: implícito.' },
+        { t:'Qué cuentas sigues', bin:'imp', why:'Sale de tu comportamiento: implícito.' },
+        { t:'Con quién interactúas más', bin:'imp', why:'Se deduce de tus interacciones: implícito.' },
+        { t:'Qué hashtags buscas o usas', bin:'imp', why:'Sale de lo que haces: implícito.' },
+        { t:'A qué horas te conectas y desde qué dispositivo', bin:'imp', why:'La app lo registra sin que lo escribas: implícito.' } ] },
+    { type:'match', q:'Análisis de patrones: ¿qué etiqueta te ponen?', pairs:[
+      ['Siempre das like a vídeos de fútbol','«Fan del deporte»'],
+      ['Compras ropa online','«Consumidor de moda»'],
+      ['Ves contenido en inglés','Deducen que hablas inglés'],
+      ['Sigues cuentas de viajes y guardas fotos de playas','«Le interesan los viajes»'] ],
+      explain:'Con tus datos implícitos te colocan etiquetas y así saben qué mostrarte.' },
+    { type:'pick', n:1, from:[
+      { type:'tf', q:'Si nunca escribes nada en tu perfil, la red social no sabe nada de ti.', answer:false,
+        explain:'Falso. Los datos implícitos (tus likes, el tiempo que miras cada vídeo, tus horarios, tu dispositivo…) dicen muchísimo de ti aunque no escribas nada.' },
+      { type:'mcq', q:'Según los apuntes, ¿qué datos son los más valiosos para la empresa?',
+        options:['Los implícitos: lo que se deduce de lo que haces','Los explícitos: lo que escribes en tu perfil','Los que borras','Solo tu número de seguidores'], answer:0,
+        explain:'Los implícitos son los más valiosos: revelan tus gustos y hábitos reales, no solo lo que tú cuentas.' } ] }
+  ]
+},
+/* ---------------- 6 ---------------- */
+{
+  id:'dash', name:'Dashboard', sub:'Resultado final', slides:'Diap. 6 y 13', icon:'chart',
+  story:function(){ return 'Ya tienen tu perfil. ¿Y ahora qué? Te convierten en gráficos, dashboards… y en anuncios.'; },
+  brief:function(){ return '' +
+    '<p class="lead">Los datos solos son difíciles de entender. Por eso se convierten en:</p>' +
+    '<div class="cols">' +
+      '<div class="col"><h3>' + ico('chart') + 'Elementos interactivos</h3><p>Gráficos, mapas, informes o dashboards.</p></div>' +
+      '<div class="col"><h3>' + ico('zap') + 'Actuaciones</h3><ul class="bullets"><li>Publicidad dirigida</li><li>Recomendaciones de vídeos</li><li>Predicciones de comportamiento</li></ul></div>' +
+    '</div>' +
+    '<div class="card" data-chart></div>' +
+    '<h3>Qué obtenemos</h3>' +
+    '<ul class="pairs">' +
+      '<li><b>Netflix</b><i>→</i><span>recomendaciones personalizadas.</span></li>' +
+      '<li><b>Amazon</b><i>→</i><span>sugerencias de compra.</span></li>' +
+      '<li><b>Google Maps</b><i>→</i><span>tráfico en tiempo real.</span></li>' +
+      '<li><b>Sanidad</b><i>→</i><span>detección temprana de enfermedades.</span></li>' +
+      '<li><b>Educación</b><i>→</i><span>mira el vídeo de clase.</span></li>' +
+    '</ul>' +
+    '<div class="videos">' + vid('https://www.youtube.com/watch?v=CvsfPrQDxD4', 'Vídeo de clase: Google Maps explicado por un ingeniero') + vid('https://www.youtube.com/watch?v=uacXhStmu1Q', 'Vídeo de clase: Big Data en educación') + '</div>';
+  },
+  challenges:[
+    { type:'sort', q:'¿Elemento interactivo o actuación?', pick:6, ensure:{ vis:2, act:2 },
+      bins:[ {id:'vis',label:'Elemento interactivo',hint:'Gráficos, mapas, informes, dashboards'}, {id:'act',label:'Actuación',hint:'Algo que la empresa hace contigo'} ],
+      items:[
+        { t:'Un gráfico con las ventas de cada mes', bin:'vis', why:'Es un gráfico: convierte los datos en algo fácil de entender.' },
+        { t:'Un mapa con las zonas de más tráfico', bin:'vis', why:'Es un mapa: un elemento para entender los datos.' },
+        { t:'Un informe con los resultados del trimestre', bin:'vis', why:'Es un informe: sirve para entender los datos.' },
+        { t:'Un dashboard con indicadores en tiempo real', bin:'vis', why:'Un dashboard (panel) reúne gráficos e indicadores.' },
+        { t:'Te sale un anuncio justo de lo que buscaste ayer', bin:'act', why:'Es publicidad dirigida: una actuación.' },
+        { t:'La app te propone el siguiente vídeo', bin:'act', why:'Es una recomendación de vídeos: una actuación.' },
+        { t:'La plataforma calcula que vas a darte de baja y te ofrece un descuento', bin:'act', why:'Es una predicción de comportamiento: una actuación.' } ] },
+    { type:'match', q:'¿Qué obtiene cada uno gracias al Big Data?', pairs:[
+      ['Netflix','Recomendaciones personalizadas'],
+      ['Amazon','Sugerencias de compra'],
+      ['Google Maps','Tráfico en tiempo real'],
+      ['Sanidad','Detección temprana de enfermedades'] ],
+      explain:'Cada empresa saca un resultado distinto de los mismos principios.' },
+    { type:'pick', n:1, from:[
+      { type:'mcq', q:'¿Por qué los datos se convierten en gráficos, mapas o dashboards?',
+        options:['Porque los datos solos son difíciles de entender','Porque así ocupan menos memoria','Porque la ley obliga a publicarlos','Para que queden bonitos en redes'], answer:0,
+        explain:'Una tabla con millones de filas no se entiende. Un gráfico o un dashboard se entiende de un vistazo.' },
+      { type:'mcq', q:'¿Cómo sabe Google Maps que hay un atasco?',
+        options:['Por las posiciones GPS que envían al momento los móviles de los conductores','Porque hay una persona vigilando cada carretera','Por las noticias de la radio','Lo adivina al azar'], answer:0,
+        explain:'Es la suma de muchos datos pequeños: el GPS de cada coche, dato a dato, analizado en tiempo real.' } ] }
+  ]
+},
+/* ---------------- 7 ---------------- */
+{
+  id:'mundo', name:'Mundo real', sub:'Aplicaciones y emergencias', slides:'Diap. 15 y 16', icon:'globe',
+  story:function(){ return 'Los datos como tú no solo venden anuncios: también ayudan en hospitales, ciudades y emergencias.'; },
+  brief:function(){ return '' +
+    '<p class="lead">El Big Data ya está en todas partes. Estas son algunas aplicaciones reales:</p>' +
+    '<div class="sectors">' +
+      '<div class="sector">' + ico('film') + '<b>Entretenimiento</b><span>Algoritmos de recomendación en Netflix y Spotify que predicen tus gustos.</span></div>' +
+      '<div class="sector">' + ico('pulse') + '<b>Salud</b><span>Medicina de precisión y predicción de brotes epidémicos mediante análisis de datos.</span></div>' +
+      '<div class="sector">' + ico('truck') + '<b>Logística</b><span>Optimización de rutas en tiempo real y envío predictivo (Amazon, UPS).</span></div>' +
+      '<div class="sector">' + ico('shield') + '<b>Finanzas</b><span>Detección instantánea de fraude bancario mediante patrones de consumo.</span></div>' +
+      '<div class="sector">' + ico('city') + '<b>Smart cities</b><span>Gestión inteligente del tráfico y ahorro energético en servicios públicos.</span></div>' +
+    '</div>' +
+    '<h3>En emergencias y prevención</h3>' +
+    '<p>El Banco Mundial usa la tecnología digital y el Big Data para prepararse ante desastres y mapear riesgos. Con <b>un dron, una cámara en un coche y un ordenador</b> pueden documentar en pocos días todos los edificios de una ciudad y ver cuáles son vulnerables a un terremoto.</p>' +
+    '<div class="bigstat"><b>4–7 $</b><span>se ahorran por cada dólar invertido en prevención de riesgos.</span></div>' +
+    '<p>El servicio de bomberos de Barcelona también cuenta cómo usa mapas y datos geográficos para prevenir y actuar en emergencias.</p>' +
+    '<div class="videos">' + vid('https://www.youtube.com/watch?v=44lnxOKfCKk', 'Vídeo de clase: el Banco Mundial y los desastres naturales') + vid('https://www.youtube.com/watch?v=5bdGMbsb8-M', 'Vídeo de clase: bomberos de Barcelona') + '</div>';
+  },
+  challenges:[
+    { type:'match', q:'Une cada sector con su aplicación', pairs:[
+      ['Entretenimiento','Recomendaciones que predicen tus gustos'],
+      ['Salud','Medicina de precisión y predicción de brotes'],
+      ['Logística','Rutas en tiempo real y envío predictivo'],
+      ['Finanzas','Detección instantánea de fraude bancario'],
+      ['Smart cities','Tráfico inteligente y ahorro energético'] ],
+      explain:'Cinco sectores, una misma idea: analizar muchos datos para decidir mejor.' },
+    { type:'pick', n:2, from:[
+      { type:'mcq', q:'Según el Banco Mundial, ¿cuánto se ahorra por cada dólar invertido en prevención de riesgos?',
+        options:['Entre 4 y 7 dólares','Nada: prevenir es solo un gasto','Medio dólar','Entre 40 y 70 dólares'], answer:0,
+        explain:'Invertir en prevención compensa: se ahorran entre 4 y 7 dólares por cada dólar invertido.' },
+      { type:'mcq', ctx:'Tu banco bloquea tu tarjeta porque detecta una compra rarísima a las 4 de la mañana en otro país.', q:'¿Qué aplicación del Big Data es?',
+        options:['Finanzas: detección de fraude por patrones de consumo','Logística: rutas en tiempo real','Smart cities: ahorro energético','Entretenimiento: recomendaciones'], answer:0,
+        explain:'La compra no encaja con tu patrón de consumo habitual, así que el sistema la marca como posible fraude.' },
+      { type:'mcq', q:'¿Qué usó el sistema del Banco Mundial para documentar en pocos días los edificios de una ciudad?',
+        options:['Un dron, una cámara en un coche y un ordenador','Miles de inspectores a pie','Un satélite propio','Encuestas a los vecinos'], answer:0,
+        explain:'Con muy pocos medios se revisa toda una ciudad y se ve qué edificios son vulnerables a un terremoto.' } ] }
+  ]
+},
+/* ---------------- 8 ---------------- */
+{
+  id:'fin', name:'Conclusión', sub:'Jefe final', slides:'Diap. 14', icon:'flag', boss:true,
+  story:function(){ return 'Última estación. Al final del andén te espera el Algoritmo Sesgado.'; },
+  brief:function(){ return '' +
+    '<p class="quote">El Big Data no es solo tener <span class="key">muchos datos</span>, sino <span class="key">usarlos con inteligencia</span>.</p>' +
+    '<div class="cols">' +
+      '<div class="col"><h3>' + ico('check') + 'Ventajas</h3><ul class="bullets"><li>Mejores servicios</li><li>Recomendaciones personalizadas</li><li>Detección de fraudes</li><li>Avances en salud</li></ul></div>' +
+      '<div class="col"><h3>' + ico('alert') + 'Riesgos</h3><ul class="bullets"><li>Privacidad</li><li>Manipulación de la información</li><li>Sesgos en los algoritmos</li></ul></div>' +
+    '</div>' +
+    '<div class="boss" data-bosspreview></div>';
+  },
+  challenges:[
+    { type:'sort', q:'¿Ventaja o riesgo?', pick:6, ensure:{ pro:3, con:3 },
+      bins:[ {id:'pro',label:'Ventaja',hint:'Lo bueno de usar los datos'}, {id:'con',label:'Riesgo',hint:'Lo que hay que vigilar'} ],
+      items:[
+        { t:'El banco frena un cargo fraudulento en tu tarjeta', bin:'pro', why:'Detección de fraudes: una ventaja.' },
+        { t:'Detectan una enfermedad antes gracias a miles de historiales', bin:'pro', why:'Avances en salud: una ventaja.' },
+        { t:'Te recomiendan una serie que te encanta', bin:'pro', why:'Recomendaciones personalizadas: una ventaja.' },
+        { t:'Tu ciudad ajusta los horarios del autobús según cuánta gente viaja', bin:'pro', why:'Mejores servicios: una ventaja.' },
+        { t:'Una app sabe dónde vives aunque nunca se lo dijiste', bin:'con', why:'Privacidad: un riesgo.' },
+        { t:'Solo te enseñan noticias que refuerzan lo que ya piensas', bin:'con', why:'Manipulación de la información: un riesgo.' },
+        { t:'Un programa de selección de personal descarta a más mujeres porque aprendió de datos antiguos', bin:'con', why:'Sesgos en los algoritmos: un riesgo.' } ] },
+    { type:'boss', n:8 }
+  ]
+}
+];
+
+/* Preguntas del jefe final: repaso de todas las estaciones */
+const BOSS_KEY = { type:'mcq', key:true, q:'Golpe final. El Big Data no es solo tener muchos datos, sino…',
+  options:['usarlos con inteligencia','guardarlos para siempre','venderlos al mejor postor','tenerlos todos en la nube'], answer:0,
+  explain:'Es la idea clave de la unidad: el Big Data consiste en usar los datos con inteligencia.' };
+const BOSS = [
+  { type:'tf', q:'La Veracidad consiste en distinguir las noticias falsas de los datos fiables.', answer:true, explain:'Verdadero. Sin datos fiables, el análisis no sirve.' },
+  { type:'tf', q:'Los datos explícitos son los más valiosos para la empresa.', answer:false, explain:'Falso. Los más valiosos son los implícitos: lo que haces, no lo que escribes.' },
+  { type:'tf', q:'Cada ordenador del clúster procesa solo una parte de los datos.', answer:true, explain:'Verdadero. Se dividen en trozos, cada ordenador procesa uno y luego se juntan los resultados.' },
+  { type:'tf', q:'Cada dato que generamos se guarda en un Data Lake.', answer:true, explain:'Verdadero. El like, la compra o la posición GPS acaban en el lago de datos.' },
+  { type:'tf', q:'Si no escribes nada en tu perfil, la red social no sabe nada de ti.', answer:false, explain:'Falso. Tus likes, tus horarios y el tiempo que miras cada vídeo dicen mucho de ti.' },
+  { type:'tf', q:'Los sesgos en los algoritmos son una ventaja del Big Data.', answer:false, explain:'Falso. Son un riesgo, junto con la privacidad y la manipulación de la información.' },
+  { type:'tf', q:'Google Maps usa Big Data para mostrar el tráfico en tiempo real.', answer:true, explain:'Verdadero. Suma el GPS de miles de coches, dato a dato.' },
+  { type:'tf', q:'Si una hoja de cálculo normal puede con tus datos, eso ya es Big Data.', answer:false, explain:'Falso. Big Data son datos que no caben ni se procesan con herramientas tradicionales.' },
+  { type:'tf', q:'Para hablar de Big Data basta con tener muchísimos datos.', answer:false, explain:'Falso. El volumen es solo una de las 5V: también hacen falta velocidad, variedad, veracidad y valor.' },
+  { type:'tf', q:'El último paso del procesamiento es dividir los datos en trozos.', answer:false, explain:'Falso. Dividir es el primer paso. El último es juntar los resultados.' },
+  { type:'tf', q:'Las estadísticas nos dicen qué está pasando.', answer:true, explain:'Verdadero. Los algoritmos buscan patrones y la IA predice comportamientos.' },
+  { type:'tf', q:'La publicidad dirigida es una actuación que sale del análisis de datos.', answer:true, explain:'Verdadero, igual que las recomendaciones de vídeos y las predicciones de comportamiento.' },
+  { type:'mcq', q:'«El resultado debe servirnos para algo» es la V de…', options:['Valor','Volumen','Velocidad','Variedad'], answer:0, explain:'Valor: si el análisis no sirve para nada, no hay Big Data.' },
+  { type:'mcq', q:'Texto, vídeo, sensores IoT y GPS son un ejemplo de…', options:['Variedad','Veracidad','Valor','Velocidad'], answer:0, explain:'Variedad: datos de muchos tipos distintos.' },
+  { type:'mcq', q:'Según los apuntes, la Inteligencia Artificial…', options:['predice comportamientos','divide los datos en trozos','guarda los datos en el lago','escribe tu perfil por ti'], answer:0, explain:'La IA predice comportamientos. Los algoritmos buscan patrones y las estadísticas dicen qué pasa.' },
+  { type:'mcq', q:'Cuánto tiempo miras un vídeo es un dato…', options:['implícito','explícito','falso','inventado'], answer:0, explain:'Implícito: no lo escribes tú, se deduce de lo que haces.' },
+  { type:'mcq', q:'¿Qué le aporta el Big Data a Amazon?', options:['Sugerencias de compra','Tráfico en tiempo real','Detección temprana de enfermedades','Nada'], answer:0, explain:'Amazon usa tus datos para sugerirte qué comprar.' },
+  { type:'mcq', q:'¿Cuál de estos es un RIESGO del Big Data?', options:['La falta de privacidad','La detección de fraudes','Los avances en salud','Los mejores servicios'], answer:0, explain:'Los riesgos son la privacidad, la manipulación de la información y los sesgos en los algoritmos.' }
+];
+
+/* Bonus arcade: datos fiables y bulos */
+const DROPS_OK = [
+  { icon:'like', t:'Like' }, { icon:'cart', t:'Compra' }, { icon:'pin', t:'GPS' }, { icon:'watch', t:'Pasos' },
+  { icon:'search', t:'Búsqueda' }, { icon:'play', t:'Vídeo visto' }, { icon:'msg', t:'Mensaje' }, { icon:'photo', t:'Foto' }, { icon:'card', t:'Pago' }
+];
+const DROPS_FAKE = [ { icon:'news', t:'BULO' }, { icon:'alert', t:'Noticia falsa' }, { icon:'x', t:'Dato inventado' } ];
+
+/* Resultado de aprendizaje de la unidad (diap. 1) */
+const RA = {
+  title:'RA5 · Evalúa la importancia de los datos, así como su protección en una economía digital globalizada, definiendo sistemas de seguridad y ciberseguridad tanto a nivel de equipo/sistema como globales.',
+  ce:[
+    'Se ha establecido la diferencia entre «dato» e «información».',
+    'Se ha descrito el ciclo de vida del dato.',
+    'Se ha identificado la relación entre big data, análisis de datos, machine/deep learning e inteligencia artificial.',
+    'Se han descrito las características que definen big data.',
+    'Se han descrito las etapas típicas de la ciencia de datos y su relación en el proceso.',
+    'Se han descrito los procedimientos de almacenaje de datos en la nube.',
+    'Se ha descrito la importancia del cloud computing.',
+    'Se han identificado los principales objetivos de la ciencia de datos en las diferentes empresas.',
+    'Se ha valorado la importancia de la seguridad y su regulación en relación con los datos.'
+  ]
+};
+
+/* =========================================================
+   MOTOR DEL JUEGO
+   ========================================================= */
+(function(){
+'use strict';
+var MAX_LIVES = 5;
+var view = document.getElementById('view');
+var hud = document.getElementById('hud');
+var S = null;             // estado de la partida
+var cleanup = [];         // se ejecuta al cambiar de pantalla
+var notesCharged = false; // apuntes consultados en el reto actual
+
+/* ---------- utilidades ---------- */
+function $(s, el){ return (el || document).querySelector(s); }
+function $$(s, el){ return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
+function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+function fmt(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function pad(n){ return (n < 10 ? '0' : '') + n; }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function reduced(){ return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+
+var store = {
+  get: function(k){ try { var v = localStorage.getItem('viajeDato.' + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  set: function(k, v){ try { localStorage.setItem('viajeDato.' + k, JSON.stringify(v)); } catch (e) {} },
+  del: function(k){ try { localStorage.removeItem('viajeDato.' + k); } catch (e) {} }
+};
+
+/* ---------- sonido (sintetizado, sin archivos) ---------- */
+var muted = store.get('muted') === true;
+var actx = null;
+function ac(){
+  if (muted) return null;
+  try {
+    if (!actx){ var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; actx = new C(); }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  } catch (e) { return null; }
+}
+function tone(f, d, type, delay, vol){
+  var c = ac(); if (!c) return;
+  try {
+    var t = c.currentTime + (delay || 0), o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.16, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + 0.05);
+  } catch (e) {}
+}
+var sfx = {
+  ok:    function(){ tone(660, .12, 'triangle'); tone(990, .2, 'triangle', .09); },
+  bad:   function(){ tone(190, .22, 'sawtooth', 0, .1); tone(140, .3, 'sawtooth', .1, .09); },
+  click: function(){ tone(540, .05, 'square', 0, .04); },
+  chime: function(){ tone(659, .5, 'sine', 0, .15); tone(523, .75, 'sine', .38, .15); },
+  win:   function(){ [523, 659, 784, 1047].forEach(function(f, i){ tone(f, .22, 'triangle', i * .11, .14); }); },
+  big:   function(){ [392, 523, 659, 784, 1047, 1319].forEach(function(f, i){ tone(f, .32, 'triangle', i * .1, .13); }); },
+  lose:  function(){ [392, 330, 262, 196].forEach(function(f, i){ tone(f, .34, 'sawtooth', i * .16, .08); }); },
+  grab:  function(){ tone(880, .07, 'triangle', 0, .09); },
+  fake:  function(){ tone(150, .18, 'square', 0, .07); },
+  hit:   function(){ tone(220, .08, 'square', 0, .1); tone(880, .16, 'triangle', .05, .12); },
+  life:  function(){ tone(784, .12, 'triangle'); tone(1175, .28, 'triangle', .1); }
+};
+function soundIcon(){
+  $$('#soundBtn,[data-sound]').forEach(function(b){
+    b.innerHTML = ico(muted ? 'volOff' : 'volOn');
+    b.setAttribute('aria-label', muted ? 'Activar el sonido' : 'Silenciar el sonido');
+    b.title = muted ? 'Activar el sonido' : 'Silenciar el sonido';
+  });
+}
+function toggleSound(){ muted = !muted; store.set('muted', muted); soundIcon(); if (!muted) sfx.click(); }
+document.getElementById('soundBtn').addEventListener('click', toggleSound);
+
+/* ---------- pantalla ---------- */
+function setView(html, opts){
+  opts = opts || {};
+  cleanup.forEach(function(f){ try { f(); } catch (e) {} });
+  cleanup = [];
+  closeDrawer();
+  var t = $('.toast'); if (t) t.remove();
+  view.innerHTML = html;
+  hud.hidden = !opts.hud;
+  if (opts.hud && S) updateHUD();
+  soundIcon();
+  $$('[data-sound]', view).forEach(function(b){ b.onclick = toggleSound; });
+  startLive(view); drawCharts(view); fillBossPreview(view);
+  window.scrollTo(0, 0);
+  try { view.focus({ preventScroll: true }); } catch (e) {}
+}
+function say(txt){ var a = $('#announce'); a.textContent = ''; setTimeout(function(){ a.textContent = txt; }, 40); }
+function flash(){ if (reduced()) return; var f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+function shake(el){ if (!el || reduced()) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+var toastTimer = null;
+function toast(msg, kind, ms){
+  var old = $('.toast'); if (old) old.remove();
+  var t = document.createElement('div');
+  t.className = 'toast' + (kind ? ' ' + kind : '');
+  t.setAttribute('role', 'status');
+  t.innerHTML = msg;
+  document.body.appendChild(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.remove(); }, ms || 2600);
+}
+
+/* ---------- HUD ---------- */
+function mult(){ return S.streak >= 6 ? 3 : S.streak >= 3 ? 2 : 1; }
+function updateHUD(anim){
+  var h = '';
+  for (var i = 0; i < MAX_LIVES; i++){
+    var cls = i >= S.lives ? 'is-lost' : '';
+    if (anim === 'lost' && i === S.lives) cls += ' is-breaking';
+    if (anim === 'gain' && i === S.lives - 1) cls += ' is-gained';
+    h += heartSvg(cls);
+  }
+  var lv = $('#lives'); lv.innerHTML = h; lv.setAttribute('aria-label', 'Vidas: ' + S.lives + ' de ' + MAX_LIVES);
+  var st = STATIONS[S.st];
+  $('#led').textContent = st ? ('E' + (S.st + 1) + ' · ' + st.name) : 'Fin de trayecto';
+  $('#scoreNum').textContent = fmt(S.score);
+  $('#streak').textContent = S.streak >= 3 ? ('Racha x' + mult()) : '';
+  var strip = '';
+  for (var k = 0; k < STATIONS.length; k++){
+    strip += '<i class="' + (k < S.st ? 'done' : k === S.st ? 'now' : '') + '"></i>' + (k < STATIONS.length - 1 ? '<b></b>' : '');
+  }
+  $('#strip').innerHTML = strip;
+}
+
+/* ---------- puntuación y vidas ---------- */
+function good(base){
+  S.streak++; S.correct++; S.total++;
+  var p = Math.round((base || 100) * mult());
+  S.score += p;
+  sfx.ok(); updateHUD();
+  return p;
+}
+function bad(entry){
+  var st = STATIONS[S.st];
+  S.streak = 0; S.total++;
+  sfx.bad(); flash();
+  if (st.warmup){ updateHUD(); return false; }
+  S.lives = Math.max(0, S.lives - 1);
+  S.stMistakes++;
+  if (entry) S.mistakes.push({ st: st.name, q: entry.q, a: entry.a });
+  updateHUD('lost'); save();
+  say(S.lives ? ('Pierdes una vida. Te quedan ' + S.lives + '.') : 'Te has quedado sin vidas.');
+  return S.lives <= 0;
+}
+function gainLife(){
+  if (S.lives >= MAX_LIVES) return false;
+  S.lives++; updateHUD('gain'); sfx.life(); save();
+  return true;
+}
+
+/* ---------- guardado ---------- */
+function snapshot(){
+  return S ? { name: S.name, avatar: S.avatar, lives: S.lives, score: S.score, st: S.st, mistakes: S.mistakes, correct: S.correct, total: S.total, id: S.id, started: S.started } : null;
+}
+function save(){ if (S && S.lives > 0 && S.st < STATIONS.length) store.set('save', snapshot()); }
+function clearSave(){ store.del('save'); }
+function makeId(){ var c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = ''; for (var i = 0; i < 8; i++) s += c[Math.floor(Math.random() * c.length)]; return s.slice(0, 4) + '-' + s.slice(4); }
+function avatar(){ for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i].id === S.avatar) return AVATARS[i]; return AVATARS[0]; }
+function newGame(name, av){
+  S = { name: name || 'Viajero/a', avatar: av || 'like', lives: MAX_LIVES, score: 0, streak: 0, st: 0, ci: 0, plan: null, mistakes: [], correct: 0, total: 0, stMistakes: 0, id: makeId(), started: Date.now() };
+  save(); goMap(true);
+}
+function resume(d){
+  S = { name: d.name || 'Viajero/a', avatar: d.avatar || 'like', lives: Math.max(1, Math.min(MAX_LIVES, d.lives || MAX_LIVES)), score: d.score || 0, streak: 0, st: Math.max(0, Math.min(STATIONS.length - 1, d.st || 0)), ci: 0, plan: null, mistakes: d.mistakes || [], correct: d.correct || 0, total: d.total || 0, stMistakes: 0, id: d.id || makeId(), started: d.started || Date.now() };
+  goMap(true);
+}
+
+/* ---------- inicio ---------- */
+function rule(icon, title, text){ return '<div class="rule">' + ico(icon) + '<div><b>' + title + '</b><span>' + text + '</span></div></div>'; }
+function renderStart(){
+  var saved = store.get('save'), best = store.get('best');
+  if (saved && !(saved.lives > 0 && saved.st < STATIONS.length)) { clearSave(); saved = null; }
+  var av = (saved && saved.avatar) || store.get('avatar') || 'like';
+  var dots = '';
+  for (var k = 0; k < STATIONS.length; k++) dots += '<i style="left:calc(' + (k / (STATIONS.length - 1)) + ' * (100% - 20px))"></i>';
+  var html = '<section class="hero fade-in">' +
+    '<div class="row between"><span class="eyebrow">UT5 · Evaluación de datos · Big Data</span><button class="iconbtn" type="button" data-sound></button></div>' +
+    '<h1 class="title-big"><span>El viaje</span><span>del dato</span></h1>' +
+    '<div class="title-line" aria-hidden="true">' + dots + '<span class="packet"></span></div>' +
+    '<p class="lead">Cada minuto generamos millones de datos. Uno de ellos eres tú. Recorre las 8 estaciones de la Línea UT5, descubre qué hacen contigo y derrota al jefe final.</p>' +
+    '<div class="rules">' +
+      rule('flag', '8 estaciones', 'Cada una con sus apuntes y sus retos.') +
+      rule('heart', '5 vidas', 'Cada error cuesta una. Sin vidas, fin del trayecto.') +
+      rule('zap', 'Rachas', '3 aciertos seguidos: puntos x2. Con 6: x3.') +
+      rule('spark', 'Estación perfecta', 'Si no fallas nada, recuperas una vida.') +
+    '</div>' +
+    '<div class="card stack">' +
+      '<div class="field"><label for="pname">Tu nombre (saldrá en el billete final)</label><input class="input" id="pname" maxlength="28" autocomplete="off" placeholder="Escribe tu nombre" value="' + esc((saved && saved.name) || store.get('name') || '') + '"></div>' +
+      '<div class="field"><span style="font-weight:800" id="avl">¿Qué dato quieres ser?</span><div class="avatars" role="group" aria-labelledby="avl">' +
+        AVATARS.map(function(a){ return '<button type="button" class="avatar" data-av="' + a.id + '" aria-pressed="' + (a.id === av) + '"><span class="dot">' + ico(a.icon) + '</span><span><b>' + a.name + '</b><span>' + a.sub + '</span></span></button>'; }).join('') +
+      '</div></div>' +
+      '<div class="actions">' +
+        (saved ? '<button class="btn btn-primary" type="button" data-primary id="bCont">Continuar en la estación ' + (saved.st + 1) + ' ' + ico('arrow') + '</button><button class="btn btn-ghost" type="button" id="bNew">Nueva partida</button>'
+               : '<button class="btn btn-primary" type="button" data-primary id="bNew">Subir al tren ' + ico('arrow') + '</button>') +
+        '<button class="btn btn-ghost" type="button" id="bNotes">' + ico('book') + 'Repasar los apuntes</button>' +
+      '</div>' +
+      (saved ? '<p class="best">Partida guardada: estación ' + (saved.st + 1) + ' de ' + STATIONS.length + ', ' + saved.lives + ' vidas, ' + fmt(saved.score) + ' puntos.</p>' : '') +
+      (best ? '<p class="best">Mejor billete en este navegador: <b>' + fmt(best.score) + ' puntos</b> (' + esc(best.name) + ')</p>' : '') +
+    '</div></section>';
+  setView(html);
+  $$('.avatar', view).forEach(function(b){ b.onclick = function(){ av = b.dataset.av; $$('.avatar', view).forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); }); sfx.click(); }; });
+  function nameVal(){ var n = $('#pname').value.trim().replace(/\s+/g, ' '); store.set('name', n); store.set('avatar', av); return n; }
+  $('#bNew').onclick = function(){ var n = nameVal(); clearSave(); newGame(n, av); };
+  if (saved) $('#bCont').onclick = function(){ var n = nameVal(); if (n) saved.name = n; saved.avatar = av; resume(saved); };
+  $('#bNotes').onclick = renderNotes;
+}
+
+/* ---------- mapa de la línea ---------- */
+function goMap(first){
+  var st = STATIONS[S.st], a = avatar();
+  var list = STATIONS.map(function(s, k){
+    var cls = k < S.st ? 'done' : k === S.st ? 'now' : 'next';
+    if (s.boss) cls += ' is-boss';
+    return '<li class="' + cls + '"><span class="stop"></span><span class="sname"><b>' + s.name + '</b><span>' + s.sub + '</span></span></li>';
+  }).join('');
+  var html = '<section class="map-wrap fade-in">' +
+    '<div class="stack">' +
+      '<div class="ledboard"><div class="l1">' + (S.st === 0 ? 'Primera estación' : S.st === STATIONS.length - 1 ? 'Última estación' : 'Próxima estación') + '</div><div class="l2">' + st.name + '</div></div>' +
+      '<p class="lead">' + st.story(a) + '</p>' +
+      '<div class="row"><span class="chip">' + ico('book') + 'Apuntes: ' + st.slides + '</span>' +
+        (st.warmup ? '<span class="chip warm">Calentamiento: aquí no pierdes vidas</span>' : '') +
+        (st.boss ? '<span class="chip warm">Jefe final</span>' : '') + '</div>' +
+      '<div class="actions"><button class="btn btn-primary" type="button" data-primary id="bEnter">Entrar en la estación ' + ico('arrow') + '</button></div>' +
+    '</div>' +
+    '<div class="card" style="position:relative"><ol class="map" id="map">' + list + '</ol><div class="rider" id="rider" aria-hidden="true">' + ico(a.icon) + '</div></div>' +
+  '</section>';
+  setView(html, { hud: true });
+  var map = $('#map'), rider = $('#rider');
+  function place(k, animate){
+    var li = map.children[k];
+    rider.style.left = (map.offsetLeft + 24 - 19) + 'px';
+    if (!animate) rider.style.transition = 'none';
+    rider.style.top = (map.offsetTop + li.offsetTop + li.offsetHeight / 2 - 19) + 'px';
+    if (!animate){ void rider.offsetWidth; rider.style.transition = ''; }
+  }
+  place(first ? S.st : Math.max(0, S.st - 1), false);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ place(S.st, true); }); });
+  function onResize(){ place(S.st, false); }
+  window.addEventListener('resize', onResize);
+  cleanup.push(function(){ window.removeEventListener('resize', onResize); });
+  sfx.chime();
+  say('Próxima estación: ' + st.name);
+  $('#bEnter').onclick = function(){ sfx.click(); goBrief(); };
+}
+
+/* ---------- apuntes de la estación ---------- */
+function buildPlan(st){
+  var out = [];
+  st.challenges.forEach(function(c){
+    if (c.type === 'pick') shuffle(c.from).slice(0, c.n).forEach(function(x){ out.push(prep(x)); });
+    else out.push(prep(c));
+  });
+  return out;
+}
+function prep(c){
+  var x = clone(c);
+  if (x.type === 'sort'){
+    var items = x.items;
+    if (x.pick && x.pick < items.length){
+      var chosen = [];
+      if (x.ensure) Object.keys(x.ensure).forEach(function(b){
+        chosen = chosen.concat(shuffle(items.filter(function(i){ return i.bin === b; })).slice(0, x.ensure[b]));
+      });
+      var rest = shuffle(items.filter(function(i){ return chosen.indexOf(i) < 0; }));
+      items = chosen.concat(rest.slice(0, x.pick - chosen.length));
+    }
+    x.items = shuffle(items);
+  }
+  return x;
+}
+function goBrief(){
+  var st = STATIONS[S.st];
+  S.ci = 0; S.plan = buildPlan(st); S.stMistakes = 0; save();
+  var n = S.plan.length;
+  var html = '<section class="stack fade-in">' +
+    '<div class="brief-head"><span class="roundel">' + (S.st + 1) + '</span><div><div class="eyebrow">Estación ' + (S.st + 1) + ' · ' + st.name + ' · ' + st.slides + '</div><h2>' + st.sub + '</h2></div></div>' +
+    '<div class="card brief stack">' + st.brief() + '</div>' +
+    '<div class="actions"><button class="btn btn-primary" type="button" data-primary id="bGo">' + (st.warmup ? '¡A calentar!' : '¡Empezar los retos!') + ' ' + ico('arrow') + '</button></div>' +
+    '<p class="note">' + (st.warmup ? 'Un juego rápido para arrancar: aquí no se pierden vidas.' : (n === 1 ? 'Te espera 1 reto.' : 'Te esperan ' + n + ' retos.') + ' Durante los retos puedes volver a mirar estos apuntes, pero cuesta 100 puntos.') + '</p>' +
+  '</section>';
+  setView(html, { hud: true });
+  $('#bGo').onclick = function(){ sfx.click(); runChallenge(); };
+}
+function openStationNotes(){
+  if (!notesCharged){ notesCharged = true; S.score = Math.max(0, S.score - 100); S.streak = 0; updateHUD(); }
+  var st = STATIONS[S.st];
+  var d = document.createElement('div');
+  d.className = 'drawer'; d.id = 'drawer';
+  d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true'); d.setAttribute('aria-label', 'Apuntes de la estación');
+  d.innerHTML = '<div class="sheet stack"><div class="row between"><div><div class="eyebrow">Apuntes · ' + st.slides + '</div><h2 class="display" style="font-size:1.4rem">' + st.sub + '</h2></div><button class="btn btn-primary" type="button" id="bCloseN">Volver al reto</button></div>' +
+    '<p class="note">Consultar los apuntes te ha costado 100 puntos y la racha. Tus vidas siguen igual.</p>' +
+    '<div class="brief stack">' + st.brief() + '</div></div>';
+  document.body.appendChild(d);
+  startLive(d); drawCharts(d); fillBossPreview(d);
+  d.addEventListener('click', function(e){ if (e.target === d) closeDrawer(); });
+  $('#bCloseN').onclick = closeDrawer;
+  $('#bCloseN').focus();
+}
+function closeDrawer(){ var d = $('#drawer'); if (d) d.remove(); }
+
+/* contador en vivo (estación 1) */
+function startLive(root){
+  var box = root.querySelector('[data-live]'); if (!box) return;
+  var els = $$('[data-rate]', box), t0 = performance.now(), raf = 0, alive = true;
+  function tick(){ if (!alive || !box.isConnected) return; var s = (performance.now() - t0) / 1000; els.forEach(function(e){ e.textContent = fmt(s * +e.dataset.rate); }); raf = requestAnimationFrame(tick); }
+  tick();
+  cleanup.push(function(){ alive = false; cancelAnimationFrame(raf); });
+}
+/* gráfico de barras con los datos del Minuto 0 */
+function drawCharts(root){
+  $$('[data-chart]', root).forEach(function(el){
+    var data = [ ['Vídeos vistos en TikTok', 625, '625'], ['Emails enviados', 231, '231'], ['Personas viendo directos de Facebook', 44, '44'], ['Mensajes de texto', 16.2, '16,2'], ['Búsquedas en Google', 6.3, '6,3'] ];
+    el.innerHTML = '<figure class="hbar"><figcaption>Un minuto en Internet, en millones</figcaption>' +
+      data.map(function(d){ return '<div class="hrow" title="' + d[0] + ': ' + d[2] + ' millones por minuto"><span class="hl">' + d[0] + '</span><span class="ht"><i style="width:calc((100% - 3.2em) * ' + (d[1] / 625).toFixed(4) + ')"></i><b>' + d[2] + '</b></span></div>'; }).join('') +
+      '</figure><p class="note">Son los datos del Minuto 0 convertidos en gráfico: de un vistazo se ve que TikTok arrasa. Fuente: LocaliQ (2023).</p>';
+  });
+}
+function eyeSVG(){
+  return '<svg class="eye" viewBox="0 0 80 80" aria-hidden="true"><path d="M6 42C18 20 62 20 74 42C62 64 18 64 6 42Z" fill="#F4EEE2"/><circle cx="40" cy="42" r="15" fill="#D2362F"/><circle class="pupil" cx="40" cy="42" r="7" fill="#15120C"/><circle cx="45" cy="37" r="3" fill="#FFFFFF" opacity=".85"/><path d="M9 20 26 28M71 20 54 28" stroke="#FFB21E" stroke-width="5" stroke-linecap="round"/></svg>';
+}
+function fillBossPreview(root){
+  $$('[data-bosspreview]', root).forEach(function(el){
+    el.innerHTML = eyeSVG() + '<div><div class="bn">El Algoritmo Sesgado</div><p class="small" style="opacity:.85;margin-top:4px">Te espera al final de esta estación. Mezcla preguntas de todas las estaciones: 15 segundos por pregunta y sin apuntes. Necesitas 8 aciertos para derrotarlo.</p></div>';
+  });
+}
+
+/* ---------- repaso de apuntes (sin jugar) ---------- */
+function renderNotes(){
+  var html = '<section class="stack fade-in">' +
+    '<div class="row between"><button class="btn btn-ghost" type="button" id="bBack">' + ico('back') + 'Volver</button><button class="iconbtn" type="button" data-sound></button></div>' +
+    '<div><div class="eyebrow">UT5 · Evaluación de datos</div><h1 class="display" style="font-size:clamp(1.8rem,6vw,2.6rem)">Apuntes de Big Data</h1></div>' +
+    '<details class="ra"><summary>Resultado de aprendizaje y criterios de evaluación</summary><p style="margin-top:8px">' + RA.title + '</p><ol type="a">' + RA.ce.map(function(c){ return '<li>' + c + '</li>'; }).join('') + '</ol></details>' +
+    STATIONS.map(function(st, k){
+      return '<article class="notes-sec"><div class="brief-head"><span class="roundel">' + (k + 1) + '</span><div><div class="eyebrow">Estación ' + st.name + ' · ' + st.slides + '</div><h2>' + st.sub + '</h2></div></div><div class="card brief stack">' + st.brief() + '</div></article>';
+    }).join('') +
+    '<div class="actions"><button class="btn btn-primary" type="button" id="bPlay">Ir a jugar ' + ico('arrow') + '</button></div>' +
+  '</section>';
+  setView(html);
+  $('#bBack').onclick = renderStart;
+  $('#bPlay').onclick = renderStart;
+}
+
+/* ---------- final de estación ---------- */
+function stationDone(){
+  var st = STATIONS[S.st], perfect = S.stMistakes === 0 && !st.warmup, bonus = '';
+  if (perfect){
+    if (gainLife()) bonus = 'Estación perfecta: recuperas una vida.';
+    else { S.score += 200; bonus = 'Estación perfecta: +200 puntos (ya tenías todas las vidas).'; }
+  }
+  if (S.st === STATIONS.length - 1) return victory();
+  S.st++; save();
+  setView('<section class="stack fade-in">' +
+    '<div class="ledboard"><div class="l1">Estación completada</div><div class="l2">' + st.name + ' ✓</div></div>' +
+    '<div class="statrow">' + stat(fmt(S.score), 'Puntos') + stat(S.lives + ' de ' + MAX_LIVES, 'Vidas') + stat(st.warmup ? '—' : String(S.stMistakes), 'Fallos aquí') + '</div>' +
+    (bonus ? '<div class="feedback ok"><div class="ft">' + ico('spark') + '<span>' + bonus + '</span></div></div>' : '') +
+    '<div class="actions"><button class="btn btn-primary" type="button" data-primary id="bOn">Siguiente estación: ' + STATIONS[S.st].name + ' ' + ico('arrow') + '</button></div>' +
+  '</section>', { hud: true });
+  sfx.win();
+  $('#bOn').onclick = function(){ goMap(false); };
+}
+function stat(v, l){ return '<div class="stat"><b>' + v + '</b><span>' + l + '</span></div>'; }
+function pct(){ return S.total ? Math.round(S.correct / S.total * 100) : 0; }
+function reviewHTML(){
+  if (!S.mistakes.length) return '';
+  var seen = {}, list = [];
+  S.mistakes.forEach(function(m){ var k = m.q + '|' + m.a; if (seen[k]) seen[k].n++; else { seen[k] = { m: m, n: 1 }; list.push(seen[k]); } });
+  return '<h3 style="margin-top:8px">Para repasar</h3><ul class="review">' + list.map(function(x){
+    var m = x.m;
+    return '<li><div class="rs">' + esc(m.st) + (x.n > 1 ? ' · ' + x.n + ' fallos' : '') + '</div><div class="rq">' + esc(m.q) + '</div><div class="ra">Respuesta correcta: <b>' + esc(m.a) + '</b></div></li>';
+  }).join('') + '</ul>';
+}
+
+/* ---------- fin de la partida ---------- */
+function gameOver(){
+  clearSave(); sfx.lose();
+  var st = STATIONS[S.st];
+  setView('<section class="stack fade-in">' +
+    '<div class="ledboard"><div class="l1">Fin de trayecto</div><div class="l2">Sin vidas en ' + st.name + '</div></div>' +
+    '<p class="lead">Te has quedado sin vidas en la estación ' + (S.st + 1) + ' de ' + STATIONS.length + '. Repasa lo que has fallado y vuelve a intentarlo: las preguntas cambian en cada partida.</p>' +
+    '<div class="statrow">' + stat(fmt(S.score), 'Puntos') + stat(S.st + ' de ' + STATIONS.length, 'Estaciones superadas') + stat(pct() + '%', 'Aciertos') + '</div>' +
+    '<div class="actions"><button class="btn btn-primary" type="button" data-primary id="bRetry">' + ico('retry') + 'Volver a intentarlo</button><button class="btn btn-ghost" type="button" id="bNotes">' + ico('book') + 'Repasar los apuntes</button></div>' +
+    reviewHTML() +
+  '</section>', { hud: true });
+  $('#bRetry').onclick = function(){ newGame(S.name, S.avatar); };
+  $('#bNotes').onclick = renderNotes;
+}
+function tk(l, v, cls){ return '<div' + (cls ? ' class="' + cls + '"' : '') + '><span>' + l + '</span><b>' + v + '</b></div>'; }
+function victory(){
+  var lifeBonus = S.lives * 150;
+  S.score += lifeBonus;
+  clearSave();
+  var acc = pct();
+  var rank = acc >= 95 ? 'Leyenda del Big Data' : acc >= 85 ? 'Analista sénior' : acc >= 70 ? 'Analista junior' : 'Aprendiz de datos';
+  var best = store.get('best'), isBest = !best || S.score > best.score;
+  if (isBest) store.set('best', { score: S.score, name: S.name, date: Date.now() });
+  var d = new Date(), date = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+  S.st = STATIONS.length;
+  setView('<section class="stack fade-in">' +
+    '<div class="ledboard"><div class="l1">Fin de trayecto</div><div class="l2">Línea UT5 completada</div></div>' +
+    '<p class="lead">Has derrotado al Algoritmo Sesgado y has recorrido la vida entera de un dato: desde que nace hasta que se usa con inteligencia.' + (isBest ? ' <b>Es tu mejor billete en este navegador.</b>' : '') + '</p>' +
+    '<div class="ticket"><div class="tb"><b>Línea UT5 · Big Data</b><span>' + S.id + '</span></div><div class="tbody">' +
+      tk('Viajero/a', esc(S.name), 'wide') + tk('Trayecto', 'Minuto 0 → Conclusión', 'wide') +
+      tk('Puntos', fmt(S.score)) + tk('Vidas restantes', S.lives + ' de ' + MAX_LIVES) +
+      tk('Aciertos', acc + '%') + tk('Rango', rank) +
+      tk('Fecha', date) + tk('Bonus de vidas', '+' + fmt(lifeBonus)) +
+    '</div><div class="stripe"></div><div class="tfoot">Billete validado · ' + date + ' · ' + S.id + '</div></div>' +
+    '<p class="note">Haz una captura de pantalla de tu billete si tu profe te la pide.</p>' +
+    '<div class="actions"><button class="btn btn-primary" type="button" data-primary id="bAgain">' + ico('retry') + 'Jugar otra vez</button><button class="btn btn-ghost" type="button" id="bNotes">' + ico('book') + 'Repasar los apuntes</button></div>' +
+    reviewHTML() +
+  '</section>', { hud: true });
+  sfx.big(); confetti();
+  say('Línea completada. ' + fmt(S.score) + ' puntos. Rango: ' + rank + '.');
+  $('#bAgain').onclick = function(){ newGame(S.name, S.avatar); };
+  $('#bNotes').onclick = renderNotes;
+}
+function confetti(){
+  if (reduced()) return;
+  var cv = document.createElement('canvas'); cv.className = 'confetti'; document.body.appendChild(cv);
+  var ctx = cv.getContext('2d'); if (!ctx) { cv.remove(); return; }
+  var dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr;
+  cv.style.width = '100%'; cv.style.height = '100%';
+  var cols = ['#FFB21E', '#F2A900', '#13864F', '#D2362F', '#3CCB84', '#6C7A93'], ps = [];
+  for (var i = 0; i < 170; i++) ps.push({ x: W / 2 + (Math.random() - .5) * W * .35, y: H * .35, vx: (Math.random() - .5) * 15 * dpr, vy: (-Math.random() * 15 - 4) * dpr, s: (5 + Math.random() * 6) * dpr, r: Math.random() * 6, vr: (Math.random() - .5) * .3, c: pick(cols) });
+  var t0 = performance.now();
+  function f(t){
+    ctx.clearRect(0, 0, W, H);
+    ps.forEach(function(p){ p.vy += .35 * dpr; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.r += p.vr; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore(); });
+    if (t - t0 < 3600) requestAnimationFrame(f); else cv.remove();
+  }
+  requestAnimationFrame(f);
+}
+
+/* ---------- retos ---------- */
+function runChallenge(){
+  var c = S.plan[S.ci];
+  notesCharged = false;
+  var r = { mcq: renderChoice, tf: renderChoice, fill: renderChoice, match: renderMatch, sort: renderSort, order: renderOrder, hilo: renderHilo, arcade: renderArcade, boss: renderBoss };
+  r[c.type](c);
+}
+function nextChallenge(){ S.ci++; if (S.ci < S.plan.length) runChallenge(); else stationDone(); }
+
+function frame(c, inner, opts){
+  opts = opts || {};
+  var st = STATIONS[S.st];
+  var label = c.type === 'boss' ? 'Jefe final' : c.type === 'arcade' ? 'Bonus' : ('Reto ' + (S.ci + 1) + ' de ' + S.plan.length);
+  var head = '<div class="chead"><span class="chip' + (st.warmup ? ' warm' : '') + '">' + label + (st.warmup ? ' · sin perder vidas' : '') + '</span>' +
+    (opts.noNotes || st.warmup ? '' : '<button class="btn btn-ghost" type="button" id="bNotesC" style="min-height:40px;padding:6px 12px;font-size:.88rem">' + ico('book') + 'Apuntes (−100)</button>') + '</div>';
+  setView('<section class="stack fade-in" id="ch">' + head + inner + '<div id="fb" aria-live="polite"></div></section>', { hud: true });
+  var nb = $('#bNotesC'); if (nb) nb.onclick = openStationNotes;
+}
+
+/* o = { ok, text, pts, dead, next, label, title } */
+function feedback(o){
+  var st = STATIONS[S.st];
+  var title = o.title || (o.ok ? ('¡Correcto!' + (o.pts ? ' +' + o.pts : ''))
+    : st.warmup ? 'Casi. En el calentamiento no pierdes vidas.'
+    : o.dead ? 'Te has quedado sin vidas' : 'Pierdes una vida');
+  var fb = $('#fb');
+  fb.innerHTML = '<div class="feedback ' + (o.ok ? 'ok' : 'bad') + ' fade-in"><div class="ft">' + ico(o.ok ? 'check' : 'x') + '<span>' + title + '</span></div>' +
+    (o.text ? '<p>' + o.text + '</p>' : '') +
+    '<div class="actions"><button class="btn btn-primary" type="button" data-primary id="bNext">' + (o.dead ? 'Ver el resultado' : (o.label || 'Continuar')) + ' ' + ico('arrow') + '</button></div></div>';
+  var b = $('#bNext');
+  b.onclick = function(){ sfx.click(); if (o.dead) gameOver(); else (o.next || nextChallenge)(); };
+  setTimeout(function(){
+    try { b.focus({ preventScroll: true }); } catch (e) {}
+    if (fb.scrollIntoView) fb.scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+  }, 60);
+}
+
+function optsHTML(opts, isTF){
+  return '<div class="opts' + (isTF ? ' two' : '') + '">' + opts.map(function(o, i){
+    return '<button class="opt" type="button" data-key="' + (i + 1) + '" data-i="' + i + '"><span class="kbd">' + (isTF ? (i ? 'F' : 'V') : (i + 1)) + '</span><span>' + o.t + '</span></button>';
+  }).join('') + '</div>';
+}
+function choiceOpts(c){
+  return c.type === 'tf'
+    ? [ { t: 'Verdadero', ok: c.answer === true }, { t: 'Falso', ok: c.answer === false } ]
+    : shuffle(c.options.map(function(t, i){ return { t: t, ok: i === c.answer }; }));
+}
+function rightText(opts){ return opts.filter(function(o){ return o.ok; })[0].t; }
+function bindChoice(opts, done){
+  var btns = $$('.opts .opt', view);
+  btns.forEach(function(b){
+    b.onclick = function(){
+      var o = opts[+b.dataset.i];
+      btns.forEach(function(x, i){ x.disabled = true; if (opts[i].ok) x.classList.add('is-correct'); else if (x !== b) x.classList.add('is-dim'); });
+      if (!o.ok){ b.classList.add('is-wrong'); shake(b); }
+      var bl = $('#blank'); if (bl) bl.textContent = rightText(opts);
+      done(o.ok);
+    };
+  });
+}
+
+/* test, verdadero/falso y completar la frase */
+function renderChoice(c){
+  var isTF = c.type === 'tf', opts = choiceOpts(c);
+  var q = c.type === 'fill'
+    ? '<p class="eyebrow">Completa la frase</p><p class="q">' + c.before + ' <span class="blank" id="blank">?</span>' + (c.after || '') + '</p>'
+    : (c.ctx ? '<p class="ctx">' + c.ctx + '</p>' : '') + (isTF ? '<p class="eyebrow">¿Verdadero o falso?</p>' : '') + '<p class="q">' + c.q + '</p>';
+  frame(c, q + optsHTML(opts, isTF));
+  bindChoice(opts, function(ok){
+    if (ok) feedback({ ok: true, pts: good(), text: c.explain });
+    else {
+      var qq = c.type === 'fill' ? (c.before + ' ___' + (c.after || '')) : c.q;
+      feedback({ ok: false, dead: bad({ q: qq, a: rightText(opts) }), text: c.explain });
+    }
+  });
+}
+
+/* unir parejas */
+function renderMatch(c){
+  var L = shuffle(c.pairs.map(function(p, i){ return { t: p[0], i: i }; }));
+  var R = shuffle(c.pairs.map(function(p, i){ return { t: p[1], i: i }; }));
+  function col(arr, side){ return '<div class="mcol">' + arr.map(function(x){ return '<button class="opt" type="button" data-side="' + side + '" data-i="' + x.i + '"><span>' + x.t + '</span></button>'; }).join('') + '</div>'; }
+  frame(c, '<p class="eyebrow">Une las parejas</p><p class="q">' + c.q + '</p><p class="small muted">Toca un elemento de cada columna para unirlos.</p><div class="match">' + col(L, 'L') + col(R, 'R') + '</div>');
+  var sel = null, done = 0, n = c.pairs.length, missed = {}, tag = 0, over = false;
+  $$('.match .opt', view).forEach(function(b){
+    b.onclick = function(){
+      if (b.disabled || over) return;
+      if (!sel){ sel = b; b.classList.add('is-sel'); sfx.click(); return; }
+      if (sel === b){ b.classList.remove('is-sel'); sel = null; return; }
+      if (sel.dataset.side === b.dataset.side){ sel.classList.remove('is-sel'); sel = b; b.classList.add('is-sel'); sfx.click(); return; }
+      var l = sel.dataset.side === 'L' ? sel : b, r = sel.dataset.side === 'L' ? b : sel;
+      sel.classList.remove('is-sel'); sel = null;
+      if (l.dataset.i === r.dataset.i){
+        tag++;
+        [l, r].forEach(function(x){ x.disabled = true; x.classList.add('is-correct'); x.insertAdjacentHTML('beforeend', '<span class="tag">' + tag + '</span>'); });
+        done++;
+        if (missed[l.dataset.i]) sfx.click(); else toast('+' + good(), 'ok', 900);
+        if (done === n) feedback({ ok: true, title: '¡Todas las parejas unidas!', text: c.explain });
+      } else {
+        [l, r].forEach(function(x){ shake(x); x.classList.add('is-wrong'); setTimeout(function(){ x.classList.remove('is-wrong'); }, 700); });
+        missed[l.dataset.i] = true;
+        var pair = c.pairs[+l.dataset.i];
+        var dead = bad({ q: c.q + ': «' + pair[0] + '»', a: pair[1] });
+        if (dead){ over = true; $$('.match .opt', view).forEach(function(x){ x.disabled = true; }); feedback({ ok: false, dead: true, text: '«' + pair[0] + '» va con «' + pair[1] + '».' }); }
+        else toast('No encajan. «' + esc(pair[0]) + '» va con «' + esc(pair[1]) + '».', 'bad', 3400);
+      }
+    };
+  });
+}
+
+/* clasificar */
+function renderSort(c){
+  var items = c.items, k = 0, many = c.bins.length > 3, first = 0;
+  function labelOf(id){ return c.bins.filter(function(b){ return b.id === id; })[0].label; }
+  var bins = c.bins.map(function(b, i){
+    return '<button class="bin" type="button" data-key="' + (i + 1) + '" data-bin="' + b.id + '"><span class="bl"><span>' + b.label + '</span><span class="kbd">' + (i + 1) + '</span></span>' +
+      (b.hint && !many ? '<span class="bh">' + b.hint + '</span>' : '') + (many ? '' : '<span class="got"></span>') + '</button>';
+  }).join('');
+  frame(c, '<p class="eyebrow">Clasifica</p><div class="row between"><p class="q">' + c.q + '</p><div class="progress-dots" id="pd" aria-hidden="true">' + items.map(function(){ return '<i></i>'; }).join('') + '</div></div>' +
+    '<div class="sortcard" id="sc" aria-live="polite"></div><div class="bins' + (many ? ' many' : '') + '">' + bins + '</div><p class="sfb" id="sfb"></p>');
+  var sc = $('#sc'), sfb = $('#sfb'), bb = $$('.bin', view);
+  function show(){
+    sc.textContent = items[k].t;
+    sc.classList.remove('fade-in'); void sc.offsetWidth; sc.classList.add('fade-in');
+    $$('#pd i', view).forEach(function(d, i){ d.classList.toggle('on', i < k); });
+    bb.forEach(function(b){ b.disabled = false; b.classList.remove('is-correct', 'is-wrong'); });
+    sfb.textContent = ''; sfb.className = 'sfb';
+  }
+  function advance(){
+    if (!sc.isConnected) return;
+    k++;
+    if (k < items.length) show();
+    else {
+      $$('#pd i', view).forEach(function(d){ d.classList.add('on'); });
+      bb.forEach(function(b){ b.disabled = true; });
+      feedback({ ok: true, title: '¡Clasificación completa!', text: 'Has acertado ' + first + ' de ' + items.length + ' a la primera.' + (c.explain ? ' ' + c.explain : '') });
+    }
+  }
+  bb.forEach(function(b){
+    b.onclick = function(){
+      var it = items[k];
+      bb.forEach(function(x){ x.disabled = true; });
+      var target = bb.filter(function(x){ return x.dataset.bin === it.bin; })[0];
+      var got = target.querySelector('.got'); if (got) got.insertAdjacentHTML('beforeend', '<span>' + esc(it.t) + '</span>');
+      if (b.dataset.bin === it.bin){
+        first++;
+        b.classList.add('is-correct');
+        sfb.className = 'sfb ok'; sfb.textContent = '+' + good() + ' · ' + it.why;
+        setTimeout(advance, 1400);
+      } else {
+        b.classList.add('is-wrong'); target.classList.add('is-correct'); shake(sc);
+        var dead = bad({ q: c.q + ': «' + it.t + '»', a: labelOf(it.bin) });
+        sfb.className = 'sfb bad'; sfb.textContent = it.why;
+        if (dead) feedback({ ok: false, dead: true, text: it.why });
+        else {
+          $('#fb').innerHTML = '<div class="actions"><button class="btn btn-primary" type="button" data-primary id="bNext">Continuar ' + ico('arrow') + '</button></div>';
+          $('#bNext').onclick = function(){ $('#fb').innerHTML = ''; advance(); };
+          setTimeout(function(){ var nb = $('#bNext'); if (nb) try { nb.focus({ preventScroll: true }); } catch (e) {} }, 60);
+        }
+      }
+    };
+  });
+  show();
+}
+
+/* ordenar pasos */
+function renderOrder(c){
+  var n = c.steps.length, idx = c.steps.map(function(s, i){ return i; }), pool;
+  do { pool = shuffle(idx); } while (pool.every(function(v, i){ return v === i; }));
+  var next = 0, missed = {}, over = false;
+  frame(c, '<p class="eyebrow">Ordena los pasos</p><p class="q">' + c.q + '</p><ol class="slots" id="slots">' + c.steps.map(function(){ return '<li>…</li>'; }).join('') + '</ol>' +
+    '<p class="small muted">Toca los pasos en el orden correcto:</p><div class="opts" id="pool">' + pool.map(function(v){ return '<button class="opt" type="button" data-i="' + v + '"><span class="kbd"></span><span>' + c.steps[v] + '</span></button>'; }).join('') + '</div>');
+  function renumber(){ $$('#pool .opt', view).filter(function(b){ return !b.hidden; }).forEach(function(b, j){ b.dataset.key = String(j + 1); b.querySelector('.kbd').textContent = j + 1; }); }
+  renumber();
+  $$('#pool .opt', view).forEach(function(b){
+    b.onclick = function(){
+      if (over) return;
+      var v = +b.dataset.i;
+      if (v === next){
+        var li = $('#slots').children[next];
+        li.textContent = c.steps[v]; li.classList.add('filled');
+        b.hidden = true; b.removeAttribute('data-key');
+        if (missed[next]) sfx.click(); else toast('+' + good(), 'ok', 900);
+        next++; renumber();
+        if (next === n){ over = true; feedback({ ok: true, title: '¡Secuencia correcta!', text: c.explain }); }
+      } else {
+        shake(b); missed[next] = true;
+        var dead = bad({ q: c.q + ' (paso ' + (next + 1) + ')', a: c.steps[next] });
+        if (dead){ over = true; $$('#pool .opt', view).forEach(function(x){ x.disabled = true; }); feedback({ ok: false, dead: true, text: 'El paso ' + (next + 1) + ' era: «' + c.steps[next] + '».' }); }
+        else toast('Todavía no. El paso ' + (next + 1) + ' es: «' + esc(c.steps[next]) + '».', 'bad', 3400);
+      }
+    };
+  });
+}
+
+/* calentamiento: ¿más o menos por minuto? */
+function renderHilo(c){
+  var pool = shuffle(MINUTE), seq = [pool[0]], i;
+  for (i = 1; i < pool.length && seq.length < c.rounds + 1; i++){
+    var ratio = pool[i].v / seq[seq.length - 1].v;
+    if (ratio > 1.25 || ratio < 0.8) seq.push(pool[i]);
+  }
+  for (i = 0; seq.length < c.rounds + 1 && i < pool.length; i++) if (seq.indexOf(pool[i]) < 0) seq.push(pool[i]);
+  var r = 0, hits = 0;
+  function round(){
+    var A = seq[r], B = seq[r + 1], last = r + 1 >= c.rounds;
+    frame(c, '<p class="eyebrow">Ronda ' + (r + 1) + ' de ' + c.rounds + '</p><p class="q">¿Qué pasa más veces en un minuto?</p>' +
+      '<div class="hl"><div class="hlc"><span class="who">' + A.who + '</span><span class="num">' + A.d + '</span><span class="unit">cada minuto</span></div>' +
+      '<div class="vs" aria-hidden="true">VS</div>' +
+      '<div class="hlc mystery"><span class="who">' + B.who + '</span><span class="num" id="bn">?</span><span class="unit" id="bu">¿más o menos?</span></div></div>' +
+      '<div class="hlbtns"><button class="btn btn-ghost" type="button" data-key="1" id="hUp">' + ico('up') + 'Más <span class="kbd">1</span></button><button class="btn btn-ghost" type="button" data-key="2" id="hDown">' + ico('down') + 'Menos <span class="kbd">2</span></button></div>');
+    function answer(up){
+      $('#hUp').disabled = true; $('#hDown').disabled = true;
+      var ok = (B.v > A.v) === up;
+      (up ? $('#hUp') : $('#hDown')).classList.add(ok ? 'is-correct' : 'is-wrong');
+      countUp($('#bn'), B, function(){
+        $('#bu').textContent = 'cada minuto';
+        var txt = '<b>' + B.who + '</b>: ' + B.d + ' por minuto. <b>' + A.who + '</b>: ' + A.d + '.';
+        var lbl = last ? 'Terminar' : 'Siguiente ronda';
+        if (ok){ hits++; feedback({ ok: true, pts: good(50), text: txt, next: nextRound, label: lbl }); }
+        else { bad(null); feedback({ ok: false, text: (B.v > A.v ? 'Era más. ' : 'Era menos. ') + txt, next: nextRound, label: lbl }); }
+      });
+    }
+    $('#hUp').onclick = function(){ answer(true); };
+    $('#hDown').onclick = function(){ answer(false); };
+  }
+  function nextRound(){ r++; if (r < c.rounds) round(); else finish(); }
+  function finish(){
+    frame(c, '<p class="eyebrow">Calentamiento terminado</p><p class="q">Has acertado ' + hits + ' de ' + c.rounds + '.</p>' +
+      '<div class="card stack"><p>Y todo eso pasa en <b>un solo minuto</b>. Un día tiene 1.440 minutos: multiplica y te harás una idea del <span class="key">volumen</span> de datos que generamos y de la <span class="key">velocidad</span> a la que llegan.</p><p>Para manejar algo así hacen falta herramientas especiales. De eso va el Big Data.</p></div>');
+    feedback({ ok: true, title: '¡Motor en marcha!', label: 'Seguir el viaje' });
+  }
+  round();
+}
+function countUp(el, item, done){
+  if (reduced()){ el.textContent = item.d; done(); return; }
+  var t0 = performance.now(), D = 900;
+  function f(t){
+    if (!el.isConnected) return;
+    var p = Math.min(1, (t - t0) / D), v = item.v * (1 - Math.pow(1 - p, 3));
+    el.textContent = v >= 1e6 ? fmt(v / 1e6) + ' millones' : fmt(v);
+    if (p < 1) requestAnimationFrame(f); else { el.textContent = item.d; done(); }
+  }
+  requestAnimationFrame(f);
+}
+
+/* bonus arcade: llena el Data Lake */
+function renderArcade(c){
+  var GOAL = 15, DUR = 30;
+  frame(c, '<p class="q">Llena el Data Lake</p>' +
+    '<p class="ctx">Atrapa los datos que caen (likes, compras, GPS…) y esquiva los <b>bulos</b>: sin veracidad, los datos no sirven. Si guardas ' + GOAL + ' datos fiables en ' + DUR + ' segundos, ganas una vida.</p>' +
+    '<div class="arcade-hud"><span>' + ico('clock') + ' <b id="aT">' + DUR + '</b> s</span><div class="meter" aria-hidden="true"><i id="aM"></i></div><span><b id="aN">0</b>/' + GOAL + ' fiables</span></div>' +
+    '<div class="arena" id="arena"><div class="bucket" id="bucket">DATA LAKE</div>' +
+      '<div class="overlay" id="aOv"><div class="stack" style="align-items:center"><p><b>Mueve el lago con el dedo, el ratón o las flechas ← →</b></p>' +
+      '<div class="actions" style="justify-content:center"><button class="btn btn-primary" type="button" data-primary id="aGo">¡Empezar!</button><button class="btn btn-ghost" type="button" id="aSkip">Saltar el bonus</button></div></div></div>' +
+    '</div>', { noNotes: true });
+  var arena = $('#arena'), bucket = $('#bucket'), ov = $('#aOv');
+  var W = 0, H = 0, bw = 120, bx = 0, drops = [], running = false, raf = 0, t0 = 0, last = 0, acc = 0, caught = 0, fakes = 0, keys = { l: 0, r: 0 };
+  function setX(x){ bx = Math.max(bw / 2, Math.min(W - bw / 2, x)); bucket.style.transform = 'translateX(' + (bx - bw / 2) + 'px)'; }
+  function size(){ W = arena.clientWidth; H = arena.clientHeight; bw = Math.max(96, Math.min(160, W * 0.26)); bucket.style.width = bw + 'px'; setX(bx || W / 2); }
+  size();
+  function onPtr(e){ if (!running) return; var rc = arena.getBoundingClientRect(); setX(e.clientX - rc.left); }
+  arena.addEventListener('pointermove', onPtr);
+  arena.addEventListener('pointerdown', onPtr);
+  function isL(k){ return k === 'ArrowLeft' || k === 'a' || k === 'A'; }
+  function isR(k){ return k === 'ArrowRight' || k === 'd' || k === 'D'; }
+  function kd(e){ if (!running) return; if (isL(e.key)){ keys.l = 1; e.preventDefault(); } if (isR(e.key)){ keys.r = 1; e.preventDefault(); } }
+  function ku(e){ if (isL(e.key)) keys.l = 0; if (isR(e.key)) keys.r = 0; }
+  window.addEventListener('keydown', kd); window.addEventListener('keyup', ku); window.addEventListener('resize', size);
+  cleanup.push(function(){ running = false; cancelAnimationFrame(raf); window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('resize', size); });
+  function spawn(elapsed){
+    var fake = Math.random() < 0.24, d = pick(fake ? DROPS_FAKE : DROPS_OK), el = document.createElement('div');
+    el.className = 'drop' + (fake ? ' fake' : '');
+    el.innerHTML = ico(d.icon) + '<span>' + d.t + '</span>';
+    arena.appendChild(el);
+    var w = el.offsetWidth, h = el.offsetHeight;
+    var o = { el: el, w: w, h: h, x: Math.random() * Math.max(1, W - w), y: -h - 4, vy: 115 + 150 * elapsed / DUR + Math.random() * 50, fake: fake };
+    el.style.transform = 'translate(' + o.x + 'px,' + o.y + 'px)';
+    drops.push(o);
+  }
+  function pop(x, y, txt, cls){ var p = document.createElement('div'); p.className = 'pop ' + cls; p.textContent = txt; p.style.left = x + 'px'; p.style.top = y + 'px'; arena.appendChild(p); setTimeout(function(){ p.remove(); }, 800); }
+  function loop(ts){
+    if (!running) return;
+    var dt = Math.min(0.05, Math.max(0, (ts - last) / 1000)); last = ts;
+    var elapsed = (ts - t0) / 1000, left = Math.max(0, DUR - elapsed);
+    $('#aT').textContent = Math.ceil(left);
+    if (keys.l || keys.r) setX(bx + (keys.r - keys.l) * 460 * dt);
+    acc += dt;
+    var every = 0.6 - 0.28 * Math.min(1, elapsed / DUR);
+    while (acc > every){ acc -= every; spawn(elapsed); }
+    var top = H - 10 - 46;
+    for (var i = drops.length - 1; i >= 0; i--){
+      var d = drops[i];
+      d.y += d.vy * dt;
+      d.el.style.transform = 'translate(' + d.x + 'px,' + d.y + 'px)';
+      var bottom = d.y + d.h;
+      if (bottom >= top + 6 && bottom <= top + 46 && d.x + d.w > bx - bw / 2 + 4 && d.x < bx + bw / 2 - 4){
+        d.el.remove(); drops.splice(i, 1);
+        if (d.fake){ fakes++; caught = Math.max(0, caught - 1); S.score = Math.max(0, S.score - 30); pop(bx - 34, top - 30, '−1 bulo', 'minus'); sfx.fake(); shake(bucket); }
+        else { caught++; S.score += 10; pop(bx - 16, top - 30, '+10', 'plus'); sfx.grab(); }
+        $('#aN').textContent = caught;
+        $('#aM').style.width = Math.min(100, caught / GOAL * 100) + '%';
+        $('#scoreNum').textContent = fmt(S.score);
+      } else if (d.y > H + 10){ d.el.remove(); drops.splice(i, 1); }
+    }
+    if (left <= 0) return end();
+    raf = requestAnimationFrame(loop);
+  }
+  function end(){
+    running = false;
+    drops.forEach(function(d){ d.el.remove(); }); drops = [];
+    var win = caught >= GOAL, extra = '';
+    if (win){
+      if (gainLife()) extra = '¡Ganas una vida!';
+      else { S.score += 150; extra = 'Ya tenías todas las vidas: te llevas 150 puntos extra.'; }
+      sfx.win();
+    }
+    updateHUD();
+    ov.hidden = false;
+    ov.innerHTML = '<div class="stack" style="align-items:center"><p class="display" style="font-size:1.6rem">' + (win ? '¡Lago lleno!' : '¡Tiempo!') + '</p>' +
+      '<p>Has guardado <b>' + caught + '</b> datos fiables y se han colado <b>' + fakes + '</b> bulos. ' + extra + '</p>' +
+      '<p class="small muted">Cada like, compra o posición GPS es un dato que acaba en el Data Lake. Y ojo con los bulos: sin veracidad, los datos no sirven.</p>' +
+      '<button class="btn btn-primary" type="button" data-primary id="aNext">Continuar ' + ico('arrow') + '</button></div>';
+    $('#aNext').onclick = function(){ sfx.click(); nextChallenge(); };
+    try { $('#aNext').focus({ preventScroll: true }); } catch (e) {}
+  }
+  $('#aGo').onclick = function(){
+    sfx.click(); ov.hidden = true; size();
+    if (arena.scrollIntoView) arena.scrollIntoView({ block: 'center', behavior: 'auto' });
+    running = true; t0 = last = performance.now(); acc = 0.5;
+    raf = requestAnimationFrame(loop);
+  };
+  $('#aSkip').onclick = function(){ sfx.click(); nextChallenge(); };
+}
+
+/* jefe final: el Algoritmo Sesgado */
+function renderBoss(c){
+  var HP = c.n, hp = HP, used = [], T = 15;
+  function nextQ(){
+    if (hp === 1 && used.indexOf('key') < 0){ used.push('key'); return BOSS_KEY; }
+    var avail = [];
+    for (var i = 0; i < BOSS.length; i++) if (used.indexOf(i) < 0) avail.push(i);
+    if (!avail.length){ used = used.filter(function(u){ return u === 'key'; }); for (var j = 0; j < BOSS.length; j++) avail.push(j); }
+    var k = pick(avail); used.push(k); return BOSS[k];
+  }
+  function ask(){
+    var q = nextQ(), isTF = q.type === 'tf', opts = choiceOpts(q);
+    frame(c, '<div class="boss" id="bossP">' + eyeSVG() + '<div><div class="bn">El Algoritmo Sesgado</div><div class="hp"><i id="hpBar" style="width:' + (hp / HP * 100) + '%"></i></div><div class="bs" id="bs">Le quedan ' + hp + ' de ' + HP + ' puntos de vida</div></div></div>' +
+      '<div class="timer" id="tm" aria-hidden="true"><i id="tmi"></i></div>' +
+      (isTF ? '<p class="eyebrow">¿Verdadero o falso?</p>' : '') + '<p class="q">' + q.q + '</p>' + optsHTML(opts, isTF), { noNotes: true });
+    var tmi = $('#tmi'), tm = $('#tm'), t0 = performance.now(), raf = 0, over = false;
+    function tick(t){
+      if (over) return;
+      var left = Math.max(0, T - (t - t0) / 1000);
+      tmi.style.transform = 'scaleX(' + (left / T) + ')';
+      tm.classList.toggle('low', left < 5);
+      if (left <= 0){ resolve(null); return; }
+      raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    cleanup.push(function(){ over = true; cancelAnimationFrame(raf); });
+    bindChoice(opts, function(ok){ resolve(ok); });
+    function resolve(ok){
+      if (over) return;
+      over = true; cancelAnimationFrame(raf);
+      var left = Math.max(0, T - (performance.now() - t0) / 1000);
+      var eye = $('#bossP .eye');
+      if (ok === null){
+        $$('.opts .opt', view).forEach(function(x, i){ x.disabled = true; x.classList.add(opts[i].ok ? 'is-correct' : 'is-dim'); });
+      }
+      if (ok){
+        var p = good(100 + Math.round(left * 10));
+        hp--; sfx.hit();
+        if (eye){ eye.classList.remove('hit'); void eye.getBoundingClientRect(); eye.classList.add('hit'); }
+        $('#hpBar').style.width = (hp / HP * 100) + '%';
+        $('#bs').textContent = hp ? ('Le quedan ' + hp + ' de ' + HP + ' puntos de vida') : '¡Derrotado!';
+        if (hp <= 0) feedback({ ok: true, title: '¡Has derrotado al Algoritmo Sesgado! +' + p, text: q.explain, label: 'Fin de trayecto' });
+        else feedback({ ok: true, pts: p, text: q.explain, next: ask, label: 'Siguiente pregunta' });
+      } else {
+        if (eye){ eye.classList.remove('laugh'); void eye.getBoundingClientRect(); eye.classList.add('laugh'); }
+        var dead = bad({ q: q.q, a: rightText(opts) });
+        var title = ok === null ? (dead ? 'Se acabó el tiempo… y las vidas' : 'Se acabó el tiempo. Pierdes una vida') : null;
+        feedback({ ok: false, dead: dead, title: title, text: q.explain, next: ask, label: 'Siguiente pregunta' });
+      }
+    }
+  }
+  ask();
+}
+
+/* ---------- teclado ---------- */
+document.addEventListener('keydown', function(e){
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if ($('#drawer')){ if (e.key === 'Escape') closeDrawer(); return; }
+  var t = e.target;
+  if (t && t.matches && t.matches('input, textarea, select')) return;
+  var k = e.key;
+  if ($('.opts.two', view)){ if (k === 'v' || k === 'V') k = '1'; else if (k === 'f' || k === 'F') k = '2'; }
+  if (/^[1-9]$/.test(k)){
+    var b = view.querySelector('[data-key="' + k + '"]:not([disabled]):not([hidden])');
+    if (b){ e.preventDefault(); b.click(); }
+    return;
+  }
+  if (k === 'Enter'){
+    if (t && t.closest && t.closest('button, a, summary')) return;
+    var p = view.querySelector('[data-primary]:not([disabled])');
+    if (p && !p.closest('[hidden]')){ e.preventDefault(); p.click(); }
+  }
+});
+
+/* ---------- arranque ---------- */
+function boot(data){
+  if (data && data.S && data.S.lives > 0 && data.S.st < STATIONS.length) resume(data.S);
+  else renderStart();
+}
+try {
+  if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === 'function')
+    window.claude.hot.snapshot(function(){ var s = snapshot(); return s ? { S: s } : {}; });
+} catch (e) {}
+try {
+  if (window.claude && window.claude.hot && typeof window.claude.hot.ready === 'function') window.claude.hot.ready(boot);
+  else boot((window.claude && window.claude.hot && window.claude.hot.data) || {});
+} catch (e) { boot({}); }
+})();
+</script>
+</body>
+</html>
