@@ -28,6 +28,12 @@ Ada o Leo encuentran en el taller del instituto, con el Teide al fondo, el *Cron
 
 Cada concepto que se descubre queda guardado como una ficha en los **Apuntes**. En total hay 73 fichas; las que faltan indican dónde se consiguen. Cada unidad termina con retos que repasan su contenido: ordenar, emparejar, clasificar, preguntas y minijuegos.
 
+## Código de finalización
+
+Al terminar la aventura, el Cronoprocesador da un **código al azar de una lista fija de 50** (por ejemplo `ABC-123`). El código queda guardado en la partida y se puede volver a ver desde el menú, así que si repiten el final les sale el mismo.
+
+Para comprobar que alguien se ha pasado el juego, busca su código en tu lista de 50 o usa **«Profesorado: comprobar un código»** en la portada. La lista no está en este repositorio, para que no la vea el alumnado.
+
 ## En clase
 
 - Desde la portada, **Elegir unidad** permite empezar directamente en cualquier UT, por ejemplo para repasar un tema concreto.

@@ -217,6 +217,18 @@ body.land .tt { background: rgba(15, 11, 30, .55); padding: 16px; clip-path: var
 .av:hover, .av:focus-visible { background: #3a2f70; }
 .av canvas { width: 104px; height: 224px; image-rendering: pixelated; }
 .final { text-align: center; }
+.codecard { margin: 4px 0 14px; padding: 14px 12px 12px; text-align: center; background: #efe7d3; color: #1d2a57; clip-path: var(--notch); box-shadow: inset 0 0 0 3px #1d2a57, inset 0 0 0 6px #efe7d3, inset 0 0 0 8px #c0392b; }
+.codecard .k { margin: 0; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #c0392b; font-weight: 700; }
+.codecard .code { margin: 6px 0 4px; font-size: clamp(34px, 11vw, 48px); font-weight: 700; letter-spacing: .08em; color: #1d2a57; -webkit-user-select: all; user-select: all; font-variant-numeric: tabular-nums; }
+.codecard .foot { margin: 0 0 10px; font-family: var(--f-mono); font-size: 18px; color: #5a5448; }
+.codecard .btn { width: 100%; }
+.codecard .msg { margin: 8px 0 0; color: #5a5448; }
+.codecard .msg.win { color: #1f7a3a; }
+.checker .chkrow { display: flex; gap: 8px; }
+.checker input { flex: 1; min-width: 0; font: 700 22px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--text); background: var(--ink2); border: 3px solid var(--line); padding: 8px 10px; -webkit-user-select: text; user-select: text; }
+.checker input:focus-visible { outline: 3px solid var(--cyan); outline-offset: 1px; }
+.linkbtn { border: 0; background: none; padding: 6px 8px; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; text-shadow: 1px 1px 0 #0f0b1e; }
+.linkbtn:hover { color: var(--text); }
 .final .big { font-size: 22px; color: var(--gold); margin: 0 0 8px; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
 .stats div { background: var(--panel2); padding: 10px 6px; clip-path: var(--notch); }
@@ -277,7 +289,8 @@ body.land .tt { background: rgba(15, 11, 30, .55); padding: 16px; clip-path: var
       <button id="tUnits" class="btn" type="button">Elegir unidad</button>
       <button id="tSound" class="btn ghost" type="button">Sonido: sí</button>
     </div>
-    <p class="how">Todo se juega tocando la pantalla: camina, habla, coge objetos y resuelve retos para recuperar los cinco chips del Cronoprocesador.</p>
+    <p class="how">Todo se juega tocando la pantalla: camina, habla, coge objetos y resuelve retos para recuperar los cinco chips del Cronoprocesador. Al terminar conseguirás tu código de finalización.</p>
+    <button id="tCheck" class="linkbtn" type="button">Profesorado: comprobar un código</button>
   </div>
 </div>
 <div id="card" hidden></div>
@@ -1800,6 +1813,7 @@ function openMenu() {
   const snd = btn(AU.on ? 'Sonido: activado' : 'Sonido: desactivado', '', () => { AU.setOn(!AU.on); prefs.sound = AU.on; savePrefs(); snd.textContent = AU.on ? 'Sonido: activado' : 'Sonido: desactivado'; });
   w.append(
     btn('Seguir jugando', 'go', () => closeModal(false)),
+    ...(G.f.finished ? [btn('Ver mi código de finalización', '', () => { closeModal(false); showCode(); })] : []),
     btn('Viajar a otra unidad', '', () => { closeModal(false); openUnits(); }),
     snd,
     btn('Volver a la portada', '', () => { closeModal(false); save(); showTitle(); }),
@@ -2690,7 +2704,8 @@ async function bitAppears() {
   await say('bit', 'Estás despierto del todo. Y tienes un examen de *Digitalización aplicada a los sectores productivos*, ¿verdad?');
   await say('bit', 'Te propongo repasar los apuntes de otra manera: *viajando* por la historia de la digitalización, desde las fábricas de vapor hasta el Big Data.');
   await say('bit', 'Todo lo que descubras se guardará como fichas en tus *Apuntes* (el botón del libro). Si te atascas, toca la *bombilla* y te daré una pista.');
-  await say('bit', 'Y si no sabes qué se puede tocar, pulsa la *chispa*. Venga, ¡quita la lona de la máquina del fondo!');
+  await say('bit', 'Y si no sabes qué se puede tocar, pulsa la *chispa*.');
+  await say('bit', 'Cuando la máquina tenga los cinco chips, te dará un *código de finalización*: la prueba de que has terminado la aventura. Venga, ¡quita la lona de la máquina del fondo!');
   b.fixed = 0;
   objective('Quita la *lona* de la máquina del fondo.', 'La máquina está a la derecha del todo. Toca la lona.');
 }
@@ -5722,9 +5737,10 @@ async function talkAncor() {
    ===================================================================== */
 async function epilogueStart() {
   if (G.f.finished) {
-    const r = await choose(['Ver otra vez la respuesta final', 'Viajar a una unidad para repasar', 'Nada, gracias'], 'bit', 'El Cronoprocesador tiene los cinco chips. ¿Qué quieres hacer?');
-    if (r === 1) { openUnits(); return; }
-    if (r === 2) return;
+    const r = await choose(['Ver mi código de finalización', 'Ver otra vez la respuesta final', 'Viajar a una unidad para repasar', 'Nada, gracias'], 'bit', 'El Cronoprocesador tiene los cinco chips. ¿Qué quieres hacer?');
+    if (r === 0) { await showCode(); return; }
+    if (r === 2) { openUnits(); return; }
+    if (r === 3) return;
   } else {
     await say('bit', '¡Los cinco chips en su sitio! Cronoprocesador: ¿estamos en una *quinta revolución industrial*?');
   }
@@ -5777,9 +5793,10 @@ defScene({
     await say('pj', 'Y sin sobredigitalizar: primero pensar qué hace falta y después elegir la tecnología.');
     learn('quinta');
     await say('bit', 'Exacto. ¿Y el examen? Llevas todas las respuestas en tus *Apuntes*. ¡Bip!');
-    G.f.finished = 1; save();
+    G.f.finished = 1; ensureCode(); save();
+    await say('bit', '¡Y la máquina ha impreso tu *código de finalización*! Guárdalo bien: es la prueba de que has terminado la aventura.');
     await credits();
-    objective('¡Aventura completada! Repasa tus *Apuntes* o vuelve a cualquier unidad desde el Cronoprocesador.', 'Toca el Cronoprocesador para repasar una unidad.');
+    objective('¡Aventura completada! Tu *código de finalización* está en el menú. Repasa tus *Apuntes* o vuelve a cualquier unidad desde el Cronoprocesador.', 'Toca el Cronoprocesador para ver tu código o repasar una unidad.');
   },
 });
 async function credits() {
@@ -5787,6 +5804,7 @@ async function credits() {
   const n = Object.keys(G.cards).length, t = Object.keys(CARDS).length, mins = Math.max(1, Math.round(G.time / 60));
   const w = el('div', 'final');
   w.appendChild(el('p', 'big', '¡Cinco chips, cinco unidades!'));
+  if (ensureCode()) w.appendChild(codeCard());
   w.appendChild(el('p', 'intro', 'Has recorrido los apuntes de <b>Digitalización aplicada a los sectores productivos</b>: de la máquina de vapor al Big Data.'));
   const st = el('div', 'stats');
   st.innerHTML = `<div><strong>${n}/${t}</strong><span>fichas de apuntes</span></div><div><strong>${mins}</strong><span>minutos de viaje</span></div><div><strong>${G.hints}</strong><span>pistas de BIT</span></div>`;
@@ -5801,6 +5819,78 @@ async function credits() {
   w.appendChild(row);
   sfx('chip');
   await openModal('La Quinta Revolución', w, { cls: 'wide' });
+}
+
+'use strict';
+/* =====================================================================
+   CÓDIGO DE FINALIZACIÓN · al terminar, el juego da al azar uno de 50 códigos.
+   El profesorado tiene la lista de los 50 (o usa el comprobador de la portada).
+   ===================================================================== */
+const CODE_MAX = 50;
+const CODE_SECRET = 'Q5R-DASP-7fK2x9Tq-teide';
+const CODE_ALPHA = 'ACDEFGHJKMNPQRTUVWXY34679';   // sin letras ni cifras que se confundan (O/0, I/1, S/5...)
+function fnv32(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return h >>> 0; }
+function finishCode(n) {                 // código número n de la lista (1–50)
+  let a = fnv32(CODE_SECRET + '|' + n + '|a'), b = fnv32(CODE_SECRET + '|' + n + '|b'), s = '';
+  for (let i = 0; i < 3; i++) { s += CODE_ALPHA[a % 25]; a = Math.floor(a / 25); }
+  for (let i = 0; i < 3; i++) { s += CODE_ALPHA[b % 25]; b = Math.floor(b / 25); }
+  return s.slice(0, 3) + '-' + s.slice(3);
+}
+function codeIndex(txt) {                // posición del código en la lista (1–50), o 0 si no es válido
+  const norm = String(txt).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (norm.length !== 6) return 0;
+  for (let n = 1; n <= CODE_MAX; n++) if (finishCode(n).replace('-', '') === norm) return n;
+  return 0;
+}
+function randomCodeNumber() {
+  try { const a = new Uint32Array(1); crypto.getRandomValues(a); return 1 + (a[0] % CODE_MAX); }
+  catch (e) { return 1 + Math.floor(Math.random() * CODE_MAX); }
+}
+function ensureCode() {                  // se asigna una sola vez por partida
+  if (G.code || !G.f.finished) return G.code || null;
+  G.code = finishCode(randomCodeNumber()); G.codeAt = Date.now(); save();
+  return G.code;
+}
+
+/* ---------- tarjeta con el código ---------- */
+function codeCard() {
+  const c = el('div', 'codecard');
+  c.innerHTML = `<p class="k">Código de finalización</p><p class="code" id="finCode">${G.code}</p><p class="foot">La Quinta Revolución · UT1–UT5</p>`;
+  const msg = el('p', 'msg', 'Enséñaselo a tu profe o cópialo en la tarea.');
+  const cp = btn('Copiar código', '', async () => {
+    try { await navigator.clipboard.writeText(G.code); msg.className = 'msg win'; msg.textContent = 'Código copiado.'; sfx('ok'); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents(c.querySelector('#finCode')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); msg.className = 'msg'; msg.textContent = 'Código seleccionado: cópialo con el menú de tu dispositivo.'; }
+  });
+  c.append(cp, msg);
+  return c;
+}
+async function showCode() {
+  if (!ensureCode()) return;
+  if (window.__AUTO) { (window.__LOG = window.__LOG || []).push('CODE ' + G.code); return; }
+  const w = el('div', 'final');
+  w.appendChild(codeCard());
+  w.appendChild(btn('Cerrar', '', () => closeModal(true)));
+  await openModal('Tu código de finalización', w, { cls: 'wide' });
+}
+
+/* ---------- comprobador para el profesorado (portada) ---------- */
+function openChecker() {
+  const w = el('div', 'checker');
+  w.appendChild(el('p', 'intro', fmt('Escribe el *código de finalización* que te enseñen y el juego te dirá si es uno de los 50 códigos válidos.')));
+  const inp = document.createElement('input'); inp.id = 'chkCode'; inp.type = 'text'; inp.maxLength = 9; inp.placeholder = 'ABC-123'; inp.autocomplete = 'off'; inp.spellcheck = false; inp.setAttribute('autocapitalize', 'characters'); inp.setAttribute('aria-label', 'Código de finalización');
+  const res = el('p', 'msg', '');
+  const check = () => {
+    if (!inp.value.trim()) { res.className = 'msg'; res.textContent = ''; return; }
+    const n = codeIndex(inp.value);
+    if (n) { res.className = 'msg win'; res.innerHTML = fmt(`Código válido: es el *número ${n}* de la lista de 50 códigos.`); sfx('ok'); }
+    else { res.className = 'msg bad'; res.textContent = 'Este código no está en la lista de 50 códigos. Revisa que esté bien escrito.'; sfx('bad'); }
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); check(); } });
+  const row = el('div', 'chkrow'); row.append(inp, btn('Comprobar', 'go', check));
+  w.append(row, res);
+  const p = openModal('Comprobar un código', w);
+  setTimeout(() => { try { inp.focus(); } catch (e) { } }, 60);
+  return p;
 }
 
 'use strict';
@@ -5912,6 +6002,7 @@ function boot() {
   $('#tNew').addEventListener('click', () => { sfx('ok'); newGame(); });
   $('#tCont').addEventListener('click', () => { sfx('ok'); continueGame(); });
   $('#tUnits').addEventListener('click', () => { AU.init(); sfx('ok'); openUnits(true); });
+  $('#tCheck').addEventListener('click', () => { AU.init(); sfx('tap'); openChecker(); });
   $('#tSound').addEventListener('click', () => { AU.init(); AU.setOn(!AU.on); prefs.sound = AU.on; savePrefs(); $('#tSound').textContent = AU.on ? 'Sonido: sí' : 'Sonido: no'; });
   document.addEventListener('pointerdown', () => AU.init(), { once: false, passive: true });
   document.addEventListener('keydown', e => { if (e.key === 'Tab') document.body.classList.add('kbd'); });
@@ -5924,7 +6015,7 @@ function boot() {
   requestAnimationFrame(frameLoop);
   const findH = n => hotspots().find(h => h.n === n || h.id === n);
   const tapH = async (n, item) => { const h = findH(n); if (!h) throw new Error('No hay punto: ' + n + ' en ' + RT.scene.id); if (item) { if (!has(item)) throw new Error('Falta objeto: ' + item); RT.sel = item; } RT.player.speed = 2000; await interact(h); await wait(10); };
-  window.Q5R = { puzOrder, puzMatch, puzSort, mgGPS, mgFish, mgTomato, mgDrone, mgLedger, openNotes, openMenu, openUnits, chapterCard, credits, say, choose, tapH, findH, has, resetGame, setupPlayer, enterGameMode, hotspots, G, RT, SC, go, enterScene, travelTo, chipGet, give, learn, UI, CARDS, ITEMS, layout, startUnit, newGame, closeModal, say, AU };
+  if (window.__AUTO || window.__Q5R_DEBUG) window.Q5R = { finishCode, codeIndex, ensureCode, showCode, openChecker, puzOrder, puzMatch, puzSort, mgGPS, mgFish, mgTomato, mgDrone, mgLedger, openNotes, openMenu, openUnits, chapterCard, credits, say, choose, tapH, findH, has, resetGame, setupPlayer, enterGameMode, hotspots, G, RT, SC, go, enterScene, travelTo, chipGet, give, learn, UI, CARDS, ITEMS, layout, startUnit, newGame, closeModal, say, AU };
   if (window.__Q5R_TEST) window.__Q5R_TEST();
 }
 function start(data) {
