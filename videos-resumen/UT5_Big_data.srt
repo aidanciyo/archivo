@@ -1,0 +1,149 @@
+1
+00:00:01,000 --> 00:00:02,466
+Unidad 5: big data.
+
+2
+00:00:02,596 --> 00:00:03,394
+¡Empezamos!
+
+3
+00:00:05,600 --> 00:00:07,664
+¿Sabes cuántos datos generamos cada minuto?
+
+4
+00:00:07,914 --> 00:00:11,084
+Seiscientos veinticinco
+millones de vídeos en TikTok,
+
+5
+00:00:11,114 --> 00:00:13,379
+casi tres millones y medio en YouTube,
+
+6
+00:00:13,409 --> 00:00:18,993
+más de seis millones de búsquedas en Google
+y doscientos treinta y un millones de correos.
+
+7
+00:00:19,123 --> 00:00:21,082
+Y todo eso, en solo sesenta segundos.
+
+8
+00:00:21,732 --> 00:00:23,762
+Eso es big data: datos tan grandes,
+
+9
+00:00:23,792 --> 00:00:28,945
+variados y rápidos que no caben ni se pueden
+procesar con herramientas tradicionales.
+
+10
+00:00:29,075 --> 00:00:34,769
+Se define con cinco uves: volumen, velocidad,
+variedad, veracidad y, sobre todo,
+
+11
+00:00:34,799 --> 00:00:37,954
+valor: el resultado debe servir para algo.
+
+12
+00:00:38,604 --> 00:00:43,662
+Cada vez que usamos el móvil,
+la tarjeta o el coche generamos datos: un like,
+
+13
+00:00:43,692 --> 00:00:45,956
+una compra, un trayecto con GPS.
+
+14
+00:00:46,086 --> 00:00:47,587
+Todo se guarda en un data lake.
+
+15
+00:00:47,717 --> 00:00:48,689
+Después se trocea,
+
+16
+00:00:48,719 --> 00:00:53,658
+se reparte entre muchos ordenadores que trabajan
+en paralelo y se unen los resultados.
+
+17
+00:00:53,788 --> 00:00:55,163
+Por último, algoritmos,
+
+18
+00:00:55,193 --> 00:01:00,293
+estadística e inteligencia artificial
+buscan patrones y predicen comportamientos.
+
+19
+00:01:00,943 --> 00:01:05,371
+En una red social hay datos explícitos,
+lo que escribes en tu perfil,
+
+20
+00:01:05,401 --> 00:01:08,795
+y datos implícitos,
+los más valiosos: a qué das like,
+
+21
+00:01:08,825 --> 00:01:11,494
+cuánto miras un vídeo o a quién sigues.
+
+22
+00:01:11,624 --> 00:01:16,842
+Con esos patrones te etiquetan: si siempre
+das like al fútbol, eres fan del deporte;
+
+23
+00:01:16,872 --> 00:01:19,708
+si compras ropa online, consumidor de moda.
+
+24
+00:01:20,358 --> 00:01:25,076
+El resultado se convierte en gráficos,
+mapas y dashboards, y en acciones:
+
+25
+00:01:25,106 --> 00:01:29,303
+recomendaciones en Netflix,
+diagnóstico temprano de enfermedades,
+
+26
+00:01:29,333 --> 00:01:31,645
+rutas en tiempo real en Google Maps,
+
+27
+00:01:31,675 --> 00:01:36,052
+detección de fraudes o ciudades
+inteligentes que ahorran energía.
+
+28
+00:01:36,702 --> 00:01:40,530
+Big data no es solo tener muchos datos,
+sino usarlos con inteligencia.
+
+29
+00:01:40,660 --> 00:01:45,905
+Aporta mejores servicios, recomendaciones
+personalizadas y avances en salud,
+
+30
+00:01:45,935 --> 00:01:48,195
+pero también riesgos: privacidad,
+
+31
+00:01:48,225 --> 00:01:52,401
+manipulación de la información
+y sesgos en los algoritmos.
+
+32
+00:01:53,051 --> 00:01:56,015
+Tus datos valen mucho:
+cuídalos y úsalos con cabeza.
+
+33
+00:01:56,145 --> 00:01:57,204
+¡Sigue aprendiendo!
+

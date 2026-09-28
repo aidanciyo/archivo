@@ -1,0 +1,129 @@
+1
+00:00:01,000 --> 00:00:04,289
+Unidad 4: aplicación
+de la inteligencia artificial.
+
+2
+00:00:04,419 --> 00:00:05,310
+¡Arrancamos!
+
+3
+00:00:05,960 --> 00:00:12,832
+La inteligencia artificial es la ciencia que intenta
+crear sistemas capaces de pensar y actuar por sí mismos,
+
+4
+00:00:12,862 --> 00:00:17,254
+imitando el razonamiento,
+la planificación y la percepción humanas.
+
+5
+00:00:17,904 --> 00:00:23,497
+Hay dos tipos: la IA débil, creada para tareas
+concretas, que es la que usamos a diario.
+
+6
+00:00:23,627 --> 00:00:27,014
+Y la IA fuerte o general,
+que no simularía una mente:
+
+7
+00:00:27,044 --> 00:00:30,805
+sería una mente capaz de razonar
+y aprender por sí sola.
+
+8
+00:00:31,455 --> 00:00:34,607
+¿Cómo aprende? Ingiriendo
+enormes cantidades de datos,
+
+9
+00:00:34,637 --> 00:00:37,379
+buscando patrones y usándolos para predecir.
+
+10
+00:00:37,509 --> 00:00:42,689
+Le damos instrucciones con prompts:
+texto, imágenes, audio, vídeo o sensores;
+
+11
+00:00:42,719 --> 00:00:46,928
+si combina varias fuentes a la vez,
+es un prompt multimodal.
+
+12
+00:00:47,578 --> 00:00:51,238
+Ya está en todas partes:
+reconocimiento de voz y rostro,
+
+13
+00:00:51,268 --> 00:00:55,569
+análisis de imágenes médicas,
+chatbots y creación de contenido.
+
+14
+00:00:55,699 --> 00:00:58,893
+En emergencias,
+predice riesgos y prioriza incidentes,
+
+15
+00:00:58,923 --> 00:01:01,461
+y ayuda a localizar personas con drones.
+
+16
+00:01:02,111 --> 00:01:08,519
+Su historia: Alan Turing sienta las bases;
+en 1956 nace el término;
+
+17
+00:01:08,549 --> 00:01:12,447
+en 1966 llega ELIZA, el primer chatbot.
+
+18
+00:01:12,577 --> 00:01:20,231
+En 1997, Deep Blue vence a Kasparov,
+y en 2016 AlphaGo impulsa el boom del deep learning.
+
+19
+00:01:20,881 --> 00:01:24,939
+Brilla con muchos datos, rapidez,
+precisión y tareas repetitivas;
+
+20
+00:01:24,969 --> 00:01:29,458
+pero flojea en creatividad,
+empatía y contextos con poca información.
+
+21
+00:01:29,588 --> 00:01:34,049
+Además, es cara, consume mucha energía
+y refleja los sesgos de sus datos.
+
+22
+00:01:34,699 --> 00:01:39,830
+Como aprende de datos, debe cumplir el RGPD:
+consentimiento, minimización,
+
+23
+00:01:39,860 --> 00:01:43,427
+anonimización,
+derecho al olvido y transparencia.
+
+24
+00:01:43,557 --> 00:01:47,276
+Y aunque transformará el empleo,
+también crea perfiles nuevos:
+
+25
+00:01:47,306 --> 00:01:51,629
+entrenadores de modelos, auditores
+de sesgos o ingenieros de prompts.
+
+26
+00:01:52,279 --> 00:01:54,470
+No sustituye tu criterio: lo potencia.
+
+27
+00:01:54,600 --> 00:01:56,147
+¡Nos vemos en la próxima unidad!
+

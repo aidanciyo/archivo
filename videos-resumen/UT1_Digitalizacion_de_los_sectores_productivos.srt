@@ -1,0 +1,153 @@
+1
+00:00:01,000 --> 00:00:04,306
+Unidad 1: digitalización
+de los sectores productivos.
+
+2
+00:00:04,436 --> 00:00:07,208
+En dos minutos, lo esencial. ¡Vamos allá!
+
+3
+00:00:07,858 --> 00:00:10,444
+Todo empieza con las revoluciones
+industriales.
+
+4
+00:00:10,574 --> 00:00:13,897
+La primera, en el siglo XVIII,
+trajo la máquina de vapor.
+
+5
+00:00:14,027 --> 00:00:17,107
+La segunda, la electricidad
+y la producción en serie.
+
+6
+00:00:17,237 --> 00:00:19,185
+La tercera, la informática e internet.
+
+7
+00:00:19,315 --> 00:00:25,541
+Y la cuarta, desde 2011, es la industria 4.0:
+datos, conectividad y robótica.
+
+8
+00:00:25,671 --> 00:00:29,546
+La cuarta no añade máquinas:
+añade información sobre ellas.
+
+9
+00:00:30,196 --> 00:00:34,161
+Sus tecnologías clave: la nube,
+el internet de las cosas,
+
+10
+00:00:34,191 --> 00:00:38,366
+la inteligencia artificial,
+la realidad virtual y aumentada,
+
+11
+00:00:38,396 --> 00:00:40,648
+la robótica y la impresión 3D.
+
+12
+00:00:40,778 --> 00:00:43,789
+¿El resultado? Cadenas
+de suministro más eficientes,
+
+13
+00:00:43,819 --> 00:00:46,249
+menos desperdicio y más sostenibilidad.
+
+14
+00:00:46,899 --> 00:00:50,042
+Pero cuidado: no es lo mismo
+digitizar que digitalizar.
+
+15
+00:00:50,172 --> 00:00:54,169
+Digitizar es pasar del papel a lo digital:
+el proceso sigue igual.
+
+16
+00:00:54,299 --> 00:00:56,310
+Digitalizar es rediseñar el proceso.
+
+17
+00:00:56,440 --> 00:00:59,473
+Y la transformación digital
+cambia el modelo de negocio.
+
+18
+00:01:00,123 --> 00:01:02,907
+Y recuerda: digitalizar
+no es comprar tecnología.
+
+19
+00:01:03,037 --> 00:01:05,988
+Si un proceso es innecesariamente complicado,
+
+20
+00:01:06,018 --> 00:01:09,878
+digitalizarlo solo lo hace
+complicado… y además digital.
+
+21
+00:01:10,008 --> 00:01:11,874
+Eso es la sobredigitalización:
+
+22
+00:01:11,904 --> 00:01:15,845
+cuando los costes y la complejidad
+superan a los beneficios.
+
+23
+00:01:16,495 --> 00:01:21,531
+El corazón de todo son los sistemas ciberfísicos,
+que unen hardware, software y redes.
+
+24
+00:01:21,661 --> 00:01:25,448
+Funcionan en ciclo: un sensor mide,
+la red transporta el dato,
+
+25
+00:01:25,478 --> 00:01:28,090
+el sistema decide y un actuador ejecuta.
+
+26
+00:01:28,220 --> 00:01:32,135
+Y si creamos una réplica virtual
+alimentada con datos en tiempo real,
+
+27
+00:01:32,165 --> 00:01:33,802
+tenemos un gemelo digital.
+
+28
+00:01:34,452 --> 00:01:39,441
+Por último, dos mundos que hoy convergen:
+IT, la tecnología de la información,
+
+29
+00:01:39,471 --> 00:01:44,318
+que gestiona datos, y OT, la tecnología
+operativa, que controla máquinas.
+
+30
+00:01:44,448 --> 00:01:45,768
+Juntos reducen costes,
+
+31
+00:01:45,798 --> 00:01:50,552
+ganan eficiencia y trazabilidad… siempre
+que se refuerce la ciberseguridad.
+
+32
+00:01:51,202 --> 00:01:53,684
+En resumen: tecnología, sí, pero con sentido.
+
+33
+00:01:53,814 --> 00:01:55,390
+¡Nos vemos en la próxima unidad!
+

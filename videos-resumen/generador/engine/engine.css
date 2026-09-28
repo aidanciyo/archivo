@@ -1,0 +1,131 @@
+/* Motor gráfico de los vídeos resumen · estilo unificado */
+@font-face { font-family: "Montserrat"; font-weight: 500; src: url("../node_modules/@fontsource/montserrat/files/montserrat-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 600; src: url("../node_modules/@fontsource/montserrat/files/montserrat-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 700; src: url("../node_modules/@fontsource/montserrat/files/montserrat-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 800; src: url("../node_modules/@fontsource/montserrat/files/montserrat-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 900; src: url("../node_modules/@fontsource/montserrat/files/montserrat-latin-900-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 400; src: url("../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 500; src: url("../node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url("../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 700; src: url("../node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2") format("woff2"); }
+
+:root {
+  --ink: #EEF3FF;
+  --muted: #9AA8C9;
+  --dim: #6B7894;
+  --good: #34D399;
+  --warn: #FB7185;
+  --accent: #22D3EE;
+  --accent2: #3B82F6;
+  --a20: color-mix(in srgb, var(--accent) 20%, transparent);
+  --a35: color-mix(in srgb, var(--accent) 35%, transparent);
+  --a60: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  width: 1920px; height: 1080px; overflow: hidden; position: relative;
+  background: #04060f; color: var(--ink);
+  font-family: "Inter", "DejaVu Sans", sans-serif; font-weight: 500;
+  -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
+}
+#bg { position: absolute; inset: 0; z-index: 0; }
+#stage { position: absolute; inset: 0; z-index: 1; }
+#chrome { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+#sweep { position: absolute; top: -200px; left: 0; width: 520px; height: 1480px; z-index: 6;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 16%, transparent) 45%, rgba(255,255,255,.10) 50%, color-mix(in srgb, var(--accent2) 16%, transparent) 55%, transparent);
+  transform: translateX(-900px) rotate(12deg); opacity: 0; }
+#fade { position: absolute; inset: 0; background: #000; z-index: 9; }
+
+.scene { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
+.abs { position: absolute; }
+.mont { font-family: "Montserrat", "DejaVu Sans", sans-serif; }
+
+/* marca superior */
+.brand { position: absolute; left: 110px; top: 44px; display: flex; align-items: center; gap: 18px; }
+.brand .ut { font-family: "Montserrat"; font-weight: 800; font-size: 22px; letter-spacing: .04em; color: #061018;
+  padding: 7px 16px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.brand .mod { font-size: 19px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.chapters { position: absolute; right: 110px; top: 52px; display: flex; align-items: center; gap: 10px; }
+.chapters .seg { width: 54px; height: 7px; border-radius: 99px; background: rgba(255,255,255,.14); overflow: hidden; position: relative; }
+.chapters .seg i { position: absolute; inset: 0; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transform-origin: left center; transform: scaleX(0); }
+.chapters .lbl { font-family: "Montserrat"; font-weight: 700; font-size: 18px; color: var(--muted); margin-left: 8px; min-width: 64px; text-align: right; }
+
+/* cabecera de escena */
+.kicker { position: absolute; left: 120px; top: 128px; font-family: "Montserrat"; font-weight: 700; font-size: 25px;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--accent); display: flex; gap: 14px; align-items: center; }
+.kicker .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 16px var(--accent); }
+.title { position: absolute; left: 120px; top: 166px; font-family: "Montserrat"; font-weight: 800; font-size: 66px;
+  line-height: 1.08; letter-spacing: -0.01em; white-space: nowrap; }
+.title .w, .split .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; margin-bottom: -.08em; }
+.title .w > span, .split .w > span { display: inline-block; }
+.lead { position: absolute; left: 120px; top: 262px; font-size: 30px; color: var(--muted); font-weight: 500; }
+
+/* tarjetas y elementos comunes */
+.card { position: absolute; border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 24px 60px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.08); }
+.card .glow { position: absolute; inset: -2px; border-radius: 30px; border: 2px solid var(--accent); opacity: 0;
+  box-shadow: 0 0 44px var(--a35), inset 0 0 30px color-mix(in srgb, var(--accent) 10%, transparent); pointer-events: none; }
+.icirc { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--accent) 55%, transparent), color-mix(in srgb, var(--accent2) 22%, transparent) 70%);
+  border: 1.5px solid var(--a60); box-shadow: 0 0 34px var(--a35), inset 0 0 18px rgba(255,255,255,.08); }
+.icirc svg { width: 48%; height: 48%; stroke: #fff; stroke-width: 1.8; }
+.ico svg { width: 100%; height: 100%; display: block; }
+.ico { display: inline-block; }
+.grad { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.chip { display: inline-flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 999px; font-size: 26px; font-weight: 600;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); white-space: nowrap; }
+.chip .ico { width: 26px; height: 26px; color: var(--accent); }
+.chip .ico svg { stroke: var(--accent); stroke-width: 2.4; }
+.pill { position: absolute; display: flex; align-items: center; gap: 18px; padding: 22px 34px; border-radius: 26px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 16%, rgba(10,14,34,.7)), color-mix(in srgb, var(--accent2) 12%, rgba(10,14,34,.7)));
+  border: 1px solid var(--a60); font-size: 30px; font-weight: 600; box-shadow: 0 0 40px var(--a20); }
+.pill .ico { width: 38px; height: 38px; flex: none; }
+.pill .ico svg { stroke: var(--accent); stroke-width: 2.2; }
+.arr { display: inline-block; width: .9em; height: .9em; vertical-align: -0.1em; margin: 0 .12em; }
+.arr svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 2.5; }
+.lbl { font-family: "Montserrat"; font-weight: 700; color: var(--ink); line-height: 1.15; }
+.desc { color: var(--muted); line-height: 1.3; font-weight: 500; }
+
+/* intro */
+.intro-mod { position: absolute; left: 0; right: 0; top: 150px; text-align: center; font-size: 24px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--muted); }
+.intro-hero { position: absolute; left: 960px; top: 420px; width: 0; height: 0; }
+.intro-ring { position: absolute; border-radius: 50%; left: 0; top: 0; }
+.intro-num { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); font-family: "Montserrat"; font-weight: 900; font-size: 250px; line-height: 1; letter-spacing: -0.02em; white-space: nowrap; }
+.intro-title { position: absolute; left: 160px; right: 160px; top: 640px; text-align: center; font-family: "Montserrat"; font-weight: 800; font-size: 78px; line-height: 1.1; }
+.intro-chip { position: absolute; left: 0; right: 0; top: 880px; display: flex; justify-content: center; }
+
+/* timeline */
+.tl-year { position: absolute; font-family: "Montserrat"; font-weight: 800; font-size: 54px; text-align: center; line-height: 1; }
+.tl-tag { position: absolute; font-size: 20px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.tl-node { position: absolute; width: 118px; height: 118px; margin: -59px 0 0 -59px; }
+.tl-node .icirc { width: 118px; height: 118px; }
+.tl-text { position: absolute; text-align: center; }
+.tl-text .lbl { font-size: 30px; }
+.tl-text .desc { font-size: 23px; margin-top: 8px; }
+
+/* definición */
+.def-term { position: absolute; left: 790px; top: 400px; width: 1010px; font-family: "Montserrat"; font-weight: 800; font-size: 72px; line-height: 1.06; }
+.def-abbr { position: absolute; left: 790px; top: 330px; font-family: "Montserrat"; font-weight: 800; font-size: 24px; letter-spacing: .12em; padding: 8px 18px; border-radius: 12px; color: var(--accent); border: 1.5px solid var(--a60); background: var(--a20); }
+.def-text { position: absolute; left: 790px; width: 1010px; font-size: 36px; line-height: 1.35; color: #DCE5FA; }
+.def-chips { position: absolute; left: 790px; width: 1030px; display: flex; flex-wrap: wrap; gap: 16px 18px; }
+
+/* stack */
+.stack-abbr { font-family: "Montserrat"; font-weight: 900; font-size: 62px; line-height: 1; }
+.stack-name { font-size: 21px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+
+/* check list */
+.row { display: flex; align-items: center; gap: 18px; font-size: 29px; font-weight: 500; line-height: 1.25; }
+.row .mk { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.row .mk svg { width: 24px; height: 24px; stroke-width: 3; }
+.mk.good { background: color-mix(in srgb, var(--good) 20%, transparent); border: 1.5px solid color-mix(in srgb, var(--good) 70%, transparent); }
+.mk.good svg { stroke: var(--good); }
+.mk.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); border: 1.5px solid color-mix(in srgb, var(--warn) 70%, transparent); }
+.mk.warn svg { stroke: var(--warn); }
+.mk.acc { background: var(--a20); border: 1.5px solid var(--a60); }
+.mk.acc svg { stroke: var(--accent); }
+
+.mono { font-family: "DejaVu Sans Mono", monospace; }

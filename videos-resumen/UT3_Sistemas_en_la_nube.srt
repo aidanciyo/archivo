@@ -1,0 +1,139 @@
+1
+00:00:01,000 --> 00:00:02,785
+Unidad 3: sistemas en la nube.
+
+2
+00:00:02,915 --> 00:00:03,945
+¡Despegamos!
+
+3
+00:00:05,600 --> 00:00:10,851
+La nube es, en pocas palabras, el ordenador
+de otra persona al que accedemos por internet.
+
+4
+00:00:10,981 --> 00:00:15,025
+Ofrece almacenamiento, aplicaciones
+y mantenimiento fuera de la empresa,
+
+5
+00:00:15,055 --> 00:00:17,242
+desde cualquier lugar y dispositivo.
+
+6
+00:00:17,892 --> 00:00:20,422
+Su historia es reciente: en 1960,
+
+7
+00:00:20,452 --> 00:00:25,412
+John McCarthy imagina la informática
+como un servicio público.
+
+8
+00:00:25,542 --> 00:00:29,634
+En 1999, Salesforce ofrece
+aplicaciones por internet;
+
+9
+00:00:29,664 --> 00:00:35,413
+en 2002 nace Amazon Web Services;
+y en 2009 se suman Google y Microsoft.
+
+10
+00:00:36,063 --> 00:00:40,086
+La usamos a diario: guardamos
+archivos con copias automáticas,
+
+11
+00:00:40,116 --> 00:00:41,786
+vemos series en streaming,
+
+12
+00:00:41,816 --> 00:00:46,608
+chateamos en redes sociales e incluso
+jugamos a videojuegos en la nube.
+
+13
+00:00:46,738 --> 00:00:50,937
+Todo funciona en enormes centros de datos;
+hay incluso centros submarinos,
+
+14
+00:00:50,967 --> 00:00:52,488
+refrigerados por el mar.
+
+15
+00:00:53,138 --> 00:00:55,939
+Hay tres niveles de servicio,
+como en un restaurante.
+
+16
+00:00:56,069 --> 00:01:01,993
+SaaS, software como servicio: solo disfrutas
+del plato, como en Gmail, Netflix o Spotify.
+
+17
+00:01:02,123 --> 00:01:07,519
+PaaS, plataforma como servicio: alquilas
+la cocina equipada y tú creas tus recetas.
+
+18
+00:01:07,649 --> 00:01:12,471
+Y por último, IaaS, infraestructura
+como servicio: alquilas el local vacío,
+
+19
+00:01:12,501 --> 00:01:15,239
+un servidor que tú instalas y mantienes.
+
+20
+00:01:15,889 --> 00:01:20,216
+¿Y dónde se procesan los datos? En el cloud,
+grandes centros de datos lejanos,
+
+21
+00:01:20,246 --> 00:01:22,463
+con mucha potencia pero más latencia.
+
+22
+00:01:22,593 --> 00:01:27,559
+En el fog, nodos intermedios, como routers
+o servidores locales, que filtran y resumen.
+
+23
+00:01:27,689 --> 00:01:31,466
+Y en el edge, el propio dispositivo,
+que decide en milisegundos:
+
+24
+00:01:31,496 --> 00:01:34,501
+como el coche que frena
+al detectar a un peatón.
+
+25
+00:01:35,151 --> 00:01:40,779
+Ventajas: ahorro de costes, pago por uso,
+almacenamiento casi sin límites,
+
+26
+00:01:40,809 --> 00:01:44,552
+soporte 24 horas
+y actualizaciones automáticas.
+
+27
+00:01:44,682 --> 00:01:46,480
+Inconvenientes: menos control,
+
+28
+00:01:46,510 --> 00:01:51,047
+riesgos de seguridad si se gestiona
+mal y dependencia total de internet.
+
+29
+00:01:51,697 --> 00:01:53,836
+La nube ya forma parte de tu día a día.
+
+30
+00:01:53,966 --> 00:01:55,513
+¡Nos vemos en la próxima unidad!
+

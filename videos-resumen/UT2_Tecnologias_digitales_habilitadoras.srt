@@ -1,0 +1,134 @@
+1
+00:00:01,000 --> 00:00:04,016
+Unidad 2: tecnologías digitales habilitadoras.
+
+2
+00:00:04,146 --> 00:00:04,944
+¡Empezamos!
+
+3
+00:00:05,594 --> 00:00:15,274
+Las tecnologías digitales habilitadoras son las herramientas que permiten
+a una empresa transformarse digitalmente y competir en la industria 4.0.
+
+4
+00:00:15,404 --> 00:00:18,163
+Son transversales: impulsan la innovación,
+
+5
+00:00:18,193 --> 00:00:23,058
+abren nuevos mercados y mejoran
+la productividad, también en las pymes.
+
+6
+00:00:23,708 --> 00:00:25,052
+Veamos las principales.
+
+7
+00:00:25,182 --> 00:00:29,788
+El big data analiza enormes volúmenes
+de datos para tomar mejores decisiones.
+
+8
+00:00:29,918 --> 00:00:35,127
+Las redes 5G son más rápidas y con menor
+latencia que el 4G, y conectan vehículos,
+
+9
+00:00:35,157 --> 00:00:37,096
+sensores y realidad virtual.
+
+10
+00:00:37,226 --> 00:00:43,109
+Los satélites GPS nos dan posición, velocidad
+y hora exacta en cualquier parte del mundo.
+
+11
+00:00:43,239 --> 00:00:46,320
+Y la inteligencia artificial
+aprende de los datos:
+
+12
+00:00:46,350 --> 00:00:48,623
+el machine learning detecta patrones,
+
+13
+00:00:48,653 --> 00:00:52,536
+y el deep learning aprende
+incluso de datos sin estructurar.
+
+14
+00:00:53,186 --> 00:00:57,147
+La realidad virtual nos sumerge
+por completo en un entorno digital;
+
+15
+00:00:57,177 --> 00:01:01,020
+la aumentada y la mixta combinan
+lo virtual con el mundo real.
+
+16
+00:01:01,150 --> 00:01:06,639
+Los cobots trabajan junto a las personas de forma
+segura y asumen las tareas más peligrosas,
+
+17
+00:01:06,669 --> 00:01:11,439
+y los robots autónomos perciben su entorno
+y deciden sin intervención humana.
+
+18
+00:01:12,089 --> 00:01:15,295
+El blockchain es como un libro
+de cuentas compartido:
+
+19
+00:01:15,325 --> 00:01:21,032
+guarda la información en bloques encadenados
+que nadie puede alterar sin que todos lo vean.
+
+20
+00:01:21,162 --> 00:01:24,973
+Aporta transparencia, seguridad
+y confianza sin intermediarios.
+
+21
+00:01:25,103 --> 00:01:26,317
+Se usa en Bitcoin,
+
+22
+00:01:26,347 --> 00:01:31,817
+en IBM Food Trust para rastrear alimentos
+o en UNICEF para seguir donaciones.
+
+23
+00:01:32,467 --> 00:01:34,639
+Todo esto reorganiza los negocios:
+
+24
+00:01:34,669 --> 00:01:38,720
+un chatbot ya atiende a clientes
+como lo haría un teleoperador,
+
+25
+00:01:38,750 --> 00:01:41,491
+y la formación se vuelve imprescindible.
+
+26
+00:01:41,621 --> 00:01:46,373
+¿Destruyen empleo? Algunas tareas desaparecen,
+pero nacen nuevos perfiles:
+
+27
+00:01:46,403 --> 00:01:50,883
+científicos de datos, técnicos
+de robótica o administradores cloud.
+
+28
+00:01:51,533 --> 00:01:53,765
+Conócelas bien: te abrirán muchas puertas.
+
+29
+00:01:53,895 --> 00:01:55,442
+¡Nos vemos en la próxima unidad!
+
