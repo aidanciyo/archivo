@@ -1005,7 +1005,7 @@ function icon(name){ return '<svg class="ic ic-' + name + '" viewBox="0 0 24 24"
    Google Apps Script (termina en /exec). Instrucciones en
    envio-notas/LEEME.md
    ============================================================ */
-const ENVIO_URL = '';
+const ENVIO_URL = 'https://script.google.com/macros/s/AKfycbzCJtuuvWb-J7E__XME_yA_NtY1YXi9M8FuIwo4czhbyXverJ72rY165hC2v4-v7qOz/exec';
 
 const CICLOS = [
   'DJK 1º Acondicionamiento Físico',
@@ -2965,7 +2965,15 @@ RANKS: [
   /* ---------- arranque ---------- */
   const hot = window.claude && window.claude.hot;
   try { if (hot && typeof hot.snapshot === 'function') hot.snapshot(() => ({ run, pos })); } catch (e) { /* sin recarga en caliente */ }
+  function testSend() {
+    setEra(0);
+    const now = new Date();
+    const res = { nombre: 'PRUEBA', apellidos: 'ENVÍO', ciclo: CICLOS[0], nota: 0, notaTxt: '0,0', aciertos: 0, retos: 0, puntos: 0, estrellas: '0/' + MAX_STARS, mejorRacha: 0, vidas: '0/' + MAX_LIVES, tiempo: '0:00', intento: 0, nivel: 'Prueba de envío', fecha: now.toISOString(), fechaTxt: now.toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' }), fallos: [] };
+    render('<main class="wrap final"><section class="panel over"><span class="eyebrow">Solo para el profesor</span><h1 class="intro-title">Prueba de envío</h1><p>Se envía un PDF de ejemplo a nombre de «PRUEBA ENVÍO» con nota 0. Compruébalo en la carpeta de Drive y bórralo después.</p><div class="send wait" id="send-box" aria-live="polite"><b class="st">Preparando…</b></div><button type="button" class="btn ghost" data-act="title">Ir al juego</button></section></main>');
+    sendResult(res);
+  }
   function boot(data) {
+    if (location.hash === '#prueba-envio') { store.del(KEY.pending); testSend(); setTimeout(() => store.del(KEY.pending), 8000); return; }
     if (data && data.run) { run = data.run; pos = data.pos || { screen: 'map' }; lastBeat = Date.now(); resume(); }
     else showTitle();
   }
