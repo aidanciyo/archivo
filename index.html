@@ -499,6 +499,12 @@ kbd{font:600 12px/1 var(--f-mono)}
 .field input,.field select{width:100%;min-height:52px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:12px 14px;font-size:17px}
 .field input:focus,.field select:focus{outline:none;border-color:var(--a1);box-shadow:0 0 0 3px rgba(255,181,71,.25)}
 .field.bad input,.field.bad select{border-color:var(--bad)}
+.howto{margin:0;padding-left:22px;display:grid;gap:8px}
+.warn-line{display:flex;gap:8px;align-items:flex-start;color:var(--ink)}
+.warn-line .ic{color:var(--bad);margin-top:3px}
+.agree{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);cursor:pointer;line-height:1.45}
+.agree input{width:24px;height:24px;flex:none;margin:1px 0 0;accent-color:var(--a1)}
+.agree.bad{border-color:var(--bad)}
 .form-err{color:var(--bad);font-weight:700}
 .nota{display:grid;gap:2px;justify-items:center}
 .nota strong{font:900 clamp(64px,18vw,120px)/.9 var(--f-display);color:var(--a1);font-variant-numeric:tabular-nums}
@@ -2053,17 +2059,22 @@ RANKS: [
       '<h1 class="logo" aria-label="Misión 4.0"><span class="logo-a">Misión</span><span class="logo-b">4.0</span></h1>' +
       '<p class="tagline">De la máquina de vapor al gemelo digital. Recorre los apuntes de la unidad, supera los retos de ' + WORLDS.length + ' épocas y derrota al <b>Sobredigitalizador</b> en el desafío final.</p>' +
       (pend ? '<section class="pending" role="alert"><b>Tienes un resultado sin enviar</b><p>' + esc(pend.nombre + ' ' + pend.apellidos) + ' · ' + esc(pend.ciclo) + ' · nota ' + esc(pend.notaTxt) + '. Conéctate a Internet y pulsa el botón.</p><div class="row-btns"><button type="button" class="btn" data-act="send-pending">Enviar ahora</button></div><div id="send-box"></div></section>' : '') +
-      '<section class="graded" aria-labelledby="graded-t"><strong id="graded-t">Ejercicio puntuable</strong>' +
-        '<ul><li>Tu nota <b>se envía automáticamente</b> a tu profesor en un PDF con tu nombre, tu ciclo y tu nota.</li>' +
-        '<li><b>Hay que llegar al final</b> (las ' + WORLDS.length + ' estaciones y el desafío final). Si te quedas sin vidas, no se envía nada y tienes que volver a empezar.</li>' +
-        '<li>Tu nota = <b>aciertos ÷ retos respondidos × 10</b> en la partida que terminas.</li>' +
-        '<li>Necesitas conexión a Internet al terminar.</li></ul></section>' +
+      '<section class="graded" aria-labelledby="graded-t"><strong id="graded-t">Ejercicio puntuable · cómo funciona</strong>' +
+        '<ol class="howto">' +
+          '<li><b>Rellena tus datos</b> abajo: nombre, apellidos y ciclo. Escríbelos bien: aparecerán en tu nota.</li>' +
+          '<li><b>Recorre las ' + WORLDS.length + ' estaciones.</b> En cada una lees primero los apuntes y después respondes los retos.</li>' +
+          '<li><b>Tienes 5 vidas.</b> Cada reto fallado quita una. Al superar cada estación recuperas una vida si has perdido alguna.</li>' +
+          '<li><b>Supera el desafío final</b>: 10 aciertos con 20 segundos por pregunta.</li>' +
+          '<li><b>Al llegar al final se calcula tu nota</b> (aciertos ÷ retos respondidos × 10) y <b>se envía automáticamente</b> a tu profesor en un PDF con tu nombre, ciclo y nota.</li>' +
+        '</ol>' +
+        '<p class="warn-line">' + icon('cross') + '<span>Si te quedas sin vidas <b>no se envía nada</b> y tienes que empezar de nuevo. Necesitas Internet al terminar. La partida se guarda sola si cierras la página.</span></p>' +
+      '</section>' +
       eras +
       '<ul class="rules">' +
         '<li>' + icon('heart') + '<span><b>5 vidas</b> para toda la misión. Cada reto fallado cuesta una.</span></li>' +
         '<li>' + icon('bulb') + '<span><b>3 pistas</b> sacadas de los apuntes. Usarlas deja el reto en la mitad de puntos.</span></li>' +
         '<li>' + icon('flame') + '<span><b>Rachas</b>: multiplican tus puntos, y cada ' + STREAK_LIFE + ' aciertos seguidos recuperas una vida.</span></li>' +
-        '<li>' + icon('star') + '<span>Termina una estación <b>sin fallos</b> y también recuperas una vida.</span></li>' +
+        '<li>' + icon('star') + '<span>Cada <b>estación superada</b> te devuelve una vida si has perdido alguna.</span></li>' +
       '</ul>' +
       '<section class="panel start">' +
         '<span class="eyebrow">Tus datos (obligatorios)</span>' +
@@ -2072,6 +2083,7 @@ RANKS: [
           '<div class="field" id="f-apellidos"><label class="eyebrow" for="in-apellidos">Apellidos</label><input id="in-apellidos" type="text" maxlength="60" autocomplete="family-name" value="' + esc(prefs.apellidos) + '"></div>' +
           '<div class="field full" id="f-ciclo"><label class="eyebrow" for="in-ciclo">Ciclo</label><select id="in-ciclo">' + opts + '</select></div>' +
         '</div>' +
+        '<label class="agree" id="f-agree"><input type="checkbox" id="in-agree"><span>He leído cómo funciona el ejercicio: es <b>puntuable</b>, tengo que <b>llegar al final</b> y mi nota se enviará con mi <b>nombre, apellidos y ciclo</b>.</span></label>' +
         '<p class="form-err" id="form-err" role="alert" hidden></p>' +
         '<div class="row-btns">' +
           (canResume
@@ -2094,8 +2106,11 @@ RANKS: [
     $('#f-apellidos').classList.toggle('bad', !prefs.apellidos); if (!prefs.apellidos) miss.push('tus apellidos');
     const okC = CICLOS.indexOf(prefs.ciclo) >= 0;
     $('#f-ciclo').classList.toggle('bad', !okC); if (!okC) miss.push('tu ciclo');
+    const ag = $('#in-agree');
+    if (ag && !ag.checked) miss.push('marca la casilla de que has entendido el ejercicio');
+    $('#f-agree').classList.toggle('bad', !!ag && !ag.checked);
     const err = $('#form-err');
-    if (miss.length) { err.hidden = false; err.textContent = 'Para empezar, escribe ' + miss.join(', ').replace(/, ([^,]*)$/, ' y $1') + '.'; const f = $('.field.bad input, .field.bad select'); if (f) f.focus(); return false; }
+    if (miss.length) { err.hidden = false; err.textContent = 'Para empezar: ' + miss.map((m) => (m.startsWith('marca') ? m : 'escribe ' + m)).join(', ').replace(/, ([^,]*)$/, ' y $1') + '.'; const f = $('.field.bad input, .field.bad select, .agree.bad input'); if (f) f.focus(); return false; }
     err.hidden = true;
     return true;
   }
@@ -2505,7 +2520,8 @@ RANKS: [
     const results = (pos.results || []).slice(), n = results.length, okN = results.filter((r) => r === 'ok').length;
     let lifeBack = false;
     run.stars[i] = stars;
-    if (errs === 0) { run.score += 300; if (run.lives < MAX_LIVES) { run.lives++; lifeBack = true; } }
+    if (errs === 0) run.score += 300;
+    if (run.lives < MAX_LIVES) { run.lives++; lifeBack = true; }
     const gained = run.score - (run.worldScore0 || 0);
     run.world = i + 1;
     seen[w.id] = true; store.set(KEY.seen, seen);
@@ -2518,9 +2534,8 @@ RANKS: [
       '<h1 class="intro-title" tabindex="-1" id="done-title">' + w.doneTitle + '</h1>' +
       '<div class="big-stars" role="img" aria-label="' + stars + ' de 3 estrellas">' + [0, 1, 2].map((k) => '<span class="bstar' + (k < stars ? ' on' : '') + '" style="--d:' + k * 180 + 'ms">' + icon('star') + '</span>').join('') + '</div>' +
       statsHTML([['Aciertos', okN + '/' + n], ['Puntos', '+' + fmt(gained)], ['Racha', run.streak]]) +
-      (errs === 0
-        ? '<p class="bonus">' + icon('heart') + ' Estación perfecta: +300 puntos' + (lifeBack ? ' y recuperas una vida.' : '.') + '</p>'
-        : '<p class="muted">Termina una estación sin fallos para ganar 3 estrellas y recuperar una vida.</p>') +
+      (lifeBack ? '<p class="bonus">' + icon('heart') + ' Estación superada: recuperas una vida.</p>' : '<p class="muted">Tienes las 5 vidas completas.</p>') +
+      (errs === 0 ? '<p class="bonus">' + icon('star') + ' Estación perfecta: +300 puntos.</p>' : '') +
       '<button type="button" class="btn big" data-act="go-map">' + (i + 1 < WORLDS.length ? 'Seguir el viaje' : 'Ir a por el jefe final') + ' ' + icon('arrow') + '</button>' +
     '</section></main>');
     $('#done-title').focus({ preventScroll: true });
