@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Misión 4.0</title>
+<title>Prueba Objetivo Unidad 1</title>
 <meta name="description" content="Juego de repaso de la UT1 · Digitalización de los sectores productivos: 7 épocas, un jefe final y 5 vidas.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 /* ============================================================
-   MISIÓN 4.0 · estilos
+   PRUEBA OBJETIVO UNIDAD 1 · estilos
    Cada época tiene su paleta (data-era). Todo usa tokens.
    ============================================================ */
 :root{
@@ -112,7 +112,7 @@ kbd{font:600 12px/1 var(--f-mono)}
 .title-bar{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .plates{display:flex;flex-wrap:wrap;gap:6px}
 .plate{font:600 11px/1.35 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
-.logo{font:900 clamp(78px,22vw,172px)/.8 var(--f-display);text-transform:uppercase;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .14em;margin-top:4px}
+.logo{font:900 clamp(52px,14vw,124px)/.88 var(--f-display);text-transform:uppercase;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .14em;margin-top:4px}
 .logo-a{color:var(--ink)}
 .logo-b{background:linear-gradient(90deg,#E7A93E,#FFD447 24%,#48E5A4 46%,#2FD6F2 66%,#5AB0FF 82%,#FF2E88);-webkit-background-clip:text;background-clip:text;color:transparent}
 .tagline{font-size:clamp(18px,4.4vw,22px);line-height:1.45;max-width:34em}
@@ -561,7 +561,7 @@ kbd{font:600 12px/1 var(--f-mono)}
 <div id="flash" class="flash" hidden></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <canvas id="fx" aria-hidden="true"></canvas>
-<noscript><div class="noscript">Misión 4.0 necesita JavaScript para funcionar. Actívalo en tu navegador y vuelve a abrir la página.</div></noscript>
+<noscript><div class="noscript">La Prueba Objetivo Unidad 1 necesita JavaScript para funcionar. Actívalo en tu navegador y vuelve a abrir la página.</div></noscript>
 
 <script>
 /* jsPDF 2.5.1 · licencia MIT · generador de PDF incluido para funcionar sin CDN */
@@ -2019,7 +2019,7 @@ RANKS: [
     }).join('');
   }
   function hudHTML(mode, wi) {
-    let ico = 'gear', eb = 'Misión 4.0', title = 'Mapa del tiempo';
+    let ico = 'gear', eb = 'Prueba Objetivo · Unidad 1', title = 'Mapa del tiempo';
     if (mode === 'world' || mode === 'done') {
       const w = WORLDS[wi];
       ico = w.icon; eb = 'Fase ' + (wi + 1) + '/' + TOTAL + ' · ' + w.yearLabel; title = w.short;
@@ -2067,7 +2067,7 @@ RANKS: [
     const opts = '<option value="">Elige tu ciclo…</option>' + CICLOS.map((c) => '<option' + (c === prefs.ciclo ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
     const pendHTML = pend ? '<section class="pending" role="alert"><b>Tienes un resultado sin enviar</b><p>' + esc(pend.nombre + ' ' + pend.apellidos) + ' · ' + esc(pend.ciclo) + ' · nota ' + esc(pend.notaTxt) + '. Conéctate a Internet y pulsa el botón.</p><div class="row-btns"><button type="button" class="btn" data-act="send-pending">Enviar ahora</button></div><div id="send-box"></div></section>' : '';
     const head = '<div class="title-bar"><div class="plates"><span class="plate">UT1</span><span class="plate">RA1</span><span class="plate">Examen gamificado</span></div>' + soundBtn() + '</div>' +
-      '<h1 class="logo" aria-label="Misión 4.0"><span class="logo-a">Misión</span><span class="logo-b">4.0</span></h1>';
+      '<h1 class="logo" aria-label="Prueba Objetivo Unidad 1"><span class="logo-a">Prueba Objetivo</span><span class="logo-b">Unidad 1</span></h1>';
     if (ex.entregado && !canResume) {
       render('<main class="wrap title-screen">' + head + pendHTML +
         '<section class="graded"><strong>Examen entregado</strong><p>' + esc(prefs.nombre + ' ' + prefs.apellidos) + ' · ' + esc(prefs.ciclo) + '</p>' +
@@ -2723,7 +2723,7 @@ RANKS: [
       '<section class="panel diploma">' +
         '<span class="eyebrow">Examen gamificado · UT1 · Digitalización de los sectores productivos</span>' +
         '<div class="dip-eras" aria-hidden="true">' + ERAS.map((e) => '<i style="background:' + e.c + '"></i>').join('') + '</div>' +
-        '<h1 class="dip-title" tabindex="-1" id="dip-title">' + (dead ? 'Examen terminado' : 'Misión 4.0 completada') + '</h1>' +
+        '<h1 class="dip-title" tabindex="-1" id="dip-title">' + (dead ? 'Examen terminado' : 'Prueba Objetivo completada') + '</h1>' +
         '<p class="dip-name">' + esc(res.nombre + ' ' + res.apellidos) + '</p>' +
         '<p><b>' + esc(res.ciclo) + '</b> · ' + esc(res.estado) + '.</p>' +
         '<div class="nota"><span class="eyebrow">Tu nota final</span><strong>' + res.notaTxt + '</strong><span class="muted">' + res.aciertos + ' aciertos de ' + res.retos + ' preguntas</span></div>' +
@@ -2761,7 +2761,7 @@ RANKS: [
     const doc = new J({ unit: 'mm', format: 'a4' });
     const L = 20, W = 170;
     doc.setFillColor(18, 19, 27); doc.rect(0, 0, 210, 38, 'F');
-    doc.setTextColor(255, 181, 71); doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(pdfSafe('MISIÓN 4.0'), L, 19);
+    doc.setTextColor(255, 181, 71); doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(pdfSafe('PRUEBA OBJETIVO · UNIDAD 1'), L, 19);
     doc.setTextColor(237, 238, 246); doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
     doc.text(pdfSafe('UT1 · Digitalización de los sectores productivos (DJK) · RA1 · Examen gamificado'), L, 29);
     doc.setTextColor(20, 20, 30);
@@ -2796,7 +2796,7 @@ RANKS: [
       doc.setFont('helvetica', 'normal'); doc.text(lines, L, y); y += lines.length * 5 + 2;
     });
     const pages = doc.getNumberOfPages();
-    for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(120, 120, 130); doc.text(pdfSafe('Generado automáticamente por Misión 4.0 al terminar el juego · página ' + i + ' de ' + pages), L, 290); }
+    for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(120, 120, 130); doc.text(pdfSafe('Generado automáticamente por la Prueba Objetivo Unidad 1 al terminar · página ' + i + ' de ' + pages), L, 290); }
     return doc;
   }
   function sendBox(kind, title, text, btns) {
