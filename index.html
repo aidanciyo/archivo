@@ -144,9 +144,13 @@ kbd{font:600 12px/1 var(--f-mono)}
 .hud-title .eyebrow{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hud-right{display:flex;align-items:center;gap:10px}
 .hearts{display:flex;gap:2px}
-.heart{width:22px;height:22px;color:var(--heart);display:grid;place-items:center}
-.heart .ic{width:22px;height:22px}
-.heart.off{color:var(--line)}
+.heart{position:relative;width:16px;height:16px;display:grid;place-items:center}
+.heart .ic{width:16px;height:16px;color:var(--line)}
+.heart .ic + .ic{position:absolute;inset:0;color:var(--heart)}
+.heart.half .ic + .ic{clip-path:inset(0 50% 0 0)}
+.heart.off .ic + .ic{display:none}
+.hearts.big .heart,.hearts.big .heart .ic{width:30px;height:30px}
+.hearts.big{gap:4px;flex-wrap:wrap;justify-content:center}
 .heart.breaking{animation:heartBreak .8s ease-out}
 .heart.gain{animation:heartGain .9s ease-out}
 .hud-score{display:grid;text-align:right;min-width:48px}
@@ -155,6 +159,8 @@ kbd{font:600 12px/1 var(--f-mono)}
 .hud-btn{appearance:none;border:1.5px solid var(--line);background:var(--panel2);color:var(--ink);height:40px;min-width:40px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 8px;cursor:pointer;font:600 14px/1 var(--f-mono)}
 .hud-btn .ic{width:20px;height:20px}
 .hint-btn .ic{color:var(--gold)}
+.theory-btn{color:var(--a1)}
+@media (max-width:460px){.theory-btn span{display:none}}
 .hud-btn:disabled{opacity:.38;cursor:not-allowed}
 .segs{grid-column:1/-1;display:flex;gap:4px}
 .seg{flex:1;height:5px;border-radius:3px;background:var(--line)}
@@ -164,7 +170,7 @@ kbd{font:600 12px/1 var(--f-mono)}
   .hud-title{display:none}
   .hud-ico{width:34px;height:34px}
   .hud-right{gap:7px}
-  .heart,.heart .ic{width:18px;height:18px}
+  .hud .hearts{display:none}
   .hud-btn{height:38px;min-width:38px;padding:0 6px}
   .hud-score b{font-size:20px}
 }
@@ -392,6 +398,8 @@ kbd{font:600 12px/1 var(--f-mono)}
 /* ---------- fin de época ---------- */
 .done-card{display:grid;gap:16px;justify-items:center;text-align:center;margin-top:16px;padding-block:30px}
 .big-stars{display:flex;gap:10px}
+.lives-left{font:800 clamp(24px,6vw,34px)/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.02em}
+.lives-left b{color:var(--heart)}
 .bstar{color:var(--line)}
 .bstar .ic{width:56px;height:56px}
 .bstar.on{color:var(--gold);animation:starPop .5s cubic-bezier(.2,1.6,.4,1) both;animation-delay:var(--d)}
@@ -1089,7 +1097,7 @@ WORLDS: [
       ex:'Progreso: más producción, transporte y comodidades. Coste humano: jornadas interminables, trabajo infantil y ninguna protección.',
       h:'Las mejoras eran para la vida diaria; los problemas estaban en las condiciones de trabajo.' }
   ],
-  pick:5,
+  pick:3,
   pool:[
     { t:'quiz', q:'¿Dónde nace la primera revolución industrial?', o:['En Inglaterra','En Alemania','En Estados Unidos','En Francia'],
       ex:'Nace en Inglaterra, aproximadamente entre 1760 y 1840 (industria 1.0).', h:'Es el país de James Watt.' },
@@ -1163,7 +1171,7 @@ WORLDS: [
       ex:'Los tres pilares de la 2ª revolución son transporte, energía y materiales, acompañados del progreso de la ciencia y la química.',
       h:'Empieza por la pareja más fácil: ¿qué pilar encaja con «ferrocarril»?' }
   ],
-  pick:5,
+  pick:3,
   pool:[
     { t:'quiz', q:'¿Qué dos fuentes de energía definen la industria 2.0?', o:['Electricidad y petróleo','Vapor y carbón','Energía solar y eólica','Energía nuclear e hidrógeno'],
       ex:'Industria 2.0: electricidad y petróleo como fuente de energía para la producción masiva.', h:'Una llega por cables; la otra sale de pozos.' },
@@ -1231,7 +1239,7 @@ WORLDS: [
       ex:'Son los conceptos clave de la industria 3.0 o era de la información.',
       h:'El interruptor que hace «1» y «0» es el transistor.' }
   ],
-  pick:5,
+  pick:3,
   pool:[
     { t:'quiz', q:'¿Qué es la automatización, según los apuntes?', o:['Máquinas que repiten tareas sin intervención humana directa','Sustituir la fuerza muscular por máquinas','Conectar todos los dispositivos a Internet','Fabricar con impresoras 3D'],
       ex:'Automatización: máquinas que repiten tareas sin intervención humana directa.', h:'La máquina lo hace sola, una y otra vez.' },
@@ -1339,7 +1347,7 @@ WORLDS: [
       ex:'1ª: vapor y textil. 2ª: petróleo, electricidad y cadena. 3ª: transistor, ordenadores y automatización. 4ª: IoT, gemelos digitales e inteligencia artificial.',
       h:'Pregúntate qué energía o qué tecnología hace falta para que exista.' }
   ],
-  pick:6,
+  pick:4,
   pool:[
     { t:'quiz', q:'¿Qué tres fuerzas impulsan la industria 4.0?', o:['Datos, conectividad y robótica','Vapor, conectividad y robótica','Datos, electricidad y automatización','Datos, conectividad y mecanización'],
       ex:'La industria 4.0 arranca en 2011 impulsada por los datos, la conectividad y la robótica.', h:'Ni vapor ni mecanización: esas son de la 1ª.' },
@@ -1426,7 +1434,7 @@ WORLDS: [
       ex:'Escalabilidad: crecer sin gastar el doble. Conectividad: todo conectado. Datos: cada clic deja rastro. Personalización: a tu medida. Automatización inteligente: máquinas que deciden pequeñas cosas.',
       h:'«Rastro» son datos; «a tu medida» es personalización.' }
   ],
-  pick:5,
+  pick:3,
   pool:[
     { t:'quiz', q:'Si al quitar la tecnología el proceso funciona igual, ¿qué es?', o:['Solo digitización','Transformación digital','Sobredigitalización','Un sistema ciberfísico'],
       ex:'Regla práctica: si al quitar la tecnología el proceso funciona igual, es solo digitización.', h:'Es el nivel 1.' },
@@ -1517,7 +1525,7 @@ WORLDS: [
       ex:'El sensor mide algo del mundo real; el actuador hace algo en el mundo real (mueve, enciende, abre, suena…).',
       h:'Si «mide» o «detecta», es sensor. Si «hace» algo, es actuador.' }
   ],
-  pick:5,
+  pick:3,
   pool:[
     { t:'quiz', q:'¿Qué hace un actuador en un sistema ciberfísico?', o:['Hace algo en el mundo real: mueve, enciende, abre…','Recoge la medida y la envía al centro de datos','Mide la presión y la temperatura del entorno','Registra la hora de cada evento en la nube'],
       ex:'Actuador: hace algo en el mundo real (mueve, enciende, abre…).', h:'El que «actúa».' },
@@ -1589,7 +1597,7 @@ WORLDS: [
       ex:'Son las «otras aplicaciones» de los sistemas ciberfísicos que aparecen en los apuntes.',
       h:'Empieza por la «Dark Factory».' }
   ],
-  pick:6,
+  pick:3,
   pool:[
     { t:'quiz', q:'¿Qué es una «Dark Factory»?', o:['Una fábrica que funciona casi sin personas (y sin luz)','Una fábrica que solo trabaja de noche con turnos','Una fábrica sin conexión a Internet','Una fábrica abandonada'],
       ex:'La «Dark Factory» es una fábrica que funciona casi sin personas, y por eso sin luz.', h:'Si no hay personas, ¿hace falta luz?' },
@@ -1677,7 +1685,7 @@ WORLDS: [
       ex:'ERP (IT): gestión integral. PLC, SCADA y MES están del lado de la fábrica (OT).',
       h:'«Autómata» es una máquina que funciona sola.' }
   ],
-  pick:5,
+  pick:3,
   pool:[
     { t:'quiz', q:'¿Qué prioridad tiene el mundo OT frente al IT?', o:['Disponibilidad y seguridad de las personas','Confidencialidad de los datos','Rapidez de las actualizaciones','Coste de las licencias'],
       ex:'OT prioriza la disponibilidad y la seguridad de las personas; IT, la confidencialidad de los datos.', h:'En la fábrica, que nadie se haga daño y la máquina no pare.' },
@@ -1744,7 +1752,7 @@ WORLDS: [
           <tr><th>SCADA</th><td>Supervisión, control y adquisición de datos</td></tr>
           <tr><th>ERP / MES</th><td>Gestión de la empresa / ejecución de la fabricación</td></tr>
         </tbody></table></div>
-      <p class="callout">Con esto ya puedes enfrentarte al <b>desafío final</b>.</p>` }
+      <p class="callout">Este glosario está siempre disponible en el botón <b>Teoría</b>.</p>` }
   ],
   fixed:[
     { t:'sort', q:'¿Ventaja o inconveniente de digitalizar toda una empresa?',
@@ -1762,7 +1770,7 @@ WORLDS: [
       ex:'Pros: eficiencia, ahorro, mejor experiencia y decisiones con datos. Contras: brecha digital, dependencia tecnológica, costes ocultos y resistencia al cambio.',
       h:'¿Ayuda a la organización o es un riesgo que hay que gestionar?' }
   ],
-  pick:6,
+  pick:3,
   pool:[
     { t:'quiz', q:'¿Cuál es un contra de la digitalización total?', o:['Brecha digital y dependencia tecnológica','Más puestos de trabajo técnicos cualificados','Procesos más transparentes y trazables','Acceso a la información desde cualquier lugar'],
       ex:'Contras: brecha digital, dependencia tecnológica, costes ocultos y resistencia al cambio.', h:'Busca la opción negativa.' },
@@ -1844,8 +1852,8 @@ RANKS: [
 (function () {
   'use strict';
   const { WORLDS, BOSS_STATION, BOSS_POOL, TAUNTS, RANKS, ERAS } = M40;
-  const MAX_LIVES = 5, START_HINTS = 3, BOSS_HP = 10, BOSS_TIME = 20, STREAK_LIFE = 5;
-  const TOTAL = WORLDS.length + 1;
+  const MAX_LIVES = 10, START_HINTS = 3, BOSS_HP = 10, BOSS_TIME = 20, MAX_INTENTOS = 2, PENALTY = 0.5;
+  const TOTAL = WORLDS.length;
   const MAX_STARS = WORLDS.length * 3;
   const NOW_YEAR = new Date().getFullYear();
   document.documentElement.lang = 'es';
@@ -1867,7 +1875,7 @@ RANKS: [
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
     del(k) { try { localStorage.removeItem(k); } catch (e) { /* sin almacenamiento */ } }
   };
-  const KEY = { save: 'mision40ut1.save', prefs: 'mision40ut1.prefs', best: 'mision40ut1.best', seen: 'mision40ut1.seen', tries: 'mision40ut1.intentos', pending: 'mision40ut1.pendiente', sent: 'mision40ut1.enviados' };
+  const KEY = { save: 'mision40ut1.save', prefs: 'mision40ut1.prefs', best: 'mision40ut1.best', seen: 'mision40ut1.seen', tries: 'mision40ut1.intentos', exam: 'mision40ut1.examen', pending: 'mision40ut1.pendiente', sent: 'mision40ut1.enviados' };
 
   /* ---------- estado ---------- */
   let prefs = Object.assign({ sound: true, nombre: '', apellidos: '', ciclo: '' }, store.get(KEY.prefs, {}));
@@ -1994,8 +2002,9 @@ RANKS: [
   }
 
   /* ---------- piezas de interfaz ---------- */
-  const livesLabel = () => run.lives + (run.lives === 1 ? ' vida' : ' vidas') + ' de ' + MAX_LIVES;
-  const heartsHTML = () => Array.from({ length: MAX_LIVES }, (_, i) => '<span class="heart' + (i < run.lives ? '' : ' off') + '">' + icon('heart') + '</span>').join('');
+  const fmtNota = (n) => Number(n).toLocaleString('es-ES', { maximumFractionDigits: 1 });
+  const livesLabel = () => fmtNota(run.lives) + (run.lives === 1 ? ' vida' : ' vidas') + ' de ' + MAX_LIVES;
+  const heartsHTML = (lives) => { const L = lives == null ? run.lives : lives; return Array.from({ length: MAX_LIVES }, (_, i) => { const st = L >= i + 1 ? 'full' : L >= i + 0.5 ? 'half' : 'off'; return '<span class="heart ' + st + '">' + icon('heart') + icon('heart') + '</span>'; }).join(''); };
   const starsHTML = (n) => [0, 1, 2].map((k) => '<span class="' + (k < n ? 'on' : '') + '">' + icon('star') + '</span>').join('');
   const streakChip = () => (run && run.streak >= 2 ? icon('flame') + ' Racha ' + run.streak : '');
   const soundBtn = () => '<button type="button" class="icon-btn" data-act="sound" aria-pressed="' + prefs.sound + '" aria-label="' + (prefs.sound ? 'Silenciar el sonido' : 'Activar el sonido') + '">' + icon(prefs.sound ? 'sound' : 'mute') + '</button>';
@@ -2013,7 +2022,7 @@ RANKS: [
     let ico = 'gear', eb = 'Misión 4.0', title = 'Mapa del tiempo';
     if (mode === 'world' || mode === 'done') {
       const w = WORLDS[wi];
-      ico = w.icon; eb = 'Estación ' + (wi + 1) + '/' + TOTAL + ' · ' + w.yearLabel; title = w.short;
+      ico = w.icon; eb = 'Fase ' + (wi + 1) + '/' + TOTAL + ' · ' + w.yearLabel; title = w.short;
     } else if (mode === 'boss') {
       ico = 'boss'; eb = 'Estación ' + TOTAL + '/' + TOTAL + ' · Jefe final'; title = 'Sobredigitalizador';
     }
@@ -2023,7 +2032,8 @@ RANKS: [
       '<div class="hud-left"><span class="hud-ico" aria-hidden="true">' + icon(ico) + '</span><div class="hud-title"><span class="eyebrow">' + eb + '</span><strong>' + title + '</strong></div></div>' +
       '<div class="hud-right">' +
         '<div class="hearts" id="hearts" role="img" aria-label="' + livesLabel() + '">' + heartsHTML() + '</div>' +
-        '<div class="hud-score"><span class="eyebrow">Puntos</span><b id="hud-score">' + fmt(run.score) + '</b></div>' +
+        '<div class="hud-score"><span class="eyebrow">Nota</span><b id="hud-score">' + fmtNota(run.lives) + '</b></div>' +
+        (showHint ? '<button type="button" class="hud-btn theory-btn" data-act="notes" title="Consultar la teoría" aria-label="Consultar la teoría">' + icon('book') + '<span>Teoría</span></button>' : '') +
         (showHint ? '<button type="button" class="hud-btn hint-btn" id="btn-hint" data-act="hint" title="Pista (tecla P)" aria-label="Usar una pista. Quedan ' + run.hints + '">' + icon('bulb') + '<span id="hint-n">' + run.hints + '</span></button>' : '') +
         '<button type="button" class="hud-btn" data-act="menu" title="Menú (Esc)" aria-label="Abrir el menú de pausa">' + icon('menu') + '</button>' +
       '</div>' +
@@ -2034,7 +2044,7 @@ RANKS: [
     if (!run) return;
     const h = $('#hearts');
     if (h) { h.innerHTML = heartsHTML(); h.setAttribute('aria-label', livesLabel()); }
-    const s = $('#hud-score'); if (s) s.textContent = fmt(run.score);
+    const s = $('#hud-score'); if (s) s.textContent = fmtNota(run.lives);
     const hb = $('#btn-hint');
     if (hb) {
       $('#hint-n').textContent = run.hints;
@@ -2050,32 +2060,37 @@ RANKS: [
     setEra(0);
     const s = store.get(KEY.save, null);
     const canResume = !!(s && s.run && s.run.lives > 0);
-    const anySeen = WORLDS.some((w) => seen[w.id]);
+    const ex = getExam();
     const pend = store.get(KEY.pending, null);
-    const eras = '<ol class="eras" aria-label="Épocas del viaje">' + ERAS.map((e) => '<li style="--c:' + e.c + '"><b>' + e.y + '</b><span>' + e.n + '</span></li>').join('') + '</ol>';
+    const fallidos = ex.intentos.filter((t) => t.estado === 'sin vidas').length;
+    const eras = '<ol class="eras" aria-label="Épocas del examen">' + ERAS.map((e) => '<li style="--c:' + e.c + '"><b>' + e.y + '</b><span>' + e.n + '</span></li>').join('') + '</ol>';
     const opts = '<option value="">Elige tu ciclo…</option>' + CICLOS.map((c) => '<option' + (c === prefs.ciclo ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
-    render('<main class="wrap title-screen">' +
-      '<div class="title-bar"><div class="plates"><span class="plate">UT1</span><span class="plate">RA1</span><span class="plate">Digitalización aplicada a los sectores productivos</span></div>' + soundBtn() + '</div>' +
-      '<h1 class="logo" aria-label="Misión 4.0"><span class="logo-a">Misión</span><span class="logo-b">4.0</span></h1>' +
-      '<p class="tagline">De la máquina de vapor al gemelo digital. Recorre los apuntes de la unidad, supera los retos de ' + WORLDS.length + ' épocas y derrota al <b>Sobredigitalizador</b> en el desafío final.</p>' +
-      (pend ? '<section class="pending" role="alert"><b>Tienes un resultado sin enviar</b><p>' + esc(pend.nombre + ' ' + pend.apellidos) + ' · ' + esc(pend.ciclo) + ' · nota ' + esc(pend.notaTxt) + '. Conéctate a Internet y pulsa el botón.</p><div class="row-btns"><button type="button" class="btn" data-act="send-pending">Enviar ahora</button></div><div id="send-box"></div></section>' : '') +
-      '<section class="graded" aria-labelledby="graded-t"><strong id="graded-t">Ejercicio puntuable · cómo funciona</strong>' +
+    const pendHTML = pend ? '<section class="pending" role="alert"><b>Tienes un resultado sin enviar</b><p>' + esc(pend.nombre + ' ' + pend.apellidos) + ' · ' + esc(pend.ciclo) + ' · nota ' + esc(pend.notaTxt) + '. Conéctate a Internet y pulsa el botón.</p><div class="row-btns"><button type="button" class="btn" data-act="send-pending">Enviar ahora</button></div><div id="send-box"></div></section>' : '';
+    const head = '<div class="title-bar"><div class="plates"><span class="plate">UT1</span><span class="plate">RA1</span><span class="plate">Examen gamificado</span></div>' + soundBtn() + '</div>' +
+      '<h1 class="logo" aria-label="Misión 4.0"><span class="logo-a">Misión</span><span class="logo-b">4.0</span></h1>';
+    if (ex.entregado && !canResume) {
+      render('<main class="wrap title-screen">' + head + pendHTML +
+        '<section class="graded"><strong>Examen entregado</strong><p>' + esc(prefs.nombre + ' ' + prefs.apellidos) + ' · ' + esc(prefs.ciclo) + '</p>' +
+        '<p>Tu nota: <b>' + fmtNota(ex.nota || 0) + '</b>. Ya has terminado el examen en este dispositivo y no se puede repetir.</p></section>' +
+        '<div class="row-btns"><button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Consultar la teoría</button></div></main>');
+      return;
+    }
+    render('<main class="wrap title-screen">' + head +
+      '<p class="tagline">Examen de la UT1 · Digitalización aplicada a los sectores productivos. Recorre ' + TOTAL + ' fases, de la máquina de vapor al gemelo digital, y no pierdas tus corazones.</p>' +
+      pendHTML +
+      (fallidos ? '<section class="pending" role="alert"><b>Atención: te queda un único intento</b><p>Ya te quedaste sin vidas en un intento anterior. Este es tu <b>último intento</b>: lo que saques será tu nota y en el envío constará que no superaste el primero.</p></section>' : '') +
+      '<section class="graded" aria-labelledby="graded-t"><strong id="graded-t">Examen puntuable · cómo funciona</strong>' +
         '<ol class="howto">' +
           '<li><b>Rellena tus datos</b> abajo: nombre, apellidos y ciclo. Escríbelos bien: aparecerán en tu nota.</li>' +
-          '<li><b>Recorre las ' + WORLDS.length + ' estaciones.</b> En cada una lees primero los apuntes y después respondes los retos.</li>' +
-          '<li><b>Tienes 5 vidas.</b> Cada reto fallado quita una. Al superar cada estación recuperas una vida si has perdido alguna.</li>' +
-          '<li><b>Supera el desafío final</b>: 10 aciertos con 20 segundos por pregunta.</li>' +
-          '<li><b>Al llegar al final se calcula tu nota</b> (aciertos ÷ retos respondidos × 10) y <b>se envía automáticamente</b> a tu profesor en un PDF con tu nombre, ciclo y nota.</li>' +
+          '<li><b>Empiezas con 10 corazones, que son tu nota: un 10.</b></li>' +
+          '<li><b>Cada pregunta fallada resta medio corazón</b> (0,5 puntos). <b>Las vidas no se recuperan.</b></li>' +
+          '<li><b>Puedes consultar la teoría</b> siempre que quieras con el botón <b>Teoría</b>, y tienes <b>3 pistas</b> gratis.</li>' +
+          '<li>El examen tiene <b>' + TOTAL + ' fases y unas ' + WORLDS.reduce((a, w) => a + w.pick + (w.fixed || []).length, 0) + ' preguntas</b>. Al terminar cada fase verás <b>tu nota actual y las vidas que te quedan</b>.</li>' +
+          '<li><b>Al terminar la última fase, tu nota se envía automáticamente</b> a tu profesor en un PDF con tu nombre, apellidos, ciclo y nota.</li>' +
         '</ol>' +
-        '<p class="warn-line">' + icon('cross') + '<span>Si te quedas sin vidas <b>no se envía nada</b> y tienes que empezar de nuevo. Necesitas Internet al terminar. La partida se guarda sola si cierras la página.</span></p>' +
+        '<p class="warn-line">' + icon('cross') + '<span>Tienes <b>' + MAX_INTENTOS + ' intentos como máximo</b>. Si pierdes todos los corazones, puedes empezar un <b>último intento</b>, y tu profesor verá que fallaste el primero. Si también lo pierdes, tu nota es 0. Necesitas Internet al terminar. El examen se guarda solo si cierras la página.</span></p>' +
       '</section>' +
       eras +
-      '<ul class="rules">' +
-        '<li>' + icon('heart') + '<span><b>5 vidas</b> para toda la misión. Cada reto fallado cuesta una.</span></li>' +
-        '<li>' + icon('bulb') + '<span><b>3 pistas</b> sacadas de los apuntes. Usarlas deja el reto en la mitad de puntos.</span></li>' +
-        '<li>' + icon('flame') + '<span><b>Rachas</b>: multiplican tus puntos, y cada ' + STREAK_LIFE + ' aciertos seguidos recuperas una vida.</span></li>' +
-        '<li>' + icon('star') + '<span>Cada <b>estación superada</b> te devuelve una vida si has perdido alguna.</span></li>' +
-      '</ul>' +
       '<section class="panel start">' +
         '<span class="eyebrow">Tus datos (obligatorios)</span>' +
         '<div class="form-grid">' +
@@ -2083,14 +2098,15 @@ RANKS: [
           '<div class="field" id="f-apellidos"><label class="eyebrow" for="in-apellidos">Apellidos</label><input id="in-apellidos" type="text" maxlength="60" autocomplete="family-name" value="' + esc(prefs.apellidos) + '"></div>' +
           '<div class="field full" id="f-ciclo"><label class="eyebrow" for="in-ciclo">Ciclo</label><select id="in-ciclo">' + opts + '</select></div>' +
         '</div>' +
-        '<label class="agree" id="f-agree"><input type="checkbox" id="in-agree"><span>He leído cómo funciona el ejercicio: es <b>puntuable</b>, tengo que <b>llegar al final</b> y mi nota se enviará con mi <b>nombre, apellidos y ciclo</b>.</span></label>' +
+        '<label class="agree" id="f-agree"><input type="checkbox" id="in-agree"><span>He leído cómo funciona el examen: es <b>puntuable</b>, cada fallo resta <b>medio corazón</b>, las vidas <b>no se recuperan</b>, tengo <b>' + MAX_INTENTOS + ' intentos como máximo</b> y mi nota se enviará con mi <b>nombre, apellidos y ciclo</b>.</span></label>' +
         '<p class="form-err" id="form-err" role="alert" hidden></p>' +
         '<div class="row-btns">' +
           (canResume
-            ? '<button type="button" class="btn big" data-act="resume" id="btn-main">' + icon(s.run.bossDone ? 'trophy' : 'play') + '<span class="btn-stack">' + (s.run.bossDone ? 'Ver tu nota y enviarla<small>Desafío final superado</small>' : 'Continuar la misión<small>Estación ' + (s.run.world + 1) + ' de ' + TOTAL + ' · ' + s.run.lives + (s.run.lives === 1 ? ' vida' : ' vidas') + '</small>') + '</span></button><button type="button" class="btn ghost" data-act="start">Empezar de cero</button>'
-            : '<button type="button" class="btn big" data-act="start" id="btn-main">' + icon('play') + ' Empezar la misión</button>') +
-          (anySeen ? '<button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Cuaderno de apuntes</button>' : '') +
+            ? '<button type="button" class="btn big" data-act="resume" id="btn-main">' + icon(s.run.finished ? 'trophy' : 'play') + '<span class="btn-stack">' + (s.run.finished ? 'Ver y enviar tu nota<small>Examen terminado</small>' : 'Continuar el examen<small>Fase ' + Math.min(s.run.world + 1, TOTAL) + ' de ' + TOTAL + ' · nota ' + fmtNota(s.run.lives) + '</small>') + '</span></button>'
+            : '<button type="button" class="btn big" data-act="start" id="btn-main">' + icon('play') + (fallidos ? ' Empezar mi último intento' : ' Empezar el examen') + '</button>') +
+          '<button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Ver la teoría</button>' +
         '</div>' +
+        '<p class="muted small">Al empezar, el examen se pondrá a pantalla completa.</p>' +
       '</section>' +
     '</main>');
   }
@@ -2114,11 +2130,21 @@ RANKS: [
     err.hidden = true;
     return true;
   }
+  const getExam = () => Object.assign({ intentos: [], entregado: false }, store.get(KEY.exam, {}) || {});
+  const setExam = (e) => store.set(KEY.exam, e);
+  function goFull() {
+    const el = document.documentElement;
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) return;
+      const f = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (f) { const r = f.call(el); if (r && r.catch) r.catch(() => {}); }
+    } catch (e) { /* sin pantalla completa */ }
+  }
   function startRun() {
+    const ex = getExam();
+    if (ex.entregado || ex.intentos.length >= MAX_INTENTOS) return showTitle();
     run = newRun();
-    const t = (store.get(KEY.tries, 0) || 0) + 1;
-    store.set(KEY.tries, t);
-    run.attempt = t;
+    run.attempt = ex.intentos.length + 1;
     lastBeat = Date.now();
     goMap();
   }
@@ -2134,16 +2160,16 @@ RANKS: [
       const isBoss = i === WORLDS.length;
       let foot = '';
       if (st === 'done' && !isBoss) foot = '<div class="st-foot"><span class="stars" role="img" aria-label="' + run.stars[i] + ' de 3 estrellas">' + starsHTML(run.stars[i]) + '</span><button type="button" class="linkbtn" data-act="notes" data-w="' + i + '">' + icon('book') + ' Apuntes</button></div>';
-      const btn = st === 'cur' ? '<button type="button" class="btn" data-act="play">' + (isBoss ? 'Enfrentarte al jefe' : 'Viajar a esta época') + ' ' + icon('arrow') + '</button>' : '';
+      const btn = st === 'cur' ? '<button type="button" class="btn" data-act="play">' + (isBoss ? 'Enfrentarte al jefe' : 'Empezar esta fase') + ' ' + icon('arrow') + '</button>' : '';
       return '<li class="station ' + st + '" style="--st:' + w.color + '">' +
         '<div class="st-node" aria-hidden="true">' + icon(st === 'locked' ? 'lock' : w.icon) + '</div>' +
-        '<div class="st-card"><span class="eyebrow">' + w.yearLabel + ' · Estación ' + (i + 1) + (st === 'locked' ? ' · bloqueada' : '') + '</span><h3>' + w.name + '</h3><p>' + w.sub + '</p>' + foot + btn + '</div>' +
+        '<div class="st-card"><span class="eyebrow">' + w.yearLabel + ' · Fase ' + (i + 1) + (st === 'locked' ? ' · bloqueada' : '') + '</span><h3>' + w.name + '</h3><p>' + w.sub + '</p>' + foot + btn + '</div>' +
       '</li>';
     }).join('');
     const intro = run.world === 0
-      ? 'Tu viaje empieza en la Inglaterra del vapor. Cada estación es una parte de la UT1.'
-      : run.world >= WORLDS.length ? 'Has reparado todas las épocas. Solo queda el jefe final.' : 'Llevas ' + run.world + ' de ' + TOTAL + ' estaciones. ¡Sigue el viaje!';
-    render(hudHTML('map') + '<main class="wrap"><div class="map-head"><h1 class="h-display">Mapa del tiempo</h1><p class="muted">' + intro + ' Estrellas: ' + totalStars() + '/' + MAX_STARS + ' · Pistas: ' + run.hints + '</p></div><ol class="rail">' + items + '</ol></main>');
+      ? 'El examen empieza en la Inglaterra del vapor. Cada fase es una parte de la UT1.'
+      : run.world >= WORLDS.length ? 'Has reparado todas las épocas. Solo queda el jefe final.' : 'Llevas ' + run.world + ' de ' + TOTAL + ' fases. Nota actual: ' + fmtNota(run.lives) + '.';
+    render(hudHTML('map') + '<main class="wrap"><div class="map-head"><h1 class="h-display">Mapa del tiempo</h1><p class="muted">' + intro + ' Pistas: ' + run.hints + '/' + START_HINTS + '</p></div><ol class="rail">' + items + '</ol></main>');
     const cur = $('.station.cur');
     if (cur && run.world > 1) cur.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
     const b = $('.station.cur .btn'); if (b) b.focus({ preventScroll: true });
@@ -2159,7 +2185,7 @@ RANKS: [
     const ov = $('#overlay');
     const sub = (st.place ? st.place + ' · ' : '') + st.sub;
     const counts = !reduceMotion && typeof to === 'number' && typeof prev === 'number' && prev !== to;
-    ov.innerHTML = '<div class="warp" aria-hidden="true"></div><div class="jump' + (st.id === 'boss' ? ' glitch' : '') + '" role="status"><span class="eyebrow">Salto temporal · Estación ' + (i + 1) + ' de ' + TOTAL + '</span><div class="jump-year" id="jump-year">' + (counts ? prev : st.jump) + '</div><div class="jump-sub">' + sub + '</div></div>';
+    ov.innerHTML = '<div class="warp" aria-hidden="true"></div><div class="jump' + (st.id === 'boss' ? ' glitch' : '') + '" role="status"><span class="eyebrow">Salto temporal · Fase ' + (i + 1) + ' de ' + TOTAL + '</span><div class="jump-year" id="jump-year">' + (counts ? prev : st.jump) + '</div><div class="jump-sub">' + sub + '</div></div>';
     ov.classList.remove('out');
     ov.hidden = false;
     Sound.jump();
@@ -2204,13 +2230,14 @@ RANKS: [
     pos.screen = 'intro'; persist();
     render(hudHTML('world', i) + '<main class="wrap intro">' +
       '<div class="intro-badge" aria-hidden="true">' + icon(w.icon) + '</div>' +
-      '<span class="eyebrow">Estación ' + (i + 1) + ' de ' + TOTAL + ' · ' + w.yearLabel + (w.place ? ' · ' + w.place : '') + '</span>' +
+      '<span class="eyebrow">Fase ' + (i + 1) + ' de ' + TOTAL + ' · ' + w.yearLabel + (w.place ? ' · ' + w.place : '') + '</span>' +
       '<h1 class="intro-title" tabindex="-1" id="intro-title">' + w.name + '</h1>' +
       '<p class="intro-sub">' + w.sub + '</p>' +
       '<section class="panel mission"><div class="panel-head"><span class="led"></span><span class="eyebrow">Tu misión</span></div><p>' + w.mission + '</p></section>' +
-      '<p class="intro-meta">' + w.cards.length + ' tarjetas de apuntes · ' + pos.list.length + ' retos</p>' +
-      '<div class="row-btns"><button type="button" class="btn big" data-act="read">' + icon('book') + ' Leer los apuntes</button>' +
-      (seen[w.id] ? '<button type="button" class="btn ghost" data-act="skip-cards">Ir directo a los retos</button>' : '') + '</div>' +
+      '<p class="intro-meta">' + w.cards.length + ' tarjetas de teoría · ' + pos.list.length + ' preguntas · nota actual ' + fmtNota(run.lives) + '</p>' +
+      '<div class="row-btns"><button type="button" class="btn big" data-act="read">' + icon('book') + ' Leer la teoría</button>' +
+      '<button type="button" class="btn ghost" data-act="skip-cards">Ir a las preguntas</button></div>' +
+      '<p class="muted small">Durante las preguntas puedes abrir la teoría cuando quieras con el botón <b>Teoría</b>.</p>' +
     '</main>');
     const b = $('[data-act="read"]'); if (b) b.focus({ preventScroll: true });
   }
@@ -2227,9 +2254,9 @@ RANKS: [
       '<nav class="note-nav" aria-label="Tarjetas de apuntes">' +
         '<button type="button" class="btn ghost" data-act="card-prev"' + (k === 0 ? ' disabled' : '') + '>Anterior</button>' +
         '<div class="dots" aria-hidden="true">' + w.cards.map((_, j) => '<i class="' + (j === k ? 'on' : '') + '"></i>').join('') + '</div>' +
-        '<button type="button" class="btn" data-act="card-next">' + (last ? '¡A los retos!' : 'Siguiente') + ' ' + icon('arrow') + '</button>' +
+        '<button type="button" class="btn" data-act="card-next">' + (last ? '¡A las preguntas!' : 'Siguiente') + ' ' + icon('arrow') + '</button>' +
       '</nav>' +
-      (!last && seen[w.id] ? '<p class="center"><button type="button" class="linkbtn" data-act="skip-cards">Saltar a los retos</button></p>' : '') +
+      (!last ? '<p class="center"><button type="button" class="linkbtn" data-act="skip-cards">Saltar a las preguntas</button></p>' : '') +
     '</main>');
     $('#note-title').focus({ preventScroll: true });
   }
@@ -2251,7 +2278,7 @@ RANKS: [
     ui = freshUI(c, 'world');
     pos.screen = 'challenge'; persist();
     render(hudHTML('world', i) + '<main class="wrap"><section class="panel ch" id="ch" aria-labelledby="q">' +
-      '<div class="panel-head"><span class="led"></span><span class="eyebrow">Reto ' + (pos.ci + 1) + ' de ' + pos.list.length + ' · ' + typeLabel(c) + '</span><span class="streak-chip" id="streak-chip">' + streakChip() + '</span></div>' +
+      '<div class="panel-head"><span class="led"></span><span class="eyebrow">Pregunta ' + (pos.ci + 1) + ' de ' + pos.list.length + ' · ' + typeLabel(c) + '</span><span class="streak-chip" id="streak-chip">' + streakChip() + '</span></div>' +
       bodyHTML(c) +
       '<div id="hint-slot"></div><div id="fb-slot" aria-live="polite"></div>' +
     '</section></main>');
@@ -2432,14 +2459,14 @@ RANKS: [
   }
   function loseLife() {
     ui.lifeLost = true;
-    run.lives = Math.max(0, run.lives - 1);
+    run.lives = Math.max(0, Math.round((run.lives - PENALTY) * 2) / 2);
     run.flawless = false;
     Sound.bad();
     flash();
     const ch = $('#ch');
     if (ch && !reduceMotion) { ch.classList.remove('shake'); void ch.offsetWidth; ch.classList.add('shake'); }
     updateHud();
-    const hs = $$('#hearts .heart'); if (hs[run.lives]) hs[run.lives].classList.add('breaking');
+    const hs = $$('#hearts .heart'); const hi = Math.floor(run.lives); if (hs[hi]) hs[hi].classList.add('breaking');
     persist();
   }
   const OK_T = ['¡Correcto!', '¡Exacto!', '¡Bien visto!', '¡Eso es!', '¡Perfecto!'];
@@ -2460,10 +2487,6 @@ RANKS: [
       run.score += pts;
       run.correct++;
       Sound.ok();
-      if (run.streak % STREAK_LIFE === 0 && run.lives < MAX_LIVES) {
-        run.lives++;
-        setTimeout(() => { toast(icon('heart') + ' ¡Racha de ' + run.streak + '! +1 vida'); Sound.life(); const hs = $$('#hearts .heart'); if (hs[run.lives - 1]) hs[run.lives - 1].classList.add('gain'); }, 300);
-      }
       if (run.streak === 3 || run.streak === 6) setTimeout(() => { toast(icon('flame') + ' ¡Racha x' + mult + '!'); Sound.streak(); }, 250);
     } else {
       run.streak = 0;
@@ -2490,8 +2513,8 @@ RANKS: [
     let next = 'Continuar';
     if (dead) next = 'Ver resultado';
     else if (boss && pos.boss.hp <= 0) next = '¡Rematar al jefe!';
-    else if (!boss && pos.ci >= pos.list.length) next = 'Terminar la estación';
-    const ptsTxt = ok ? '+' + pts + ' puntos' + (mult > 1 ? ' · racha x' + mult : '') + (ui.hint ? ' · con pista' : '') : '−1 vida';
+    else if (!boss && pos.ci >= pos.list.length) next = 'Terminar la fase';
+    const ptsTxt = (ok ? '' : '−½ vida · ') + 'nota actual ' + fmtNota(run.lives);
     const right = !ok && info.right && c.t !== 'sort' && c.t !== 'match' ? '<p class="fb-right">' + icon('check') + '<span>Respuesta correcta: <b>' + info.right + '</b></span></p>' : '';
     const slot = $('#fb-slot');
     if (!slot) return;
@@ -2518,30 +2541,30 @@ RANKS: [
     const i = pos.world, w = WORLDS[i];
     const errs = run.worldErrors, stars = errs === 0 ? 3 : errs === 1 ? 2 : 1;
     const results = (pos.results || []).slice(), n = results.length, okN = results.filter((r) => r === 'ok').length;
-    let lifeBack = false;
     run.stars[i] = stars;
     if (errs === 0) run.score += 300;
-    if (run.lives < MAX_LIVES) { run.lives++; lifeBack = true; }
-    const gained = run.score - (run.worldScore0 || 0);
     run.world = i + 1;
+    const last = run.world >= WORLDS.length;
+    if (last) run.finished = true;
     seen[w.id] = true; store.set(KEY.seen, seen);
     pos = { screen: 'map' };
     persist();
     setEra(w.era);
     render(hudHTML('done', i) + '<main class="wrap"><section class="panel done-card">' +
-      '<div class="intro-badge" aria-hidden="true">' + icon(w.icon) + '</div>' +
-      '<span class="eyebrow">Estación ' + (i + 1) + ' completada · ' + w.short + '</span>' +
+      '<span class="eyebrow">Fase ' + (i + 1) + ' de ' + TOTAL + ' superada · ' + w.short + '</span>' +
       '<h1 class="intro-title" tabindex="-1" id="done-title">' + w.doneTitle + '</h1>' +
-      '<div class="big-stars" role="img" aria-label="' + stars + ' de 3 estrellas">' + [0, 1, 2].map((k) => '<span class="bstar' + (k < stars ? ' on' : '') + '" style="--d:' + k * 180 + 'ms">' + icon('star') + '</span>').join('') + '</div>' +
-      statsHTML([['Aciertos', okN + '/' + n], ['Puntos', '+' + fmt(gained)], ['Racha', run.streak]]) +
-      (lifeBack ? '<p class="bonus">' + icon('heart') + ' Estación superada: recuperas una vida.</p>' : '<p class="muted">Tienes las 5 vidas completas.</p>') +
-      (errs === 0 ? '<p class="bonus">' + icon('star') + ' Estación perfecta: +300 puntos.</p>' : '') +
-      '<button type="button" class="btn big" data-act="go-map">' + (i + 1 < WORLDS.length ? 'Seguir el viaje' : 'Ir a por el jefe final') + ' ' + icon('arrow') + '</button>' +
+      '<div class="nota"><span class="eyebrow">Tu nota actual</span><strong>' + fmtNota(run.lives) + '</strong></div>' +
+      '<div class="hearts big" role="img" aria-label="' + livesLabel() + '">' + heartsHTML() + '</div>' +
+      '<p class="lives-left">Te quedan <b>' + fmtNota(run.lives) + '</b> ' + (run.lives === 1 ? 'vida' : 'vidas') + '</p>' +
+      statsHTML([['Aciertos en la fase', okN + '/' + n], ['Fallos en la fase', errs], ['Pistas', run.hints + '/' + START_HINTS]]) +
+      '<p class="muted">Las vidas no se recuperan: cada fallo resta medio corazón.</p>' +
+      (last
+        ? '<button type="button" class="btn big" data-act="victory">Ver y enviar mi nota final ' + icon('arrow') + '</button>'
+        : '<button type="button" class="btn big" data-act="go-map">Siguiente fase ' + icon('arrow') + '</button>') +
     '</section></main>');
     $('#done-title').focus({ preventScroll: true });
     Sound.win();
-    confetti(150);
-    if (lifeBack) setTimeout(() => { Sound.life(); const hs = $$('#hearts .heart'); if (hs[run.lives - 1]) hs[run.lives - 1].classList.add('gain'); }, 700);
+    confetti(120);
   }
 
   /* ---------- jefe final ---------- */
@@ -2674,45 +2697,48 @@ RANKS: [
   }
   function notaDe(r) { return r.answered ? Math.round((r.correct / r.answered) * 100) / 10 : 0; }
   const notaTxt = (n) => n.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  function victory() {
+  function victory(dead) {
     stopTimer();
     setEra(0);
-    run.score += 1000 + run.lives * 250;
-    const stars = totalStars(), frac = stars / MAX_STARS;
-    const rank = run.flawless ? RANKS[0] : frac >= 0.85 ? RANKS[1] : frac >= 0.66 ? RANKS[2] : frac >= 0.48 ? RANKS[3] : RANKS[4];
-    const nota = notaDe(run);
     const r = run;
-    saveBest(r.score);
+    const nota = dead ? 0 : r.lives;
+    const ex = getExam();
+    if (!dead) ex.intentos.push({ n: r.attempt || 1, estado: 'terminado', fase: TOTAL, faseNombre: WORLDS[TOTAL - 1].name, aciertos: r.correct, retos: r.answered, fallos: r.mistakes.length, fecha: new Date().toISOString() });
+    ex.entregado = true; ex.nota = nota;
+    setExam(ex);
     const now = new Date();
+    const previos = ex.intentos.filter((t) => t.n !== (r.attempt || 1));
     const res = {
       nombre: prefs.nombre, apellidos: prefs.apellidos, ciclo: prefs.ciclo,
-      nota, notaTxt: notaTxt(nota), aciertos: r.correct, retos: r.answered, puntos: r.score,
-      estrellas: stars + '/' + MAX_STARS, mejorRacha: r.bestStreak, vidas: r.lives + '/' + MAX_LIVES,
-      tiempo: fmtTime(r.elapsed), intento: r.attempt || 1, nivel: rank.lvl,
+      nota, notaTxt: fmtNota(nota), aciertos: r.correct, retos: r.answered, puntos: r.score,
+      fallosN: r.mistakes.length, pistas: (START_HINTS - r.hints) + '/' + START_HINTS,
+      vidas: fmtNota(dead ? 0 : r.lives) + '/' + MAX_LIVES, tiempo: fmtTime(r.elapsed), intento: r.attempt || 1,
+      estado: dead ? 'Sin vidas en el intento ' + (r.attempt || 1) + ' (fase ' + Math.min(r.world + 1, TOTAL) + ' de ' + TOTAL + ')' : 'Examen terminado (' + TOTAL + ' fases)',
+      intentosPrevios: previos.map((t) => 'Intento ' + t.n + ': NO SUPERADO, sin vidas en la fase ' + t.fase + ' (' + t.faseNombre + ') · ' + t.aciertos + ' aciertos de ' + t.retos + ' preguntas · ' + new Date(t.fecha).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })),
       fecha: now.toISOString(), fechaTxt: now.toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' }),
       fallos: r.mistakes.map((m) => ({ w: m.w, q: m.q, yours: strip(m.yours), right: strip(m.right) }))
     };
     clearSave();
     render('<main class="wrap final">' +
       '<section class="panel diploma">' +
-        '<span class="eyebrow">Ejercicio puntuable · UT1 · Digitalización de los sectores productivos</span>' +
+        '<span class="eyebrow">Examen gamificado · UT1 · Digitalización de los sectores productivos</span>' +
         '<div class="dip-eras" aria-hidden="true">' + ERAS.map((e) => '<i style="background:' + e.c + '"></i>').join('') + '</div>' +
-        '<h1 class="dip-title" tabindex="-1" id="dip-title">Misión 4.0 completada</h1>' +
+        '<h1 class="dip-title" tabindex="-1" id="dip-title">' + (dead ? 'Examen terminado' : 'Misión 4.0 completada') + '</h1>' +
         '<p class="dip-name">' + esc(res.nombre + ' ' + res.apellidos) + '</p>' +
-        '<p><b>' + esc(res.ciclo) + '</b> · ha recorrido todas las épocas de la unidad y ha superado el desafío final.</p>' +
-        '<div class="nota"><span class="eyebrow">Tu nota</span><strong>' + res.notaTxt + '</strong><span class="muted">' + res.aciertos + ' aciertos de ' + res.retos + ' retos</span></div>' +
+        '<p><b>' + esc(res.ciclo) + '</b> · ' + esc(res.estado) + '.</p>' +
+        '<div class="nota"><span class="eyebrow">Tu nota final</span><strong>' + res.notaTxt + '</strong><span class="muted">' + res.aciertos + ' aciertos de ' + res.retos + ' preguntas</span></div>' +
+        '<div class="hearts big" role="img" aria-label="' + fmtNota(nota) + ' vidas de 10">' + heartsHTML(nota) + '</div>' +
         '<div class="send wait" id="send-box" aria-live="polite"><b class="st">Preparando el envío…</b></div>' +
-        '<div class="rank"><span class="eyebrow">Nivel alcanzado</span><strong>' + rank.lvl + '</strong><p>' + rank.txt + '</p></div>' +
-        statsHTML([['Puntos', fmt(r.score)], ['Estrellas', res.estrellas], ['Intento', res.intento], ['Mejor racha', r.bestStreak], ['Vidas', res.vidas], ['Tiempo', res.tiempo]], 'six') +
+        (previos.length ? '<p class="warn-line">' + icon('cross') + '<span>Constará en el envío: ' + esc(res.intentosPrevios.join(' · ')) + '</span></p>' : '') +
+        statsHTML([['Nota', res.notaTxt], ['Fallos', res.fallosN], ['Pistas usadas', res.pistas], ['Intento', res.intento + ' de ' + MAX_INTENTOS], ['Puntos', fmt(r.score)], ['Tiempo', res.tiempo]], 'six') +
         '<p class="muted small">' + esc(res.fechaTxt) + '</p>' +
       '</section>' +
       reviewHTML(r.mistakes) +
-      '<div class="row-btns"><button type="button" class="btn ghost" data-act="new">' + icon('play') + ' Jugar otra vez (se enviaría otro resultado)</button><button type="button" class="btn ghost" data-act="title">Volver a la portada</button></div>' +
+      '<div class="row-btns"><button type="button" class="btn ghost" data-act="title">Volver a la portada</button></div>' +
     '</main>');
     run = null; pos = null; ui = {};
     $('#dip-title').focus({ preventScroll: true });
-    Sound.win();
-    confetti(240);
+    if (dead) Sound.lose(); else { Sound.win(); confetti(240); }
     sendResult(res);
   }
 
@@ -2727,7 +2753,7 @@ RANKS: [
   function fileName(r) {
     const d = new Date(r.fecha), z = (n) => String(n).padStart(2, '0');
     const stamp = d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes());
-    return 'UT1_' + slug(r.ciclo.replace(/^DJK 1º /, '')) + '_' + slug(r.apellidos) + '_' + slug(r.nombre) + '_nota' + String(r.nota).replace('.', ',') + '_' + stamp + '.pdf';
+    return 'UT1_' + slug(r.ciclo.replace(/^DJK 1º /, '')) + '_' + slug(r.apellidos) + '_' + slug(r.nombre) + '_nota' + String(r.nota).replace('.', ',') + '_intento' + r.intento + '_' + stamp + '.pdf';
   }
   function buildPDF(r) {
     const J = window.jspdf && window.jspdf.jsPDF;
@@ -2737,7 +2763,7 @@ RANKS: [
     doc.setFillColor(18, 19, 27); doc.rect(0, 0, 210, 38, 'F');
     doc.setTextColor(255, 181, 71); doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.text(pdfSafe('MISIÓN 4.0'), L, 19);
     doc.setTextColor(237, 238, 246); doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
-    doc.text(pdfSafe('UT1 · Digitalización de los sectores productivos (DJK) · RA1 · Ejercicio puntuable'), L, 29);
+    doc.text(pdfSafe('UT1 · Digitalización de los sectores productivos (DJK) · RA1 · Examen gamificado'), L, 29);
     doc.setTextColor(20, 20, 30);
     let y = 54;
     const row = (k, v) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text(pdfSafe(k), L, y); doc.setFont('helvetica', 'normal'); doc.text(pdfSafe(v), L + 42, y); y += 8; };
@@ -2747,12 +2773,18 @@ RANKS: [
     doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.text('NOTA', L + 8, y + 12);
     doc.setFontSize(34); doc.text(pdfSafe(r.notaTxt + ' / 10'), L + 8, y + 25);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
-    doc.text(pdfSafe(r.aciertos + ' aciertos de ' + r.retos + ' retos respondidos'), L + 90, y + 13);
-    doc.text(pdfSafe('Nivel alcanzado: ' + r.nivel), L + 90, y + 21);
+    doc.text(pdfSafe(r.aciertos + ' aciertos de ' + r.retos + ' preguntas'), L + 90, y + 13);
+    doc.text(pdfSafe(r.estado), L + 90, y + 21);
     y += 42;
-    row('Puntos:', fmt(r.puntos)); row('Estrellas:', r.estrellas); row('Vidas finales:', r.vidas); row('Mejor racha:', String(r.mejorRacha)); row('Tiempo de juego:', r.tiempo); row('Intento nº:', String(r.intento));
+    row('Vidas finales:', String(r.vidas)); row('Fallos:', String(r.fallosN)); row('Pistas usadas:', String(r.pistas)); row('Tiempo:', r.tiempo); row('Intento nº:', r.intento + ' de ' + MAX_INTENTOS);
+    if (r.intentosPrevios && r.intentosPrevios.length) {
+      y += 2; doc.setTextColor(190, 30, 45); doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.text(pdfSafe('Intentos anteriores'), L, y); y += 6;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      r.intentosPrevios.forEach((t) => { const ln = doc.splitTextToSize(pdfSafe(t), W); doc.text(ln, L, y); y += ln.length * 5 + 1; });
+      doc.setTextColor(20, 20, 30);
+    } else { row('Intentos anteriores:', 'ninguno'); }
     y += 4;
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text(pdfSafe('Retos fallados (' + r.fallos.length + ')'), L, y); y += 7;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.text(pdfSafe('Preguntas falladas (' + r.fallos.length + ')'), L, y); y += 7;
     doc.setFontSize(10);
     if (!r.fallos.length) { doc.setFont('helvetica', 'normal'); doc.text(pdfSafe('Ninguno.'), L, y); }
     r.fallos.forEach((m, i) => {
@@ -2813,20 +2845,23 @@ RANKS: [
   function gameOver() {
     stopTimer();
     setEra(0);
-    const r = run, reachedIdx = Math.min(r.world, WORLDS.length), st = station(reachedIdx);
-    const acc = r.answered ? Math.round((r.correct / r.answered) * 100) : 0;
-    const record = saveBest(r.score);
+    const r = run, reachedIdx = Math.min(r.world, WORLDS.length - 1), st = WORLDS[reachedIdx];
+    const ex = getExam();
+    ex.intentos.push({ n: r.attempt || 1, estado: 'sin vidas', fase: reachedIdx + 1, faseNombre: st.name, aciertos: r.correct, retos: r.answered, fallos: r.mistakes.length, fecha: new Date().toISOString() });
+    setExam(ex);
+    if ((r.attempt || 1) >= MAX_INTENTOS) return victory(true);
     clearSave();
     render('<main class="wrap final">' +
       '<section class="panel over">' +
         '<div class="over-ico" aria-hidden="true">' + icon('heart') + '</div>' +
-        '<span class="eyebrow">Fin de la misión</span>' +
+        '<span class="eyebrow">Intento ' + (r.attempt || 1) + ' no superado</span>' +
         '<h1 class="intro-title" tabindex="-1" id="over-title">Sin vidas</h1>' +
-        '<p>El Sobredigitalizador gana esta ronda. Has llegado a la estación <b>' + (reachedIdx + 1) + ' de ' + TOTAL + ': ' + st.name + '</b>.</p>' +
-        statsHTML([['Puntos', fmt(r.score)], ['Aciertos', acc + '%'], ['Retos', r.answered], ['Estrellas', totalStars() + '/' + MAX_STARS], ['Mejor racha', r.bestStreak], ['Tiempo', fmtTime(r.elapsed)]], 'six') +
-        (record ? '<p class="bonus">' + icon('trophy') + ' Aun así, ¡nuevo récord en este dispositivo!</p>' : '') +
-        '<p class="graded" style="text-align:left"><span><b>No se ha enviado ninguna nota.</b> El ejercicio solo cuenta si llegas al final. Repasa tus fallos y los apuntes y vuelve a intentarlo: las preguntas cambian en cada partida.</span></p>' +
-        '<div class="row-btns" style="justify-content:center"><button type="button" class="btn big" data-act="new">' + icon('play') + ' Volver a intentarlo</button><button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Repasar apuntes</button></div>' +
+        '<p>Has perdido los 10 corazones en la fase <b>' + (reachedIdx + 1) + ' de ' + TOTAL + ': ' + st.name + '</b>.</p>' +
+        statsHTML([['Aciertos', r.correct], ['Fallos', r.mistakes.length], ['Preguntas', r.answered]]) +
+        '<section class="graded" style="text-align:left"><strong>Te queda un único intento</strong>' +
+          '<p>Puedes volver a empezar el examen desde el principio, pero <b>será tu último intento</b>: lo que saques en él será tu nota (si te vuelves a quedar sin vidas, tu nota será 0).</p>' +
+          '<p>En el envío a tu profesor constará que <b>no superaste el primer intento</b>.</p></section>' +
+        '<div class="row-btns" style="justify-content:center"><button type="button" class="btn big" data-act="new">' + icon('play') + ' Empezar mi último intento</button><button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Repasar la teoría</button></div>' +
       '</section>' +
       reviewHTML(r.mistakes) +
     '</main>');
@@ -2855,18 +2890,18 @@ RANKS: [
     openModal('<div class="modal-head"><h2 id="modal-title" class="h-display">Pausa</h2><button type="button" class="icon-btn" data-act="close-modal" aria-label="Cerrar">' + icon('cross') + '</button></div>' +
       '<div class="menu-list">' +
         '<button type="button" class="btn" data-act="close-modal" data-autofocus>' + icon('play') + ' Seguir jugando</button>' +
-        '<button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Cuaderno de apuntes</button>' +
+        '<button type="button" class="btn ghost" data-act="notes">' + icon('book') + ' Teoría</button>' +
         '<button type="button" class="btn ghost" data-act="sound" id="menu-sound">' + icon(prefs.sound ? 'sound' : 'mute') + ' Sonido: ' + (prefs.sound ? 'activado' : 'desactivado') + '</button>' +
-        '<button type="button" class="btn ghost danger" data-act="quit">' + icon('cross') + ' Abandonar la misión</button>' +
+        '<button type="button" class="btn ghost" data-act="fullscreen">' + icon('arrow') + ' Pantalla completa</button>' +
       '</div>' +
       '<p class="muted small" style="margin-top:14px">La partida se guarda sola en este dispositivo. Atajos: A–D o 1–4 para responder, V/F en verdadero o falso, P para pedir pista.</p>');
   }
   function openNotes(w) {
-    const avail = WORLDS.map((_, i) => i).filter((i) => seen[WORLDS[i].id] || (run && i <= run.world && i < WORLDS.length && pos && pos.world === i));
+    const avail = WORLDS.map((_, i) => i);
     if (!avail.length) avail.push(0);
-    if (w == null || avail.indexOf(w) < 0) w = avail[avail.length - 1];
+    if (w == null || avail.indexOf(w) < 0) w = pos && pos.world != null ? pos.world : 0;
     const W = WORLDS[w];
-    openModal('<div class="modal-head"><h2 id="modal-title" class="h-display">Cuaderno de apuntes</h2><button type="button" class="icon-btn" data-act="close-modal" aria-label="Cerrar">' + icon('cross') + '</button></div>' +
+    openModal('<div class="modal-head"><h2 id="modal-title" class="h-display">Teoría</h2><button type="button" class="icon-btn" data-act="close-modal" aria-label="Cerrar">' + icon('cross') + '</button></div>' +
       '<div class="tabs" role="tablist" aria-label="Épocas">' + avail.map((i) => '<button type="button" role="tab" class="tab' + (i === w ? ' on' : '') + '" aria-selected="' + (i === w) + '" data-act="notes-tab" data-w="' + i + '" style="--st:' + WORLDS[i].color + '">' + WORLDS[i].short + '</button>').join('') + '</div>' +
       '<div class="notes-stack">' + W.cards.map((c, k) => '<article class="note-mini"><span class="eyebrow">' + W.short + ' · ' + (k + 1) + '/' + W.cards.length + '</span><h3>' + c.title + '</h3><div class="note-body">' + c.html + '</div></article>').join('') + '</div>' +
       (avail.length < WORLDS.length ? '<p class="muted small" style="margin-top:14px">Las demás épocas aparecen aquí cuando llegas a ellas.</p>' : ''),
@@ -2878,7 +2913,7 @@ RANKS: [
   /* ---------- reanudar ---------- */
   function resume() {
     if (!run) return showTitle();
-    if (run.bossDone) return victory();
+    if (run.bossDone || run.finished) return victory();
     if (run.lives <= 0) return gameOver();
     const p = pos || { screen: 'map' };
     if ((p.screen === 'intro' || p.screen === 'cards' || p.screen === 'challenge') && p.list && p.world != null) {
@@ -2899,13 +2934,14 @@ RANKS: [
     if (ms) ms.innerHTML = icon(prefs.sound ? 'sound' : 'mute') + ' Sonido: ' + (prefs.sound ? 'activado' : 'desactivado');
   }
   const ACT = {
-    start() { if (!readForm()) return; Sound.unlock(); startRun(); },
+    start() { if (!readForm()) return; goFull(); Sound.unlock(); startRun(); },
+    fullscreen() { goFull(); closeModal(); },
     resume() {
-      if (!readForm()) return; Sound.unlock();
+      if (!readForm()) return; goFull(); Sound.unlock();
       const s = store.get(KEY.save, null);
       if (s && s.run) { run = s.run; pos = s.pos || { screen: 'map' }; lastBeat = Date.now(); resume(); } else showTitle();
     },
-    'new'() { Sound.unlock(); if (!readForm()) return showTitle(); startRun(); },
+    'new'() { goFull(); Sound.unlock(); if (!readForm()) return showTitle(); startRun(); },
     'send-retry'() { if (lastPayload) sendPayload(lastPayload); },
     'send-pending'() { const p = store.get(KEY.pending, null); if (p) { lastPayload = p; sendPayload(p); } },
     'pdf-download'() { if (lastDoc) { try { lastDoc.save(lastPayload ? lastPayload.filename : 'resultado.pdf'); } catch (e) { /* descarga bloqueada */ } } },
@@ -2938,7 +2974,7 @@ RANKS: [
     },
     'go-map'() { goMap(); },
     'boss-start'() { bossQuestion(); },
-    victory() { victory(); }
+    victory() { if (run && run.finished) victory(); }
   };
   const GUARDED = { opt: 1, tf: 1, slot: 1, unslot: 1, bin: 1, ml: 1, mr: 1, 'order-check': 1, 'order-reset': 1, next: 1 };
   document.addEventListener('click', (e) => {
