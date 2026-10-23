@@ -1875,7 +1875,7 @@ RANKS: [
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } },
     del(k) { try { localStorage.removeItem(k); } catch (e) { /* sin almacenamiento */ } }
   };
-  const KEY = { save: 'mision40ut1.save', prefs: 'mision40ut1.prefs', best: 'mision40ut1.best', seen: 'mision40ut1.seen', tries: 'mision40ut1.intentos', exam: 'mision40ut1.examen', pending: 'mision40ut1.pendiente', sent: 'mision40ut1.enviados' };
+  const KEY = { save: 'm40examen.ut1.save', prefs: 'm40examen.ut1.prefs', best: 'm40examen.ut1.best', seen: 'm40examen.ut1.seen', tries: 'm40examen.ut1.intentos', exam: 'm40examen.ut1.examen', pending: 'm40examen.ut1.pendiente', sent: 'm40examen.ut1.enviados' };
 
   /* ---------- estado ---------- */
   let prefs = Object.assign({ sound: true, nombre: '', apellidos: '', ciclo: '' }, store.get(KEY.prefs, {}));
